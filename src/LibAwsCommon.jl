@@ -1,4 +1,4 @@
-module Example
+module L
 export hello, domath
 
 """
