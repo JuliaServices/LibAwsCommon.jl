@@ -7,6 +7,7 @@ aws_c_common_jll = "73048d1d-b8c4-5092-a58d-866c5e8d1e50"
 
 [compat]
 julia = "1.6"
+aws_c_common_jll = "0.9"
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
