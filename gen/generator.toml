@@ -38,3 +38,4 @@ use_deterministic_symbol = true
 
 [codegen]
 use_julia_bool = true
+use_ccall_macro = true

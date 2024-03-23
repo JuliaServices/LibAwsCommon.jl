@@ -1,85 +1,60 @@
 using CEnum
 
-const __time_t = Clong
+const __darwin_time_t = Clong
 
-const time_t = __time_t
-
-const pthread_t = Culong
-
-struct __pthread_internal_list
-    __prev::Ptr{__pthread_internal_list}
-    __next::Ptr{__pthread_internal_list}
+struct __darwin_pthread_handler_rec
+    __routine::Ptr{Cvoid}
+    __arg::Ptr{Cvoid}
+    __next::Ptr{__darwin_pthread_handler_rec}
 end
 
-const __pthread_list_t = __pthread_internal_list
-
-struct pthread_mutex_t
-    data::NTuple{40, UInt8}
+struct _opaque_pthread_cond_t
+    __sig::Clong
+    __opaque::NTuple{40, Cchar}
 end
 
-function Base.getproperty(x::Ptr{pthread_mutex_t}, f::Symbol)
-    f === :__data && return Ptr{__pthread_mutex_s}(x + 0)
-    f === :__size && return Ptr{NTuple{40, Cchar}}(x + 0)
-    f === :__align && return Ptr{Clong}(x + 0)
-    return getfield(x, f)
+struct _opaque_pthread_mutex_t
+    __sig::Clong
+    __opaque::NTuple{56, Cchar}
 end
 
-function Base.getproperty(x::pthread_mutex_t, f::Symbol)
-    r = Ref{pthread_mutex_t}(x)
-    ptr = Base.unsafe_convert(Ptr{pthread_mutex_t}, r)
-    fptr = getproperty(ptr, f)
-    GC.@preserve r unsafe_load(fptr)
+struct _opaque_pthread_once_t
+    __sig::Clong
+    __opaque::NTuple{8, Cchar}
 end
 
-function Base.setproperty!(x::Ptr{pthread_mutex_t}, f::Symbol, v)
-    unsafe_store!(getproperty(x, f), v)
+struct _opaque_pthread_rwlock_t
+    __sig::Clong
+    __opaque::NTuple{192, Cchar}
 end
 
-struct pthread_cond_t
-    data::NTuple{48, UInt8}
+struct _opaque_pthread_t
+    __sig::Clong
+    __cleanup_stack::Ptr{__darwin_pthread_handler_rec}
+    __opaque::NTuple{8176, Cchar}
 end
 
-function Base.getproperty(x::Ptr{pthread_cond_t}, f::Symbol)
-    f === :__data && return Ptr{__JL_Ctag_1115}(x + 0)
-    f === :__size && return Ptr{NTuple{48, Cchar}}(x + 0)
-    f === :__align && return Ptr{Clonglong}(x + 0)
-    return getfield(x, f)
-end
+const __darwin_pthread_cond_t = _opaque_pthread_cond_t
 
-function Base.getproperty(x::pthread_cond_t, f::Symbol)
-    r = Ref{pthread_cond_t}(x)
-    ptr = Base.unsafe_convert(Ptr{pthread_cond_t}, r)
-    fptr = getproperty(ptr, f)
-    GC.@preserve r unsafe_load(fptr)
-end
+const __darwin_pthread_mutex_t = _opaque_pthread_mutex_t
 
-function Base.setproperty!(x::Ptr{pthread_cond_t}, f::Symbol, v)
-    unsafe_store!(getproperty(x, f), v)
-end
+const __darwin_pthread_once_t = _opaque_pthread_once_t
 
-const pthread_once_t = Cint
+const __darwin_pthread_rwlock_t = _opaque_pthread_rwlock_t
 
-struct pthread_rwlock_t
-    data::NTuple{56, UInt8}
-end
+const __darwin_pthread_t = Ptr{_opaque_pthread_t}
 
-function Base.getproperty(x::Ptr{pthread_rwlock_t}, f::Symbol)
-    f === :__data && return Ptr{__JL_Ctag_1114}(x + 0)
-    f === :__size && return Ptr{NTuple{56, Cchar}}(x + 0)
-    f === :__align && return Ptr{Clong}(x + 0)
-    return getfield(x, f)
-end
+const time_t = __darwin_time_t
 
-function Base.getproperty(x::pthread_rwlock_t, f::Symbol)
-    r = Ref{pthread_rwlock_t}(x)
-    ptr = Base.unsafe_convert(Ptr{pthread_rwlock_t}, r)
-    fptr = getproperty(ptr, f)
-    GC.@preserve r unsafe_load(fptr)
-end
+const pthread_cond_t = __darwin_pthread_cond_t
 
-function Base.setproperty!(x::Ptr{pthread_rwlock_t}, f::Symbol, v)
-    unsafe_store!(getproperty(x, f), v)
-end
+const pthread_mutex_t = __darwin_pthread_mutex_t
+
+const pthread_once_t = __darwin_pthread_once_t
+
+const pthread_rwlock_t = __darwin_pthread_rwlock_t
+
+const pthread_t = __darwin_pthread_t
 
 struct tm
     tm_sec::Cint
@@ -114,7 +89,7 @@ bool aws_allocator_is_valid(const struct aws_allocator *alloc);
 ```
 """
 function aws_allocator_is_valid(alloc)
-    ccall((:aws_allocator_is_valid, libaws_c_common), Bool, (Ptr{aws_allocator},), alloc)
+    @ccall libaws_c_common.aws_allocator_is_valid(alloc::Ptr{aws_allocator})::Bool
 end
 
 """
@@ -126,7 +101,51 @@ struct aws_allocator *aws_default_allocator(void);
 ```
 """
 function aws_default_allocator()
-    ccall((:aws_default_allocator, libaws_c_common), Ptr{aws_allocator}, ())
+    @ccall libaws_c_common.aws_default_allocator()::Ptr{aws_allocator}
+end
+
+"""
+    aws_aligned_allocator()
+
+### Prototype
+```c
+struct aws_allocator *aws_aligned_allocator(void);
+```
+"""
+function aws_aligned_allocator()
+    @ccall libaws_c_common.aws_aligned_allocator()::Ptr{aws_allocator}
+end
+
+mutable struct __CFAllocator end
+
+const CFAllocatorRef = Ptr{__CFAllocator}
+
+"""
+    aws_wrapped_cf_allocator_new(allocator)
+
+Wraps a CFAllocator around [`aws_allocator`](@ref). For Mac only. Use this anytime you need a [`CFAllocatorRef`](@ref) for interacting with Apple Frameworks. Unfortunately, it allocates memory so we can't make it static file scope, be sure to call [`aws_wrapped_cf_allocator_destroy`](@ref) when finished.
+
+### Prototype
+```c
+CFAllocatorRef aws_wrapped_cf_allocator_new(struct aws_allocator *allocator);
+```
+"""
+function aws_wrapped_cf_allocator_new(allocator)
+    @ccall libaws_c_common.aws_wrapped_cf_allocator_new(allocator::Ptr{aws_allocator})::CFAllocatorRef
+end
+
+"""
+    aws_wrapped_cf_allocator_destroy(allocator)
+
+Cleans up any resources alloced in [`aws_wrapped_cf_allocator_new`](@ref).
+
+### Prototype
+```c
+void aws_wrapped_cf_allocator_destroy(CFAllocatorRef allocator);
+```
+"""
+function aws_wrapped_cf_allocator_destroy(allocator)
+    @ccall libaws_c_common.aws_wrapped_cf_allocator_destroy(allocator::CFAllocatorRef)::Cvoid
 end
 
 """
@@ -140,7 +159,7 @@ void *aws_mem_acquire(struct aws_allocator *allocator, size_t size);
 ```
 """
 function aws_mem_acquire(allocator, size)
-    ccall((:aws_mem_acquire, libaws_c_common), Ptr{Cvoid}, (Ptr{aws_allocator}, Csize_t), allocator, size)
+    @ccall libaws_c_common.aws_mem_acquire(allocator::Ptr{aws_allocator}, size::Csize_t)::Ptr{Cvoid}
 end
 
 """
@@ -154,7 +173,7 @@ void *aws_mem_calloc(struct aws_allocator *allocator, size_t num, size_t size);
 ```
 """
 function aws_mem_calloc(allocator, num, size)
-    ccall((:aws_mem_calloc, libaws_c_common), Ptr{Cvoid}, (Ptr{aws_allocator}, Csize_t, Csize_t), allocator, num, size)
+    @ccall libaws_c_common.aws_mem_calloc(allocator::Ptr{aws_allocator}, num::Csize_t, size::Csize_t)::Ptr{Cvoid}
 end
 
 """
@@ -168,7 +187,7 @@ void aws_mem_release(struct aws_allocator *allocator, void *ptr);
 ```
 """
 function aws_mem_release(allocator, ptr)
-    ccall((:aws_mem_release, libaws_c_common), Cvoid, (Ptr{aws_allocator}, Ptr{Cvoid}), allocator, ptr)
+    @ccall libaws_c_common.aws_mem_release(allocator::Ptr{aws_allocator}, ptr::Ptr{Cvoid})::Cvoid
 end
 
 """
@@ -184,7 +203,7 @@ int aws_mem_realloc(struct aws_allocator *allocator, void **ptr, size_t oldsize,
 ```
 """
 function aws_mem_realloc(allocator, ptr, oldsize, newsize)
-    ccall((:aws_mem_realloc, libaws_c_common), Cint, (Ptr{aws_allocator}, Ptr{Ptr{Cvoid}}, Csize_t, Csize_t), allocator, ptr, oldsize, newsize)
+    @ccall libaws_c_common.aws_mem_realloc(allocator::Ptr{aws_allocator}, ptr::Ptr{Ptr{Cvoid}}, oldsize::Csize_t, newsize::Csize_t)::Cint
 end
 
 @cenum aws_mem_trace_level::UInt32 begin
@@ -202,7 +221,7 @@ struct aws_allocator *aws_mem_tracer_new( struct aws_allocator *allocator, struc
 ```
 """
 function aws_mem_tracer_new(allocator, deprecated, level, frames_per_stack)
-    ccall((:aws_mem_tracer_new, libaws_c_common), Ptr{aws_allocator}, (Ptr{aws_allocator}, Ptr{aws_allocator}, aws_mem_trace_level, Csize_t), allocator, deprecated, level, frames_per_stack)
+    @ccall libaws_c_common.aws_mem_tracer_new(allocator::Ptr{aws_allocator}, deprecated::Ptr{aws_allocator}, level::aws_mem_trace_level, frames_per_stack::Csize_t)::Ptr{aws_allocator}
 end
 
 """
@@ -214,7 +233,7 @@ struct aws_allocator *aws_mem_tracer_destroy(struct aws_allocator *trace_allocat
 ```
 """
 function aws_mem_tracer_destroy(trace_allocator)
-    ccall((:aws_mem_tracer_destroy, libaws_c_common), Ptr{aws_allocator}, (Ptr{aws_allocator},), trace_allocator)
+    @ccall libaws_c_common.aws_mem_tracer_destroy(trace_allocator::Ptr{aws_allocator})::Ptr{aws_allocator}
 end
 
 """
@@ -226,7 +245,7 @@ void aws_mem_tracer_dump(struct aws_allocator *trace_allocator);
 ```
 """
 function aws_mem_tracer_dump(trace_allocator)
-    ccall((:aws_mem_tracer_dump, libaws_c_common), Cvoid, (Ptr{aws_allocator},), trace_allocator)
+    @ccall libaws_c_common.aws_mem_tracer_dump(trace_allocator::Ptr{aws_allocator})::Cvoid
 end
 
 """
@@ -238,7 +257,7 @@ size_t aws_mem_tracer_bytes(struct aws_allocator *trace_allocator);
 ```
 """
 function aws_mem_tracer_bytes(trace_allocator)
-    ccall((:aws_mem_tracer_bytes, libaws_c_common), Csize_t, (Ptr{aws_allocator},), trace_allocator)
+    @ccall libaws_c_common.aws_mem_tracer_bytes(trace_allocator::Ptr{aws_allocator})::Csize_t
 end
 
 """
@@ -250,7 +269,7 @@ size_t aws_mem_tracer_count(struct aws_allocator *trace_allocator);
 ```
 """
 function aws_mem_tracer_count(trace_allocator)
-    ccall((:aws_mem_tracer_count, libaws_c_common), Csize_t, (Ptr{aws_allocator},), trace_allocator)
+    @ccall libaws_c_common.aws_mem_tracer_count(trace_allocator::Ptr{aws_allocator})::Csize_t
 end
 
 """
@@ -262,7 +281,7 @@ struct aws_allocator *aws_small_block_allocator_new(struct aws_allocator *alloca
 ```
 """
 function aws_small_block_allocator_new(allocator, multi_threaded)
-    ccall((:aws_small_block_allocator_new, libaws_c_common), Ptr{aws_allocator}, (Ptr{aws_allocator}, Bool), allocator, multi_threaded)
+    @ccall libaws_c_common.aws_small_block_allocator_new(allocator::Ptr{aws_allocator}, multi_threaded::Bool)::Ptr{aws_allocator}
 end
 
 """
@@ -274,7 +293,7 @@ void aws_small_block_allocator_destroy(struct aws_allocator *sba_allocator);
 ```
 """
 function aws_small_block_allocator_destroy(sba_allocator)
-    ccall((:aws_small_block_allocator_destroy, libaws_c_common), Cvoid, (Ptr{aws_allocator},), sba_allocator)
+    @ccall libaws_c_common.aws_small_block_allocator_destroy(sba_allocator::Ptr{aws_allocator})::Cvoid
 end
 
 """
@@ -286,7 +305,7 @@ size_t aws_small_block_allocator_bytes_active(struct aws_allocator *sba_allocato
 ```
 """
 function aws_small_block_allocator_bytes_active(sba_allocator)
-    ccall((:aws_small_block_allocator_bytes_active, libaws_c_common), Csize_t, (Ptr{aws_allocator},), sba_allocator)
+    @ccall libaws_c_common.aws_small_block_allocator_bytes_active(sba_allocator::Ptr{aws_allocator})::Csize_t
 end
 
 """
@@ -298,7 +317,7 @@ size_t aws_small_block_allocator_bytes_reserved(struct aws_allocator *sba_alloca
 ```
 """
 function aws_small_block_allocator_bytes_reserved(sba_allocator)
-    ccall((:aws_small_block_allocator_bytes_reserved, libaws_c_common), Csize_t, (Ptr{aws_allocator},), sba_allocator)
+    @ccall libaws_c_common.aws_small_block_allocator_bytes_reserved(sba_allocator::Ptr{aws_allocator})::Csize_t
 end
 
 """
@@ -310,7 +329,7 @@ size_t aws_small_block_allocator_page_size(struct aws_allocator *sba_allocator);
 ```
 """
 function aws_small_block_allocator_page_size(sba_allocator)
-    ccall((:aws_small_block_allocator_page_size, libaws_c_common), Csize_t, (Ptr{aws_allocator},), sba_allocator)
+    @ccall libaws_c_common.aws_small_block_allocator_page_size(sba_allocator::Ptr{aws_allocator})::Csize_t
 end
 
 """
@@ -322,7 +341,7 @@ size_t aws_small_block_allocator_page_size_available(struct aws_allocator *sba_a
 ```
 """
 function aws_small_block_allocator_page_size_available(sba_allocator)
-    ccall((:aws_small_block_allocator_page_size_available, libaws_c_common), Csize_t, (Ptr{aws_allocator},), sba_allocator)
+    @ccall libaws_c_common.aws_small_block_allocator_page_size_available(sba_allocator::Ptr{aws_allocator})::Csize_t
 end
 
 """
@@ -334,7 +353,7 @@ AWS_STATIC_IMPL int aws_raise_error(int err);
 ```
 """
 function aws_raise_error(err)
-    ccall((:aws_raise_error, libaws_c_common), Cint, (Cint,), err)
+    @ccall libaws_c_common.aws_raise_error(err::Cint)::Cint
 end
 
 """
@@ -348,7 +367,7 @@ AWS_STATIC_IMPL bool aws_is_mem_zeroed(const void *buf, size_t bufsize);
 ```
 """
 function aws_is_mem_zeroed(buf, bufsize)
-    ccall((:aws_is_mem_zeroed, libaws_c_common), Bool, (Ptr{Cvoid}, Csize_t), buf, bufsize)
+    @ccall libaws_c_common.aws_is_mem_zeroed(buf::Ptr{Cvoid}, bufsize::Csize_t)::Bool
 end
 
 """
@@ -362,7 +381,7 @@ AWS_STATIC_IMPL uint64_t aws_mul_u64_saturating(uint64_t a, uint64_t b);
 ```
 """
 function aws_mul_u64_saturating(a, b)
-    ccall((:aws_mul_u64_saturating, libaws_c_common), UInt64, (UInt64, UInt64), a, b)
+    @ccall libaws_c_common.aws_mul_u64_saturating(a::UInt64, b::UInt64)::UInt64
 end
 
 """
@@ -376,7 +395,7 @@ AWS_STATIC_IMPL int aws_mul_u64_checked(uint64_t a, uint64_t b, uint64_t *r);
 ```
 """
 function aws_mul_u64_checked(a, b, r)
-    ccall((:aws_mul_u64_checked, libaws_c_common), Cint, (UInt64, UInt64, Ptr{UInt64}), a, b, r)
+    @ccall libaws_c_common.aws_mul_u64_checked(a::UInt64, b::UInt64, r::Ptr{UInt64})::Cint
 end
 
 """
@@ -390,7 +409,7 @@ AWS_STATIC_IMPL uint32_t aws_mul_u32_saturating(uint32_t a, uint32_t b);
 ```
 """
 function aws_mul_u32_saturating(a, b)
-    ccall((:aws_mul_u32_saturating, libaws_c_common), UInt32, (UInt32, UInt32), a, b)
+    @ccall libaws_c_common.aws_mul_u32_saturating(a::UInt32, b::UInt32)::UInt32
 end
 
 """
@@ -404,7 +423,7 @@ AWS_STATIC_IMPL int aws_mul_u32_checked(uint32_t a, uint32_t b, uint32_t *r);
 ```
 """
 function aws_mul_u32_checked(a, b, r)
-    ccall((:aws_mul_u32_checked, libaws_c_common), Cint, (UInt32, UInt32, Ptr{UInt32}), a, b, r)
+    @ccall libaws_c_common.aws_mul_u32_checked(a::UInt32, b::UInt32, r::Ptr{UInt32})::Cint
 end
 
 """
@@ -418,7 +437,7 @@ AWS_STATIC_IMPL int aws_add_u64_checked(uint64_t a, uint64_t b, uint64_t *r);
 ```
 """
 function aws_add_u64_checked(a, b, r)
-    ccall((:aws_add_u64_checked, libaws_c_common), Cint, (UInt64, UInt64, Ptr{UInt64}), a, b, r)
+    @ccall libaws_c_common.aws_add_u64_checked(a::UInt64, b::UInt64, r::Ptr{UInt64})::Cint
 end
 
 """
@@ -432,7 +451,7 @@ AWS_STATIC_IMPL uint64_t aws_add_u64_saturating(uint64_t a, uint64_t b);
 ```
 """
 function aws_add_u64_saturating(a, b)
-    ccall((:aws_add_u64_saturating, libaws_c_common), UInt64, (UInt64, UInt64), a, b)
+    @ccall libaws_c_common.aws_add_u64_saturating(a::UInt64, b::UInt64)::UInt64
 end
 
 """
@@ -446,7 +465,7 @@ AWS_STATIC_IMPL int aws_add_u32_checked(uint32_t a, uint32_t b, uint32_t *r);
 ```
 """
 function aws_add_u32_checked(a, b, r)
-    ccall((:aws_add_u32_checked, libaws_c_common), Cint, (UInt32, UInt32, Ptr{UInt32}), a, b, r)
+    @ccall libaws_c_common.aws_add_u32_checked(a::UInt32, b::UInt32, r::Ptr{UInt32})::Cint
 end
 
 """
@@ -460,7 +479,7 @@ AWS_STATIC_IMPL uint32_t aws_add_u32_saturating(uint32_t a, uint32_t b);
 ```
 """
 function aws_add_u32_saturating(a, b)
-    ccall((:aws_add_u32_saturating, libaws_c_common), UInt32, (UInt32, UInt32), a, b)
+    @ccall libaws_c_common.aws_add_u32_saturating(a::UInt32, b::UInt32)::UInt32
 end
 
 """
@@ -474,7 +493,7 @@ AWS_STATIC_IMPL size_t aws_clz_u32(uint32_t n);
 ```
 """
 function aws_clz_u32(n)
-    ccall((:aws_clz_u32, libaws_c_common), Csize_t, (UInt32,), n)
+    @ccall libaws_c_common.aws_clz_u32(n::UInt32)::Csize_t
 end
 
 """
@@ -486,7 +505,7 @@ AWS_STATIC_IMPL size_t aws_clz_i32(int32_t n);
 ```
 """
 function aws_clz_i32(n)
-    ccall((:aws_clz_i32, libaws_c_common), Csize_t, (Int32,), n)
+    @ccall libaws_c_common.aws_clz_i32(n::Int32)::Csize_t
 end
 
 """
@@ -498,7 +517,7 @@ AWS_STATIC_IMPL size_t aws_clz_u64(uint64_t n);
 ```
 """
 function aws_clz_u64(n)
-    ccall((:aws_clz_u64, libaws_c_common), Csize_t, (UInt64,), n)
+    @ccall libaws_c_common.aws_clz_u64(n::UInt64)::Csize_t
 end
 
 """
@@ -510,7 +529,7 @@ AWS_STATIC_IMPL size_t aws_clz_i64(int64_t n);
 ```
 """
 function aws_clz_i64(n)
-    ccall((:aws_clz_i64, libaws_c_common), Csize_t, (Int64,), n)
+    @ccall libaws_c_common.aws_clz_i64(n::Int64)::Csize_t
 end
 
 """
@@ -522,7 +541,7 @@ AWS_STATIC_IMPL size_t aws_clz_size(size_t n);
 ```
 """
 function aws_clz_size(n)
-    ccall((:aws_clz_size, libaws_c_common), Csize_t, (Csize_t,), n)
+    @ccall libaws_c_common.aws_clz_size(n::Csize_t)::Csize_t
 end
 
 """
@@ -536,7 +555,7 @@ AWS_STATIC_IMPL size_t aws_ctz_u32(uint32_t n);
 ```
 """
 function aws_ctz_u32(n)
-    ccall((:aws_ctz_u32, libaws_c_common), Csize_t, (UInt32,), n)
+    @ccall libaws_c_common.aws_ctz_u32(n::UInt32)::Csize_t
 end
 
 """
@@ -548,7 +567,7 @@ AWS_STATIC_IMPL size_t aws_ctz_i32(int32_t n);
 ```
 """
 function aws_ctz_i32(n)
-    ccall((:aws_ctz_i32, libaws_c_common), Csize_t, (Int32,), n)
+    @ccall libaws_c_common.aws_ctz_i32(n::Int32)::Csize_t
 end
 
 """
@@ -560,7 +579,7 @@ AWS_STATIC_IMPL size_t aws_ctz_u64(uint64_t n);
 ```
 """
 function aws_ctz_u64(n)
-    ccall((:aws_ctz_u64, libaws_c_common), Csize_t, (UInt64,), n)
+    @ccall libaws_c_common.aws_ctz_u64(n::UInt64)::Csize_t
 end
 
 """
@@ -572,7 +591,7 @@ AWS_STATIC_IMPL size_t aws_ctz_i64(int64_t n);
 ```
 """
 function aws_ctz_i64(n)
-    ccall((:aws_ctz_i64, libaws_c_common), Csize_t, (Int64,), n)
+    @ccall libaws_c_common.aws_ctz_i64(n::Int64)::Csize_t
 end
 
 """
@@ -584,7 +603,7 @@ AWS_STATIC_IMPL size_t aws_ctz_size(size_t n);
 ```
 """
 function aws_ctz_size(n)
-    ccall((:aws_ctz_size, libaws_c_common), Csize_t, (Csize_t,), n)
+    @ccall libaws_c_common.aws_ctz_size(n::Csize_t)::Csize_t
 end
 
 """
@@ -598,7 +617,7 @@ AWS_STATIC_IMPL uint64_t aws_sub_u64_saturating(uint64_t a, uint64_t b);
 ```
 """
 function aws_sub_u64_saturating(a, b)
-    ccall((:aws_sub_u64_saturating, libaws_c_common), UInt64, (UInt64, UInt64), a, b)
+    @ccall libaws_c_common.aws_sub_u64_saturating(a::UInt64, b::UInt64)::UInt64
 end
 
 """
@@ -612,7 +631,7 @@ AWS_STATIC_IMPL int aws_sub_u64_checked(uint64_t a, uint64_t b, uint64_t *r);
 ```
 """
 function aws_sub_u64_checked(a, b, r)
-    ccall((:aws_sub_u64_checked, libaws_c_common), Cint, (UInt64, UInt64, Ptr{UInt64}), a, b, r)
+    @ccall libaws_c_common.aws_sub_u64_checked(a::UInt64, b::UInt64, r::Ptr{UInt64})::Cint
 end
 
 """
@@ -626,7 +645,7 @@ AWS_STATIC_IMPL uint32_t aws_sub_u32_saturating(uint32_t a, uint32_t b);
 ```
 """
 function aws_sub_u32_saturating(a, b)
-    ccall((:aws_sub_u32_saturating, libaws_c_common), UInt32, (UInt32, UInt32), a, b)
+    @ccall libaws_c_common.aws_sub_u32_saturating(a::UInt32, b::UInt32)::UInt32
 end
 
 """
@@ -640,7 +659,7 @@ AWS_STATIC_IMPL int aws_sub_u32_checked(uint32_t a, uint32_t b, uint32_t *r);
 ```
 """
 function aws_sub_u32_checked(a, b, r)
-    ccall((:aws_sub_u32_checked, libaws_c_common), Cint, (UInt32, UInt32, Ptr{UInt32}), a, b, r)
+    @ccall libaws_c_common.aws_sub_u32_checked(a::UInt32, b::UInt32, r::Ptr{UInt32})::Cint
 end
 
 """
@@ -654,7 +673,7 @@ AWS_STATIC_IMPL size_t aws_mul_size_saturating(size_t a, size_t b);
 ```
 """
 function aws_mul_size_saturating(a, b)
-    ccall((:aws_mul_size_saturating, libaws_c_common), Csize_t, (Csize_t, Csize_t), a, b)
+    @ccall libaws_c_common.aws_mul_size_saturating(a::Csize_t, b::Csize_t)::Csize_t
 end
 
 """
@@ -668,7 +687,7 @@ AWS_STATIC_IMPL int aws_mul_size_checked(size_t a, size_t b, size_t *r);
 ```
 """
 function aws_mul_size_checked(a, b, r)
-    ccall((:aws_mul_size_checked, libaws_c_common), Cint, (Csize_t, Csize_t, Ptr{Csize_t}), a, b, r)
+    @ccall libaws_c_common.aws_mul_size_checked(a::Csize_t, b::Csize_t, r::Ptr{Csize_t})::Cint
 end
 
 """
@@ -682,7 +701,7 @@ AWS_STATIC_IMPL size_t aws_add_size_saturating(size_t a, size_t b);
 ```
 """
 function aws_add_size_saturating(a, b)
-    ccall((:aws_add_size_saturating, libaws_c_common), Csize_t, (Csize_t, Csize_t), a, b)
+    @ccall libaws_c_common.aws_add_size_saturating(a::Csize_t, b::Csize_t)::Csize_t
 end
 
 """
@@ -696,7 +715,7 @@ AWS_STATIC_IMPL int aws_add_size_checked(size_t a, size_t b, size_t *r);
 ```
 """
 function aws_add_size_checked(a, b, r)
-    ccall((:aws_add_size_checked, libaws_c_common), Cint, (Csize_t, Csize_t, Ptr{Csize_t}), a, b, r)
+    @ccall libaws_c_common.aws_add_size_checked(a::Csize_t, b::Csize_t, r::Ptr{Csize_t})::Cint
 end
 
 """
@@ -710,7 +729,7 @@ AWS_STATIC_IMPL size_t aws_sub_size_saturating(size_t a, size_t b);
 ```
 """
 function aws_sub_size_saturating(a, b)
-    ccall((:aws_sub_size_saturating, libaws_c_common), Csize_t, (Csize_t, Csize_t), a, b)
+    @ccall libaws_c_common.aws_sub_size_saturating(a::Csize_t, b::Csize_t)::Csize_t
 end
 
 """
@@ -724,7 +743,7 @@ AWS_STATIC_IMPL int aws_sub_size_checked(size_t a, size_t b, size_t *r);
 ```
 """
 function aws_sub_size_checked(a, b, r)
-    ccall((:aws_sub_size_checked, libaws_c_common), Cint, (Csize_t, Csize_t, Ptr{Csize_t}), a, b, r)
+    @ccall libaws_c_common.aws_sub_size_checked(a::Csize_t, b::Csize_t, r::Ptr{Csize_t})::Cint
 end
 
 """
@@ -738,7 +757,7 @@ AWS_STATIC_IMPL bool aws_is_power_of_two(const size_t x);
 ```
 """
 function aws_is_power_of_two(x)
-    ccall((:aws_is_power_of_two, libaws_c_common), Bool, (Csize_t,), x)
+    @ccall libaws_c_common.aws_is_power_of_two(x::Csize_t)::Bool
 end
 
 """
@@ -752,7 +771,7 @@ AWS_STATIC_IMPL int aws_round_up_to_power_of_two(size_t n, size_t *result);
 ```
 """
 function aws_round_up_to_power_of_two(n, result)
-    ccall((:aws_round_up_to_power_of_two, libaws_c_common), Cint, (Csize_t, Ptr{Csize_t}), n, result)
+    @ccall libaws_c_common.aws_round_up_to_power_of_two(n::Csize_t, result::Ptr{Csize_t})::Cint
 end
 
 """
@@ -764,7 +783,7 @@ AWS_STATIC_IMPL uint8_t aws_min_u8(uint8_t a, uint8_t b);
 ```
 """
 function aws_min_u8(a, b)
-    ccall((:aws_min_u8, libaws_c_common), UInt8, (UInt8, UInt8), a, b)
+    @ccall libaws_c_common.aws_min_u8(a::UInt8, b::UInt8)::UInt8
 end
 
 """
@@ -776,7 +795,7 @@ AWS_STATIC_IMPL uint8_t aws_max_u8(uint8_t a, uint8_t b);
 ```
 """
 function aws_max_u8(a, b)
-    ccall((:aws_max_u8, libaws_c_common), UInt8, (UInt8, UInt8), a, b)
+    @ccall libaws_c_common.aws_max_u8(a::UInt8, b::UInt8)::UInt8
 end
 
 """
@@ -788,7 +807,7 @@ AWS_STATIC_IMPL int8_t aws_min_i8(int8_t a, int8_t b);
 ```
 """
 function aws_min_i8(a, b)
-    ccall((:aws_min_i8, libaws_c_common), Int8, (Int8, Int8), a, b)
+    @ccall libaws_c_common.aws_min_i8(a::Int8, b::Int8)::Int8
 end
 
 """
@@ -800,7 +819,7 @@ AWS_STATIC_IMPL int8_t aws_max_i8(int8_t a, int8_t b);
 ```
 """
 function aws_max_i8(a, b)
-    ccall((:aws_max_i8, libaws_c_common), Int8, (Int8, Int8), a, b)
+    @ccall libaws_c_common.aws_max_i8(a::Int8, b::Int8)::Int8
 end
 
 """
@@ -812,7 +831,7 @@ AWS_STATIC_IMPL uint16_t aws_min_u16(uint16_t a, uint16_t b);
 ```
 """
 function aws_min_u16(a, b)
-    ccall((:aws_min_u16, libaws_c_common), UInt16, (UInt16, UInt16), a, b)
+    @ccall libaws_c_common.aws_min_u16(a::UInt16, b::UInt16)::UInt16
 end
 
 """
@@ -824,7 +843,7 @@ AWS_STATIC_IMPL uint16_t aws_max_u16(uint16_t a, uint16_t b);
 ```
 """
 function aws_max_u16(a, b)
-    ccall((:aws_max_u16, libaws_c_common), UInt16, (UInt16, UInt16), a, b)
+    @ccall libaws_c_common.aws_max_u16(a::UInt16, b::UInt16)::UInt16
 end
 
 """
@@ -836,7 +855,7 @@ AWS_STATIC_IMPL int16_t aws_min_i16(int16_t a, int16_t b);
 ```
 """
 function aws_min_i16(a, b)
-    ccall((:aws_min_i16, libaws_c_common), Int16, (Int16, Int16), a, b)
+    @ccall libaws_c_common.aws_min_i16(a::Int16, b::Int16)::Int16
 end
 
 """
@@ -848,7 +867,7 @@ AWS_STATIC_IMPL int16_t aws_max_i16(int16_t a, int16_t b);
 ```
 """
 function aws_max_i16(a, b)
-    ccall((:aws_max_i16, libaws_c_common), Int16, (Int16, Int16), a, b)
+    @ccall libaws_c_common.aws_max_i16(a::Int16, b::Int16)::Int16
 end
 
 """
@@ -860,7 +879,7 @@ AWS_STATIC_IMPL uint32_t aws_min_u32(uint32_t a, uint32_t b);
 ```
 """
 function aws_min_u32(a, b)
-    ccall((:aws_min_u32, libaws_c_common), UInt32, (UInt32, UInt32), a, b)
+    @ccall libaws_c_common.aws_min_u32(a::UInt32, b::UInt32)::UInt32
 end
 
 """
@@ -872,7 +891,7 @@ AWS_STATIC_IMPL uint32_t aws_max_u32(uint32_t a, uint32_t b);
 ```
 """
 function aws_max_u32(a, b)
-    ccall((:aws_max_u32, libaws_c_common), UInt32, (UInt32, UInt32), a, b)
+    @ccall libaws_c_common.aws_max_u32(a::UInt32, b::UInt32)::UInt32
 end
 
 """
@@ -884,7 +903,7 @@ AWS_STATIC_IMPL int32_t aws_min_i32(int32_t a, int32_t b);
 ```
 """
 function aws_min_i32(a, b)
-    ccall((:aws_min_i32, libaws_c_common), Int32, (Int32, Int32), a, b)
+    @ccall libaws_c_common.aws_min_i32(a::Int32, b::Int32)::Int32
 end
 
 """
@@ -896,7 +915,7 @@ AWS_STATIC_IMPL int32_t aws_max_i32(int32_t a, int32_t b);
 ```
 """
 function aws_max_i32(a, b)
-    ccall((:aws_max_i32, libaws_c_common), Int32, (Int32, Int32), a, b)
+    @ccall libaws_c_common.aws_max_i32(a::Int32, b::Int32)::Int32
 end
 
 """
@@ -908,7 +927,7 @@ AWS_STATIC_IMPL uint64_t aws_min_u64(uint64_t a, uint64_t b);
 ```
 """
 function aws_min_u64(a, b)
-    ccall((:aws_min_u64, libaws_c_common), UInt64, (UInt64, UInt64), a, b)
+    @ccall libaws_c_common.aws_min_u64(a::UInt64, b::UInt64)::UInt64
 end
 
 """
@@ -920,7 +939,7 @@ AWS_STATIC_IMPL uint64_t aws_max_u64(uint64_t a, uint64_t b);
 ```
 """
 function aws_max_u64(a, b)
-    ccall((:aws_max_u64, libaws_c_common), UInt64, (UInt64, UInt64), a, b)
+    @ccall libaws_c_common.aws_max_u64(a::UInt64, b::UInt64)::UInt64
 end
 
 """
@@ -932,7 +951,7 @@ AWS_STATIC_IMPL int64_t aws_min_i64(int64_t a, int64_t b);
 ```
 """
 function aws_min_i64(a, b)
-    ccall((:aws_min_i64, libaws_c_common), Int64, (Int64, Int64), a, b)
+    @ccall libaws_c_common.aws_min_i64(a::Int64, b::Int64)::Int64
 end
 
 """
@@ -944,7 +963,7 @@ AWS_STATIC_IMPL int64_t aws_max_i64(int64_t a, int64_t b);
 ```
 """
 function aws_max_i64(a, b)
-    ccall((:aws_max_i64, libaws_c_common), Int64, (Int64, Int64), a, b)
+    @ccall libaws_c_common.aws_max_i64(a::Int64, b::Int64)::Int64
 end
 
 """
@@ -956,7 +975,7 @@ AWS_STATIC_IMPL size_t aws_min_size(size_t a, size_t b);
 ```
 """
 function aws_min_size(a, b)
-    ccall((:aws_min_size, libaws_c_common), Csize_t, (Csize_t, Csize_t), a, b)
+    @ccall libaws_c_common.aws_min_size(a::Csize_t, b::Csize_t)::Csize_t
 end
 
 """
@@ -968,7 +987,7 @@ AWS_STATIC_IMPL size_t aws_max_size(size_t a, size_t b);
 ```
 """
 function aws_max_size(a, b)
-    ccall((:aws_max_size, libaws_c_common), Csize_t, (Csize_t, Csize_t), a, b)
+    @ccall libaws_c_common.aws_max_size(a::Csize_t, b::Csize_t)::Csize_t
 end
 
 """
@@ -980,7 +999,7 @@ AWS_STATIC_IMPL int aws_min_int(int a, int b);
 ```
 """
 function aws_min_int(a, b)
-    ccall((:aws_min_int, libaws_c_common), Cint, (Cint, Cint), a, b)
+    @ccall libaws_c_common.aws_min_int(a::Cint, b::Cint)::Cint
 end
 
 """
@@ -992,7 +1011,7 @@ AWS_STATIC_IMPL int aws_max_int(int a, int b);
 ```
 """
 function aws_max_int(a, b)
-    ccall((:aws_max_int, libaws_c_common), Cint, (Cint, Cint), a, b)
+    @ccall libaws_c_common.aws_max_int(a::Cint, b::Cint)::Cint
 end
 
 """
@@ -1004,7 +1023,7 @@ AWS_STATIC_IMPL float aws_min_float(float a, float b);
 ```
 """
 function aws_min_float(a, b)
-    ccall((:aws_min_float, libaws_c_common), Cfloat, (Cfloat, Cfloat), a, b)
+    @ccall libaws_c_common.aws_min_float(a::Cfloat, b::Cfloat)::Cfloat
 end
 
 """
@@ -1016,7 +1035,7 @@ AWS_STATIC_IMPL float aws_max_float(float a, float b);
 ```
 """
 function aws_max_float(a, b)
-    ccall((:aws_max_float, libaws_c_common), Cfloat, (Cfloat, Cfloat), a, b)
+    @ccall libaws_c_common.aws_max_float(a::Cfloat, b::Cfloat)::Cfloat
 end
 
 """
@@ -1028,7 +1047,7 @@ AWS_STATIC_IMPL double aws_min_double(double a, double b);
 ```
 """
 function aws_min_double(a, b)
-    ccall((:aws_min_double, libaws_c_common), Cdouble, (Cdouble, Cdouble), a, b)
+    @ccall libaws_c_common.aws_min_double(a::Cdouble, b::Cdouble)::Cdouble
 end
 
 """
@@ -1040,10 +1059,10 @@ AWS_STATIC_IMPL double aws_max_double(double a, double b);
 ```
 """
 function aws_max_double(a, b)
-    ccall((:aws_max_double, libaws_c_common), Cdouble, (Cdouble, Cdouble), a, b)
+    @ccall libaws_c_common.aws_max_double(a::Cdouble, b::Cdouble)::Cdouble
 end
 
-@cenum __JL_Ctag_41::UInt32 begin
+@cenum __JL_Ctag_13::UInt32 begin
     AWS_ARRAY_LIST_DEBUG_FILL = 221
 end
 
@@ -1074,7 +1093,7 @@ AWS_STATIC_IMPL int aws_array_list_init_dynamic( struct aws_array_list *AWS_REST
 ```
 """
 function aws_array_list_init_dynamic(list, alloc, initial_item_allocation, item_size)
-    ccall((:aws_array_list_init_dynamic, libaws_c_common), Cint, (Ptr{aws_array_list}, Ptr{aws_allocator}, Csize_t, Csize_t), list, alloc, initial_item_allocation, item_size)
+    @ccall libaws_c_common.aws_array_list_init_dynamic(list::Ptr{aws_array_list}, alloc::Ptr{aws_allocator}, initial_item_allocation::Csize_t, item_size::Csize_t)::Cint
 end
 
 """
@@ -1088,7 +1107,7 @@ AWS_STATIC_IMPL void aws_array_list_init_static( struct aws_array_list *AWS_REST
 ```
 """
 function aws_array_list_init_static(list, raw_array, item_count, item_size)
-    ccall((:aws_array_list_init_static, libaws_c_common), Cvoid, (Ptr{aws_array_list}, Ptr{Cvoid}, Csize_t, Csize_t), list, raw_array, item_count, item_size)
+    @ccall libaws_c_common.aws_array_list_init_static(list::Ptr{aws_array_list}, raw_array::Ptr{Cvoid}, item_count::Csize_t, item_size::Csize_t)::Cvoid
 end
 
 """
@@ -1106,7 +1125,7 @@ AWS_STATIC_IMPL void aws_array_list_init_static_from_initialized( struct aws_arr
 ```
 """
 function aws_array_list_init_static_from_initialized(list, raw_array, item_count, item_size)
-    ccall((:aws_array_list_init_static_from_initialized, libaws_c_common), Cvoid, (Ptr{aws_array_list}, Ptr{Cvoid}, Csize_t, Csize_t), list, raw_array, item_count, item_size)
+    @ccall libaws_c_common.aws_array_list_init_static_from_initialized(list::Ptr{aws_array_list}, raw_array::Ptr{Cvoid}, item_count::Csize_t, item_size::Csize_t)::Cvoid
 end
 
 """
@@ -1120,7 +1139,7 @@ AWS_STATIC_IMPL bool aws_array_list_is_valid(const struct aws_array_list *AWS_RE
 ```
 """
 function aws_array_list_is_valid(list)
-    ccall((:aws_array_list_is_valid, libaws_c_common), Bool, (Ptr{aws_array_list},), list)
+    @ccall libaws_c_common.aws_array_list_is_valid(list::Ptr{aws_array_list})::Bool
 end
 
 """
@@ -1134,7 +1153,7 @@ AWS_STATIC_IMPL void aws_array_list_clean_up(struct aws_array_list *AWS_RESTRICT
 ```
 """
 function aws_array_list_clean_up(list)
-    ccall((:aws_array_list_clean_up, libaws_c_common), Cvoid, (Ptr{aws_array_list},), list)
+    @ccall libaws_c_common.aws_array_list_clean_up(list::Ptr{aws_array_list})::Cvoid
 end
 
 """
@@ -1148,7 +1167,7 @@ AWS_STATIC_IMPL void aws_array_list_clean_up_secure(struct aws_array_list *AWS_R
 ```
 """
 function aws_array_list_clean_up_secure(list)
-    ccall((:aws_array_list_clean_up_secure, libaws_c_common), Cvoid, (Ptr{aws_array_list},), list)
+    @ccall libaws_c_common.aws_array_list_clean_up_secure(list::Ptr{aws_array_list})::Cvoid
 end
 
 """
@@ -1162,7 +1181,7 @@ AWS_STATIC_IMPL int aws_array_list_push_back(struct aws_array_list *AWS_RESTRICT
 ```
 """
 function aws_array_list_push_back(list, val)
-    ccall((:aws_array_list_push_back, libaws_c_common), Cint, (Ptr{aws_array_list}, Ptr{Cvoid}), list, val)
+    @ccall libaws_c_common.aws_array_list_push_back(list::Ptr{aws_array_list}, val::Ptr{Cvoid})::Cint
 end
 
 """
@@ -1176,7 +1195,7 @@ AWS_STATIC_IMPL int aws_array_list_front(const struct aws_array_list *AWS_RESTRI
 ```
 """
 function aws_array_list_front(list, val)
-    ccall((:aws_array_list_front, libaws_c_common), Cint, (Ptr{aws_array_list}, Ptr{Cvoid}), list, val)
+    @ccall libaws_c_common.aws_array_list_front(list::Ptr{aws_array_list}, val::Ptr{Cvoid})::Cint
 end
 
 """
@@ -1190,7 +1209,7 @@ AWS_STATIC_IMPL int aws_array_list_push_front(struct aws_array_list *AWS_RESTRIC
 ```
 """
 function aws_array_list_push_front(list, val)
-    ccall((:aws_array_list_push_front, libaws_c_common), Cint, (Ptr{aws_array_list}, Ptr{Cvoid}), list, val)
+    @ccall libaws_c_common.aws_array_list_push_front(list::Ptr{aws_array_list}, val::Ptr{Cvoid})::Cint
 end
 
 """
@@ -1204,7 +1223,7 @@ AWS_STATIC_IMPL int aws_array_list_pop_front(struct aws_array_list *AWS_RESTRICT
 ```
 """
 function aws_array_list_pop_front(list)
-    ccall((:aws_array_list_pop_front, libaws_c_common), Cint, (Ptr{aws_array_list},), list)
+    @ccall libaws_c_common.aws_array_list_pop_front(list::Ptr{aws_array_list})::Cint
 end
 
 """
@@ -1218,7 +1237,7 @@ AWS_STATIC_IMPL void aws_array_list_pop_front_n(struct aws_array_list *AWS_RESTR
 ```
 """
 function aws_array_list_pop_front_n(list, n)
-    ccall((:aws_array_list_pop_front_n, libaws_c_common), Cvoid, (Ptr{aws_array_list}, Csize_t), list, n)
+    @ccall libaws_c_common.aws_array_list_pop_front_n(list::Ptr{aws_array_list}, n::Csize_t)::Cvoid
 end
 
 """
@@ -1232,7 +1251,7 @@ AWS_STATIC_IMPL int aws_array_list_erase(struct aws_array_list *AWS_RESTRICT lis
 ```
 """
 function aws_array_list_erase(list, index)
-    ccall((:aws_array_list_erase, libaws_c_common), Cint, (Ptr{aws_array_list}, Csize_t), list, index)
+    @ccall libaws_c_common.aws_array_list_erase(list::Ptr{aws_array_list}, index::Csize_t)::Cint
 end
 
 """
@@ -1246,7 +1265,7 @@ AWS_STATIC_IMPL int aws_array_list_back(const struct aws_array_list *AWS_RESTRIC
 ```
 """
 function aws_array_list_back(list, val)
-    ccall((:aws_array_list_back, libaws_c_common), Cint, (Ptr{aws_array_list}, Ptr{Cvoid}), list, val)
+    @ccall libaws_c_common.aws_array_list_back(list::Ptr{aws_array_list}, val::Ptr{Cvoid})::Cint
 end
 
 """
@@ -1260,7 +1279,7 @@ AWS_STATIC_IMPL int aws_array_list_pop_back(struct aws_array_list *AWS_RESTRICT 
 ```
 """
 function aws_array_list_pop_back(list)
-    ccall((:aws_array_list_pop_back, libaws_c_common), Cint, (Ptr{aws_array_list},), list)
+    @ccall libaws_c_common.aws_array_list_pop_back(list::Ptr{aws_array_list})::Cint
 end
 
 """
@@ -1274,7 +1293,7 @@ AWS_STATIC_IMPL void aws_array_list_clear(struct aws_array_list *AWS_RESTRICT li
 ```
 """
 function aws_array_list_clear(list)
-    ccall((:aws_array_list_clear, libaws_c_common), Cvoid, (Ptr{aws_array_list},), list)
+    @ccall libaws_c_common.aws_array_list_clear(list::Ptr{aws_array_list})::Cvoid
 end
 
 """
@@ -1288,7 +1307,7 @@ int aws_array_list_shrink_to_fit(struct aws_array_list *AWS_RESTRICT list);
 ```
 """
 function aws_array_list_shrink_to_fit(list)
-    ccall((:aws_array_list_shrink_to_fit, libaws_c_common), Cint, (Ptr{aws_array_list},), list)
+    @ccall libaws_c_common.aws_array_list_shrink_to_fit(list::Ptr{aws_array_list})::Cint
 end
 
 """
@@ -1302,7 +1321,7 @@ int aws_array_list_copy(const struct aws_array_list *AWS_RESTRICT from, struct a
 ```
 """
 function aws_array_list_copy(from, to)
-    ccall((:aws_array_list_copy, libaws_c_common), Cint, (Ptr{aws_array_list}, Ptr{aws_array_list}), from, to)
+    @ccall libaws_c_common.aws_array_list_copy(from::Ptr{aws_array_list}, to::Ptr{aws_array_list})::Cint
 end
 
 """
@@ -1316,7 +1335,7 @@ AWS_STATIC_IMPL void aws_array_list_swap_contents( struct aws_array_list *AWS_RE
 ```
 """
 function aws_array_list_swap_contents(list_a, list_b)
-    ccall((:aws_array_list_swap_contents, libaws_c_common), Cvoid, (Ptr{aws_array_list}, Ptr{aws_array_list}), list_a, list_b)
+    @ccall libaws_c_common.aws_array_list_swap_contents(list_a::Ptr{aws_array_list}, list_b::Ptr{aws_array_list})::Cvoid
 end
 
 """
@@ -1330,7 +1349,7 @@ AWS_STATIC_IMPL size_t aws_array_list_capacity(const struct aws_array_list *AWS_
 ```
 """
 function aws_array_list_capacity(list)
-    ccall((:aws_array_list_capacity, libaws_c_common), Csize_t, (Ptr{aws_array_list},), list)
+    @ccall libaws_c_common.aws_array_list_capacity(list::Ptr{aws_array_list})::Csize_t
 end
 
 """
@@ -1344,7 +1363,7 @@ AWS_STATIC_IMPL size_t aws_array_list_length(const struct aws_array_list *AWS_RE
 ```
 """
 function aws_array_list_length(list)
-    ccall((:aws_array_list_length, libaws_c_common), Csize_t, (Ptr{aws_array_list},), list)
+    @ccall libaws_c_common.aws_array_list_length(list::Ptr{aws_array_list})::Csize_t
 end
 
 """
@@ -1358,7 +1377,7 @@ AWS_STATIC_IMPL int aws_array_list_get_at(const struct aws_array_list *AWS_RESTR
 ```
 """
 function aws_array_list_get_at(list, val, index)
-    ccall((:aws_array_list_get_at, libaws_c_common), Cint, (Ptr{aws_array_list}, Ptr{Cvoid}, Csize_t), list, val, index)
+    @ccall libaws_c_common.aws_array_list_get_at(list::Ptr{aws_array_list}, val::Ptr{Cvoid}, index::Csize_t)::Cint
 end
 
 """
@@ -1372,7 +1391,7 @@ AWS_STATIC_IMPL int aws_array_list_get_at_ptr(const struct aws_array_list *AWS_R
 ```
 """
 function aws_array_list_get_at_ptr(list, val, index)
-    ccall((:aws_array_list_get_at_ptr, libaws_c_common), Cint, (Ptr{aws_array_list}, Ptr{Ptr{Cvoid}}, Csize_t), list, val, index)
+    @ccall libaws_c_common.aws_array_list_get_at_ptr(list::Ptr{aws_array_list}, val::Ptr{Ptr{Cvoid}}, index::Csize_t)::Cint
 end
 
 """
@@ -1386,7 +1405,7 @@ int aws_array_list_ensure_capacity(struct aws_array_list *AWS_RESTRICT list, siz
 ```
 """
 function aws_array_list_ensure_capacity(list, index)
-    ccall((:aws_array_list_ensure_capacity, libaws_c_common), Cint, (Ptr{aws_array_list}, Csize_t), list, index)
+    @ccall libaws_c_common.aws_array_list_ensure_capacity(list::Ptr{aws_array_list}, index::Csize_t)::Cint
 end
 
 """
@@ -1400,7 +1419,7 @@ AWS_STATIC_IMPL int aws_array_list_set_at(struct aws_array_list *AWS_RESTRICT li
 ```
 """
 function aws_array_list_set_at(list, val, index)
-    ccall((:aws_array_list_set_at, libaws_c_common), Cint, (Ptr{aws_array_list}, Ptr{Cvoid}, Csize_t), list, val, index)
+    @ccall libaws_c_common.aws_array_list_set_at(list::Ptr{aws_array_list}, val::Ptr{Cvoid}, index::Csize_t)::Cint
 end
 
 """
@@ -1414,7 +1433,7 @@ void aws_array_list_swap(struct aws_array_list *AWS_RESTRICT list, size_t a, siz
 ```
 """
 function aws_array_list_swap(list, a, b)
-    ccall((:aws_array_list_swap, libaws_c_common), Cvoid, (Ptr{aws_array_list}, Csize_t, Csize_t), list, a, b)
+    @ccall libaws_c_common.aws_array_list_swap(list::Ptr{aws_array_list}, a::Csize_t, b::Csize_t)::Cvoid
 end
 
 """
@@ -1428,7 +1447,7 @@ void aws_array_list_sort(struct aws_array_list *AWS_RESTRICT list, aws_array_lis
 ```
 """
 function aws_array_list_sort(list, compare_fn)
-    ccall((:aws_array_list_sort, libaws_c_common), Cvoid, (Ptr{aws_array_list}, Ptr{aws_array_list_comparator_fn}), list, compare_fn)
+    @ccall libaws_c_common.aws_array_list_sort(list::Ptr{aws_array_list}, compare_fn::Ptr{aws_array_list_comparator_fn})::Cvoid
 end
 
 """
@@ -1440,7 +1459,7 @@ void aws_fatal_assert(const char *cond_str, const char *file, int line) AWS_ATTR
 ```
 """
 function aws_fatal_assert(cond_str, file, line)
-    ccall((:aws_fatal_assert, libaws_c_common), Cvoid, (Ptr{Cchar}, Ptr{Cchar}, Cint), cond_str, file, line)
+    @ccall libaws_c_common.aws_fatal_assert(cond_str::Ptr{Cchar}, file::Ptr{Cchar}, line::Cint)::Cvoid
 end
 
 const aws_atomic_impl_int_t = Csize_t
@@ -1475,7 +1494,7 @@ AWS_STATIC_IMPL void aws_atomic_init_int(volatile struct aws_atomic_var *var, si
 ```
 """
 function aws_atomic_init_int(var, n)
-    ccall((:aws_atomic_init_int, libaws_c_common), Cvoid, (Ptr{aws_atomic_var}, Csize_t), var, n)
+    @ccall libaws_c_common.aws_atomic_init_int(var::Ptr{aws_atomic_var}, n::Csize_t)::Cvoid
 end
 
 """
@@ -1491,7 +1510,7 @@ AWS_STATIC_IMPL void aws_atomic_init_ptr(volatile struct aws_atomic_var *var, vo
 ```
 """
 function aws_atomic_init_ptr(var, p)
-    ccall((:aws_atomic_init_ptr, libaws_c_common), Cvoid, (Ptr{aws_atomic_var}, Ptr{Cvoid}), var, p)
+    @ccall libaws_c_common.aws_atomic_init_ptr(var::Ptr{aws_atomic_var}, p::Ptr{Cvoid})::Cvoid
 end
 
 """
@@ -1505,7 +1524,7 @@ AWS_STATIC_IMPL size_t aws_atomic_load_int_explicit(volatile const struct aws_at
 ```
 """
 function aws_atomic_load_int_explicit(var, memory_order)
-    ccall((:aws_atomic_load_int_explicit, libaws_c_common), Csize_t, (Ptr{aws_atomic_var}, aws_memory_order), var, memory_order)
+    @ccall libaws_c_common.aws_atomic_load_int_explicit(var::Ptr{aws_atomic_var}, memory_order::aws_memory_order)::Csize_t
 end
 
 """
@@ -1519,7 +1538,7 @@ AWS_STATIC_IMPL size_t aws_atomic_load_int(volatile const struct aws_atomic_var 
 ```
 """
 function aws_atomic_load_int(var)
-    ccall((:aws_atomic_load_int, libaws_c_common), Csize_t, (Ptr{aws_atomic_var},), var)
+    @ccall libaws_c_common.aws_atomic_load_int(var::Ptr{aws_atomic_var})::Csize_t
 end
 
 """
@@ -1533,7 +1552,7 @@ AWS_STATIC_IMPL void *aws_atomic_load_ptr_explicit(volatile const struct aws_ato
 ```
 """
 function aws_atomic_load_ptr_explicit(var, memory_order)
-    ccall((:aws_atomic_load_ptr_explicit, libaws_c_common), Ptr{Cvoid}, (Ptr{aws_atomic_var}, aws_memory_order), var, memory_order)
+    @ccall libaws_c_common.aws_atomic_load_ptr_explicit(var::Ptr{aws_atomic_var}, memory_order::aws_memory_order)::Ptr{Cvoid}
 end
 
 """
@@ -1547,7 +1566,7 @@ AWS_STATIC_IMPL void *aws_atomic_load_ptr(volatile const struct aws_atomic_var *
 ```
 """
 function aws_atomic_load_ptr(var)
-    ccall((:aws_atomic_load_ptr, libaws_c_common), Ptr{Cvoid}, (Ptr{aws_atomic_var},), var)
+    @ccall libaws_c_common.aws_atomic_load_ptr(var::Ptr{aws_atomic_var})::Ptr{Cvoid}
 end
 
 """
@@ -1561,7 +1580,7 @@ AWS_STATIC_IMPL void aws_atomic_store_int_explicit(volatile struct aws_atomic_va
 ```
 """
 function aws_atomic_store_int_explicit(var, n, memory_order)
-    ccall((:aws_atomic_store_int_explicit, libaws_c_common), Cvoid, (Ptr{aws_atomic_var}, Csize_t, aws_memory_order), var, n, memory_order)
+    @ccall libaws_c_common.aws_atomic_store_int_explicit(var::Ptr{aws_atomic_var}, n::Csize_t, memory_order::aws_memory_order)::Cvoid
 end
 
 """
@@ -1575,7 +1594,7 @@ AWS_STATIC_IMPL void aws_atomic_store_int(volatile struct aws_atomic_var *var, s
 ```
 """
 function aws_atomic_store_int(var, n)
-    ccall((:aws_atomic_store_int, libaws_c_common), Cvoid, (Ptr{aws_atomic_var}, Csize_t), var, n)
+    @ccall libaws_c_common.aws_atomic_store_int(var::Ptr{aws_atomic_var}, n::Csize_t)::Cvoid
 end
 
 """
@@ -1589,7 +1608,7 @@ AWS_STATIC_IMPL void aws_atomic_store_ptr_explicit(volatile struct aws_atomic_va
 ```
 """
 function aws_atomic_store_ptr_explicit(var, p, memory_order)
-    ccall((:aws_atomic_store_ptr_explicit, libaws_c_common), Cvoid, (Ptr{aws_atomic_var}, Ptr{Cvoid}, aws_memory_order), var, p, memory_order)
+    @ccall libaws_c_common.aws_atomic_store_ptr_explicit(var::Ptr{aws_atomic_var}, p::Ptr{Cvoid}, memory_order::aws_memory_order)::Cvoid
 end
 
 """
@@ -1603,7 +1622,7 @@ AWS_STATIC_IMPL void aws_atomic_store_ptr(volatile struct aws_atomic_var *var, v
 ```
 """
 function aws_atomic_store_ptr(var, p)
-    ccall((:aws_atomic_store_ptr, libaws_c_common), Cvoid, (Ptr{aws_atomic_var}, Ptr{Cvoid}), var, p)
+    @ccall libaws_c_common.aws_atomic_store_ptr(var::Ptr{aws_atomic_var}, p::Ptr{Cvoid})::Cvoid
 end
 
 """
@@ -1617,7 +1636,7 @@ AWS_STATIC_IMPL size_t aws_atomic_exchange_int_explicit( volatile struct aws_ato
 ```
 """
 function aws_atomic_exchange_int_explicit(var, n, memory_order)
-    ccall((:aws_atomic_exchange_int_explicit, libaws_c_common), Csize_t, (Ptr{aws_atomic_var}, Csize_t, aws_memory_order), var, n, memory_order)
+    @ccall libaws_c_common.aws_atomic_exchange_int_explicit(var::Ptr{aws_atomic_var}, n::Csize_t, memory_order::aws_memory_order)::Csize_t
 end
 
 """
@@ -1631,7 +1650,7 @@ AWS_STATIC_IMPL size_t aws_atomic_exchange_int(volatile struct aws_atomic_var *v
 ```
 """
 function aws_atomic_exchange_int(var, n)
-    ccall((:aws_atomic_exchange_int, libaws_c_common), Csize_t, (Ptr{aws_atomic_var}, Csize_t), var, n)
+    @ccall libaws_c_common.aws_atomic_exchange_int(var::Ptr{aws_atomic_var}, n::Csize_t)::Csize_t
 end
 
 """
@@ -1645,7 +1664,7 @@ AWS_STATIC_IMPL void *aws_atomic_exchange_ptr_explicit( volatile struct aws_atom
 ```
 """
 function aws_atomic_exchange_ptr_explicit(var, p, memory_order)
-    ccall((:aws_atomic_exchange_ptr_explicit, libaws_c_common), Ptr{Cvoid}, (Ptr{aws_atomic_var}, Ptr{Cvoid}, aws_memory_order), var, p, memory_order)
+    @ccall libaws_c_common.aws_atomic_exchange_ptr_explicit(var::Ptr{aws_atomic_var}, p::Ptr{Cvoid}, memory_order::aws_memory_order)::Ptr{Cvoid}
 end
 
 """
@@ -1659,7 +1678,7 @@ AWS_STATIC_IMPL void *aws_atomic_exchange_ptr(volatile struct aws_atomic_var *va
 ```
 """
 function aws_atomic_exchange_ptr(var, p)
-    ccall((:aws_atomic_exchange_ptr, libaws_c_common), Ptr{Cvoid}, (Ptr{aws_atomic_var}, Ptr{Cvoid}), var, p)
+    @ccall libaws_c_common.aws_atomic_exchange_ptr(var::Ptr{aws_atomic_var}, p::Ptr{Cvoid})::Ptr{Cvoid}
 end
 
 """
@@ -1673,7 +1692,7 @@ AWS_STATIC_IMPL bool aws_atomic_compare_exchange_int_explicit( volatile struct a
 ```
 """
 function aws_atomic_compare_exchange_int_explicit(var, expected, desired, order_success, order_failure)
-    ccall((:aws_atomic_compare_exchange_int_explicit, libaws_c_common), Bool, (Ptr{aws_atomic_var}, Ptr{Csize_t}, Csize_t, aws_memory_order, aws_memory_order), var, expected, desired, order_success, order_failure)
+    @ccall libaws_c_common.aws_atomic_compare_exchange_int_explicit(var::Ptr{aws_atomic_var}, expected::Ptr{Csize_t}, desired::Csize_t, order_success::aws_memory_order, order_failure::aws_memory_order)::Bool
 end
 
 """
@@ -1687,7 +1706,7 @@ AWS_STATIC_IMPL bool aws_atomic_compare_exchange_int(volatile struct aws_atomic_
 ```
 """
 function aws_atomic_compare_exchange_int(var, expected, desired)
-    ccall((:aws_atomic_compare_exchange_int, libaws_c_common), Bool, (Ptr{aws_atomic_var}, Ptr{Csize_t}, Csize_t), var, expected, desired)
+    @ccall libaws_c_common.aws_atomic_compare_exchange_int(var::Ptr{aws_atomic_var}, expected::Ptr{Csize_t}, desired::Csize_t)::Bool
 end
 
 """
@@ -1701,7 +1720,7 @@ AWS_STATIC_IMPL bool aws_atomic_compare_exchange_ptr_explicit( volatile struct a
 ```
 """
 function aws_atomic_compare_exchange_ptr_explicit(var, expected, desired, order_success, order_failure)
-    ccall((:aws_atomic_compare_exchange_ptr_explicit, libaws_c_common), Bool, (Ptr{aws_atomic_var}, Ptr{Ptr{Cvoid}}, Ptr{Cvoid}, aws_memory_order, aws_memory_order), var, expected, desired, order_success, order_failure)
+    @ccall libaws_c_common.aws_atomic_compare_exchange_ptr_explicit(var::Ptr{aws_atomic_var}, expected::Ptr{Ptr{Cvoid}}, desired::Ptr{Cvoid}, order_success::aws_memory_order, order_failure::aws_memory_order)::Bool
 end
 
 """
@@ -1715,7 +1734,7 @@ AWS_STATIC_IMPL bool aws_atomic_compare_exchange_ptr(volatile struct aws_atomic_
 ```
 """
 function aws_atomic_compare_exchange_ptr(var, expected, desired)
-    ccall((:aws_atomic_compare_exchange_ptr, libaws_c_common), Bool, (Ptr{aws_atomic_var}, Ptr{Ptr{Cvoid}}, Ptr{Cvoid}), var, expected, desired)
+    @ccall libaws_c_common.aws_atomic_compare_exchange_ptr(var::Ptr{aws_atomic_var}, expected::Ptr{Ptr{Cvoid}}, desired::Ptr{Cvoid})::Bool
 end
 
 """
@@ -1729,7 +1748,7 @@ AWS_STATIC_IMPL size_t aws_atomic_fetch_add_explicit(volatile struct aws_atomic_
 ```
 """
 function aws_atomic_fetch_add_explicit(var, n, order)
-    ccall((:aws_atomic_fetch_add_explicit, libaws_c_common), Csize_t, (Ptr{aws_atomic_var}, Csize_t, aws_memory_order), var, n, order)
+    @ccall libaws_c_common.aws_atomic_fetch_add_explicit(var::Ptr{aws_atomic_var}, n::Csize_t, order::aws_memory_order)::Csize_t
 end
 
 """
@@ -1743,7 +1762,7 @@ AWS_STATIC_IMPL size_t aws_atomic_fetch_sub_explicit(volatile struct aws_atomic_
 ```
 """
 function aws_atomic_fetch_sub_explicit(var, n, order)
-    ccall((:aws_atomic_fetch_sub_explicit, libaws_c_common), Csize_t, (Ptr{aws_atomic_var}, Csize_t, aws_memory_order), var, n, order)
+    @ccall libaws_c_common.aws_atomic_fetch_sub_explicit(var::Ptr{aws_atomic_var}, n::Csize_t, order::aws_memory_order)::Csize_t
 end
 
 """
@@ -1757,7 +1776,7 @@ AWS_STATIC_IMPL size_t aws_atomic_fetch_or_explicit(volatile struct aws_atomic_v
 ```
 """
 function aws_atomic_fetch_or_explicit(var, n, order)
-    ccall((:aws_atomic_fetch_or_explicit, libaws_c_common), Csize_t, (Ptr{aws_atomic_var}, Csize_t, aws_memory_order), var, n, order)
+    @ccall libaws_c_common.aws_atomic_fetch_or_explicit(var::Ptr{aws_atomic_var}, n::Csize_t, order::aws_memory_order)::Csize_t
 end
 
 """
@@ -1771,7 +1790,7 @@ AWS_STATIC_IMPL size_t aws_atomic_fetch_and_explicit(volatile struct aws_atomic_
 ```
 """
 function aws_atomic_fetch_and_explicit(var, n, order)
-    ccall((:aws_atomic_fetch_and_explicit, libaws_c_common), Csize_t, (Ptr{aws_atomic_var}, Csize_t, aws_memory_order), var, n, order)
+    @ccall libaws_c_common.aws_atomic_fetch_and_explicit(var::Ptr{aws_atomic_var}, n::Csize_t, order::aws_memory_order)::Csize_t
 end
 
 """
@@ -1785,7 +1804,7 @@ AWS_STATIC_IMPL size_t aws_atomic_fetch_xor_explicit(volatile struct aws_atomic_
 ```
 """
 function aws_atomic_fetch_xor_explicit(var, n, order)
-    ccall((:aws_atomic_fetch_xor_explicit, libaws_c_common), Csize_t, (Ptr{aws_atomic_var}, Csize_t, aws_memory_order), var, n, order)
+    @ccall libaws_c_common.aws_atomic_fetch_xor_explicit(var::Ptr{aws_atomic_var}, n::Csize_t, order::aws_memory_order)::Csize_t
 end
 
 """
@@ -1799,7 +1818,7 @@ AWS_STATIC_IMPL size_t aws_atomic_fetch_add(volatile struct aws_atomic_var *var,
 ```
 """
 function aws_atomic_fetch_add(var, n)
-    ccall((:aws_atomic_fetch_add, libaws_c_common), Csize_t, (Ptr{aws_atomic_var}, Csize_t), var, n)
+    @ccall libaws_c_common.aws_atomic_fetch_add(var::Ptr{aws_atomic_var}, n::Csize_t)::Csize_t
 end
 
 """
@@ -1813,7 +1832,7 @@ AWS_STATIC_IMPL size_t aws_atomic_fetch_sub(volatile struct aws_atomic_var *var,
 ```
 """
 function aws_atomic_fetch_sub(var, n)
-    ccall((:aws_atomic_fetch_sub, libaws_c_common), Csize_t, (Ptr{aws_atomic_var}, Csize_t), var, n)
+    @ccall libaws_c_common.aws_atomic_fetch_sub(var::Ptr{aws_atomic_var}, n::Csize_t)::Csize_t
 end
 
 """
@@ -1827,7 +1846,7 @@ AWS_STATIC_IMPL size_t aws_atomic_fetch_and(volatile struct aws_atomic_var *var,
 ```
 """
 function aws_atomic_fetch_and(var, n)
-    ccall((:aws_atomic_fetch_and, libaws_c_common), Csize_t, (Ptr{aws_atomic_var}, Csize_t), var, n)
+    @ccall libaws_c_common.aws_atomic_fetch_and(var::Ptr{aws_atomic_var}, n::Csize_t)::Csize_t
 end
 
 """
@@ -1841,7 +1860,7 @@ AWS_STATIC_IMPL size_t aws_atomic_fetch_or(volatile struct aws_atomic_var *var, 
 ```
 """
 function aws_atomic_fetch_or(var, n)
-    ccall((:aws_atomic_fetch_or, libaws_c_common), Csize_t, (Ptr{aws_atomic_var}, Csize_t), var, n)
+    @ccall libaws_c_common.aws_atomic_fetch_or(var::Ptr{aws_atomic_var}, n::Csize_t)::Csize_t
 end
 
 """
@@ -1855,7 +1874,7 @@ AWS_STATIC_IMPL size_t aws_atomic_fetch_xor(volatile struct aws_atomic_var *var,
 ```
 """
 function aws_atomic_fetch_xor(var, n)
-    ccall((:aws_atomic_fetch_xor, libaws_c_common), Csize_t, (Ptr{aws_atomic_var}, Csize_t), var, n)
+    @ccall libaws_c_common.aws_atomic_fetch_xor(var::Ptr{aws_atomic_var}, n::Csize_t)::Csize_t
 end
 
 """
@@ -1869,7 +1888,7 @@ AWS_STATIC_IMPL void aws_atomic_thread_fence(enum aws_memory_order order);
 ```
 """
 function aws_atomic_thread_fence(order)
-    ccall((:aws_atomic_thread_fence, libaws_c_common), Cvoid, (aws_memory_order,), order)
+    @ccall libaws_c_common.aws_atomic_thread_fence(order::aws_memory_order)::Cvoid
 end
 
 """
@@ -1881,7 +1900,7 @@ static inline int aws_atomic_priv_xlate_order(enum aws_memory_order order);
 ```
 """
 function aws_atomic_priv_xlate_order(order)
-    ccall((:aws_atomic_priv_xlate_order, libaws_c_common), Cint, (aws_memory_order,), order)
+    @ccall libaws_c_common.aws_atomic_priv_xlate_order(order::aws_memory_order)::Cint
 end
 
 """
@@ -1895,7 +1914,7 @@ AWS_STATIC_IMPL int aws_is_big_endian(void);
 ```
 """
 function aws_is_big_endian()
-    ccall((:aws_is_big_endian, libaws_c_common), Cint, ())
+    @ccall libaws_c_common.aws_is_big_endian()::Cint
 end
 
 """
@@ -1909,7 +1928,7 @@ AWS_STATIC_IMPL uint64_t aws_hton64(uint64_t x);
 ```
 """
 function aws_hton64(x)
-    ccall((:aws_hton64, libaws_c_common), UInt64, (UInt64,), x)
+    @ccall libaws_c_common.aws_hton64(x::UInt64)::UInt64
 end
 
 """
@@ -1923,7 +1942,7 @@ AWS_STATIC_IMPL uint64_t aws_ntoh64(uint64_t x);
 ```
 """
 function aws_ntoh64(x)
-    ccall((:aws_ntoh64, libaws_c_common), UInt64, (UInt64,), x)
+    @ccall libaws_c_common.aws_ntoh64(x::UInt64)::UInt64
 end
 
 """
@@ -1937,7 +1956,7 @@ AWS_STATIC_IMPL uint32_t aws_hton32(uint32_t x);
 ```
 """
 function aws_hton32(x)
-    ccall((:aws_hton32, libaws_c_common), UInt32, (UInt32,), x)
+    @ccall libaws_c_common.aws_hton32(x::UInt32)::UInt32
 end
 
 """
@@ -1951,7 +1970,7 @@ AWS_STATIC_IMPL float aws_htonf32(float x);
 ```
 """
 function aws_htonf32(x)
-    ccall((:aws_htonf32, libaws_c_common), Cfloat, (Cfloat,), x)
+    @ccall libaws_c_common.aws_htonf32(x::Cfloat)::Cfloat
 end
 
 """
@@ -1965,7 +1984,7 @@ AWS_STATIC_IMPL double aws_htonf64(double x);
 ```
 """
 function aws_htonf64(x)
-    ccall((:aws_htonf64, libaws_c_common), Cdouble, (Cdouble,), x)
+    @ccall libaws_c_common.aws_htonf64(x::Cdouble)::Cdouble
 end
 
 """
@@ -1979,7 +1998,7 @@ AWS_STATIC_IMPL uint32_t aws_ntoh32(uint32_t x);
 ```
 """
 function aws_ntoh32(x)
-    ccall((:aws_ntoh32, libaws_c_common), UInt32, (UInt32,), x)
+    @ccall libaws_c_common.aws_ntoh32(x::UInt32)::UInt32
 end
 
 """
@@ -1993,7 +2012,7 @@ AWS_STATIC_IMPL float aws_ntohf32(float x);
 ```
 """
 function aws_ntohf32(x)
-    ccall((:aws_ntohf32, libaws_c_common), Cfloat, (Cfloat,), x)
+    @ccall libaws_c_common.aws_ntohf32(x::Cfloat)::Cfloat
 end
 
 """
@@ -2007,7 +2026,7 @@ AWS_STATIC_IMPL double aws_ntohf64(double x);
 ```
 """
 function aws_ntohf64(x)
-    ccall((:aws_ntohf64, libaws_c_common), Cdouble, (Cdouble,), x)
+    @ccall libaws_c_common.aws_ntohf64(x::Cdouble)::Cdouble
 end
 
 """
@@ -2021,7 +2040,7 @@ AWS_STATIC_IMPL uint16_t aws_hton16(uint16_t x);
 ```
 """
 function aws_hton16(x)
-    ccall((:aws_hton16, libaws_c_common), UInt16, (UInt16,), x)
+    @ccall libaws_c_common.aws_hton16(x::UInt16)::UInt16
 end
 
 """
@@ -2035,7 +2054,7 @@ AWS_STATIC_IMPL uint16_t aws_ntoh16(uint16_t x);
 ```
 """
 function aws_ntoh16(x)
-    ccall((:aws_ntoh16, libaws_c_common), UInt16, (UInt16,), x)
+    @ccall libaws_c_common.aws_ntoh16(x::UInt16)::UInt16
 end
 
 """
@@ -2083,7 +2102,7 @@ bool aws_array_eq(const void *const array_a, const size_t len_a, const void *arr
 ```
 """
 function aws_array_eq(array_a, len_a, array_b, len_b)
-    ccall((:aws_array_eq, libaws_c_common), Bool, (Ptr{Cvoid}, Csize_t, Ptr{Cvoid}, Csize_t), array_a, len_a, array_b, len_b)
+    @ccall libaws_c_common.aws_array_eq(array_a::Ptr{Cvoid}, len_a::Csize_t, array_b::Ptr{Cvoid}, len_b::Csize_t)::Bool
 end
 
 """
@@ -2097,7 +2116,7 @@ bool aws_array_eq_ignore_case( const void *const array_a, const size_t len_a, co
 ```
 """
 function aws_array_eq_ignore_case(array_a, len_a, array_b, len_b)
-    ccall((:aws_array_eq_ignore_case, libaws_c_common), Bool, (Ptr{Cvoid}, Csize_t, Ptr{Cvoid}, Csize_t), array_a, len_a, array_b, len_b)
+    @ccall libaws_c_common.aws_array_eq_ignore_case(array_a::Ptr{Cvoid}, len_a::Csize_t, array_b::Ptr{Cvoid}, len_b::Csize_t)::Bool
 end
 
 """
@@ -2111,7 +2130,7 @@ bool aws_array_eq_c_str(const void *const array, const size_t array_len, const c
 ```
 """
 function aws_array_eq_c_str(array, array_len, c_str)
-    ccall((:aws_array_eq_c_str, libaws_c_common), Bool, (Ptr{Cvoid}, Csize_t, Ptr{Cchar}), array, array_len, c_str)
+    @ccall libaws_c_common.aws_array_eq_c_str(array::Ptr{Cvoid}, array_len::Csize_t, c_str::Ptr{Cchar})::Bool
 end
 
 """
@@ -2125,7 +2144,7 @@ bool aws_array_eq_c_str_ignore_case(const void *const array, const size_t array_
 ```
 """
 function aws_array_eq_c_str_ignore_case(array, array_len, c_str)
-    ccall((:aws_array_eq_c_str_ignore_case, libaws_c_common), Bool, (Ptr{Cvoid}, Csize_t, Ptr{Cchar}), array, array_len, c_str)
+    @ccall libaws_c_common.aws_array_eq_c_str_ignore_case(array::Ptr{Cvoid}, array_len::Csize_t, c_str::Ptr{Cchar})::Bool
 end
 
 """
@@ -2137,7 +2156,7 @@ int aws_byte_buf_init(struct aws_byte_buf *buf, struct aws_allocator *allocator,
 ```
 """
 function aws_byte_buf_init(buf, allocator, capacity)
-    ccall((:aws_byte_buf_init, libaws_c_common), Cint, (Ptr{aws_byte_buf}, Ptr{aws_allocator}, Csize_t), buf, allocator, capacity)
+    @ccall libaws_c_common.aws_byte_buf_init(buf::Ptr{aws_byte_buf}, allocator::Ptr{aws_allocator}, capacity::Csize_t)::Cint
 end
 
 """
@@ -2151,7 +2170,7 @@ int aws_byte_buf_init_copy( struct aws_byte_buf *dest, struct aws_allocator *all
 ```
 """
 function aws_byte_buf_init_copy(dest, allocator, src)
-    ccall((:aws_byte_buf_init_copy, libaws_c_common), Cint, (Ptr{aws_byte_buf}, Ptr{aws_allocator}, Ptr{aws_byte_buf}), dest, allocator, src)
+    @ccall libaws_c_common.aws_byte_buf_init_copy(dest::Ptr{aws_byte_buf}, allocator::Ptr{aws_allocator}, src::Ptr{aws_byte_buf})::Cint
 end
 
 """
@@ -2165,7 +2184,21 @@ int aws_byte_buf_init_from_file(struct aws_byte_buf *out_buf, struct aws_allocat
 ```
 """
 function aws_byte_buf_init_from_file(out_buf, alloc, filename)
-    ccall((:aws_byte_buf_init_from_file, libaws_c_common), Cint, (Ptr{aws_byte_buf}, Ptr{aws_allocator}, Ptr{Cchar}), out_buf, alloc, filename)
+    @ccall libaws_c_common.aws_byte_buf_init_from_file(out_buf::Ptr{aws_byte_buf}, alloc::Ptr{aws_allocator}, filename::Ptr{Cchar})::Cint
+end
+
+"""
+    aws_byte_buf_init_from_file_with_size_hint(out_buf, alloc, filename, size_hint)
+
+Same as [`aws_byte_buf_init_from_file`](@ref)(), but for reading "special files" like /proc/cpuinfo. These files don't accurately report their size, so size\\_hint is used as initial buffer size, and the buffer grows until the while file is read.
+
+### Prototype
+```c
+int aws_byte_buf_init_from_file_with_size_hint( struct aws_byte_buf *out_buf, struct aws_allocator *alloc, const char *filename, size_t size_hint);
+```
+"""
+function aws_byte_buf_init_from_file_with_size_hint(out_buf, alloc, filename, size_hint)
+    @ccall libaws_c_common.aws_byte_buf_init_from_file_with_size_hint(out_buf::Ptr{aws_byte_buf}, alloc::Ptr{aws_allocator}, filename::Ptr{Cchar}, size_hint::Csize_t)::Cint
 end
 
 """
@@ -2179,7 +2212,7 @@ bool aws_byte_buf_is_valid(const struct aws_byte_buf *const buf);
 ```
 """
 function aws_byte_buf_is_valid(buf)
-    ccall((:aws_byte_buf_is_valid, libaws_c_common), Bool, (Ptr{aws_byte_buf},), buf)
+    @ccall libaws_c_common.aws_byte_buf_is_valid(buf::Ptr{aws_byte_buf})::Bool
 end
 
 """
@@ -2193,7 +2226,7 @@ bool aws_byte_cursor_is_valid(const struct aws_byte_cursor *cursor);
 ```
 """
 function aws_byte_cursor_is_valid(cursor)
-    ccall((:aws_byte_cursor_is_valid, libaws_c_common), Bool, (Ptr{aws_byte_cursor},), cursor)
+    @ccall libaws_c_common.aws_byte_cursor_is_valid(cursor::Ptr{aws_byte_cursor})::Bool
 end
 
 """
@@ -2207,7 +2240,7 @@ int aws_byte_buf_init_copy_from_cursor( struct aws_byte_buf *dest, struct aws_al
 ```
 """
 function aws_byte_buf_init_copy_from_cursor(dest, allocator, src)
-    ccall((:aws_byte_buf_init_copy_from_cursor, libaws_c_common), Cint, (Ptr{aws_byte_buf}, Ptr{aws_allocator}, aws_byte_cursor), dest, allocator, src)
+    @ccall libaws_c_common.aws_byte_buf_init_copy_from_cursor(dest::Ptr{aws_byte_buf}, allocator::Ptr{aws_allocator}, src::aws_byte_cursor)::Cint
 end
 
 """
@@ -2219,7 +2252,7 @@ void aws_byte_buf_clean_up(struct aws_byte_buf *buf);
 ```
 """
 function aws_byte_buf_clean_up(buf)
-    ccall((:aws_byte_buf_clean_up, libaws_c_common), Cvoid, (Ptr{aws_byte_buf},), buf)
+    @ccall libaws_c_common.aws_byte_buf_clean_up(buf::Ptr{aws_byte_buf})::Cvoid
 end
 
 """
@@ -2233,7 +2266,7 @@ void aws_byte_buf_clean_up_secure(struct aws_byte_buf *buf);
 ```
 """
 function aws_byte_buf_clean_up_secure(buf)
-    ccall((:aws_byte_buf_clean_up_secure, libaws_c_common), Cvoid, (Ptr{aws_byte_buf},), buf)
+    @ccall libaws_c_common.aws_byte_buf_clean_up_secure(buf::Ptr{aws_byte_buf})::Cvoid
 end
 
 """
@@ -2247,7 +2280,7 @@ void aws_byte_buf_reset(struct aws_byte_buf *buf, bool zero_contents);
 ```
 """
 function aws_byte_buf_reset(buf, zero_contents)
-    ccall((:aws_byte_buf_reset, libaws_c_common), Cvoid, (Ptr{aws_byte_buf}, Bool), buf, zero_contents)
+    @ccall libaws_c_common.aws_byte_buf_reset(buf::Ptr{aws_byte_buf}, zero_contents::Bool)::Cvoid
 end
 
 """
@@ -2261,7 +2294,7 @@ void aws_byte_buf_secure_zero(struct aws_byte_buf *buf);
 ```
 """
 function aws_byte_buf_secure_zero(buf)
-    ccall((:aws_byte_buf_secure_zero, libaws_c_common), Cvoid, (Ptr{aws_byte_buf},), buf)
+    @ccall libaws_c_common.aws_byte_buf_secure_zero(buf::Ptr{aws_byte_buf})::Cvoid
 end
 
 """
@@ -2275,7 +2308,7 @@ bool aws_byte_buf_eq(const struct aws_byte_buf *const a, const struct aws_byte_b
 ```
 """
 function aws_byte_buf_eq(a, b)
-    ccall((:aws_byte_buf_eq, libaws_c_common), Bool, (Ptr{aws_byte_buf}, Ptr{aws_byte_buf}), a, b)
+    @ccall libaws_c_common.aws_byte_buf_eq(a::Ptr{aws_byte_buf}, b::Ptr{aws_byte_buf})::Bool
 end
 
 """
@@ -2289,7 +2322,7 @@ bool aws_byte_buf_eq_ignore_case(const struct aws_byte_buf *const a, const struc
 ```
 """
 function aws_byte_buf_eq_ignore_case(a, b)
-    ccall((:aws_byte_buf_eq_ignore_case, libaws_c_common), Bool, (Ptr{aws_byte_buf}, Ptr{aws_byte_buf}), a, b)
+    @ccall libaws_c_common.aws_byte_buf_eq_ignore_case(a::Ptr{aws_byte_buf}, b::Ptr{aws_byte_buf})::Bool
 end
 
 """
@@ -2303,7 +2336,7 @@ bool aws_byte_buf_eq_c_str(const struct aws_byte_buf *const buf, const char *con
 ```
 """
 function aws_byte_buf_eq_c_str(buf, c_str)
-    ccall((:aws_byte_buf_eq_c_str, libaws_c_common), Bool, (Ptr{aws_byte_buf}, Ptr{Cchar}), buf, c_str)
+    @ccall libaws_c_common.aws_byte_buf_eq_c_str(buf::Ptr{aws_byte_buf}, c_str::Ptr{Cchar})::Bool
 end
 
 """
@@ -2317,7 +2350,7 @@ bool aws_byte_buf_eq_c_str_ignore_case(const struct aws_byte_buf *const buf, con
 ```
 """
 function aws_byte_buf_eq_c_str_ignore_case(buf, c_str)
-    ccall((:aws_byte_buf_eq_c_str_ignore_case, libaws_c_common), Bool, (Ptr{aws_byte_buf}, Ptr{Cchar}), buf, c_str)
+    @ccall libaws_c_common.aws_byte_buf_eq_c_str_ignore_case(buf::Ptr{aws_byte_buf}, c_str::Ptr{Cchar})::Bool
 end
 
 """
@@ -2341,7 +2374,7 @@ bool aws_byte_cursor_next_split( const struct aws_byte_cursor *AWS_RESTRICT inpu
 ```
 """
 function aws_byte_cursor_next_split(input_str, split_on, substr)
-    ccall((:aws_byte_cursor_next_split, libaws_c_common), Bool, (Ptr{aws_byte_cursor}, Cchar, Ptr{aws_byte_cursor}), input_str, split_on, substr)
+    @ccall libaws_c_common.aws_byte_cursor_next_split(input_str::Ptr{aws_byte_cursor}, split_on::Cchar, substr::Ptr{aws_byte_cursor})::Bool
 end
 
 """
@@ -2363,7 +2396,7 @@ int aws_byte_cursor_split_on_char( const struct aws_byte_cursor *AWS_RESTRICT in
 ```
 """
 function aws_byte_cursor_split_on_char(input_str, split_on, output)
-    ccall((:aws_byte_cursor_split_on_char, libaws_c_common), Cint, (Ptr{aws_byte_cursor}, Cchar, Ptr{aws_array_list}), input_str, split_on, output)
+    @ccall libaws_c_common.aws_byte_cursor_split_on_char(input_str::Ptr{aws_byte_cursor}, split_on::Cchar, output::Ptr{aws_array_list})::Cint
 end
 
 """
@@ -2387,7 +2420,7 @@ int aws_byte_cursor_split_on_char_n( const struct aws_byte_cursor *AWS_RESTRICT 
 ```
 """
 function aws_byte_cursor_split_on_char_n(input_str, split_on, n, output)
-    ccall((:aws_byte_cursor_split_on_char_n, libaws_c_common), Cint, (Ptr{aws_byte_cursor}, Cchar, Csize_t, Ptr{aws_array_list}), input_str, split_on, n, output)
+    @ccall libaws_c_common.aws_byte_cursor_split_on_char_n(input_str::Ptr{aws_byte_cursor}, split_on::Cchar, n::Csize_t, output::Ptr{aws_array_list})::Cint
 end
 
 """
@@ -2401,7 +2434,7 @@ int aws_byte_cursor_find_exact( const struct aws_byte_cursor *AWS_RESTRICT input
 ```
 """
 function aws_byte_cursor_find_exact(input_str, to_find, first_find)
-    ccall((:aws_byte_cursor_find_exact, libaws_c_common), Cint, (Ptr{aws_byte_cursor}, Ptr{aws_byte_cursor}, Ptr{aws_byte_cursor}), input_str, to_find, first_find)
+    @ccall libaws_c_common.aws_byte_cursor_find_exact(input_str::Ptr{aws_byte_cursor}, to_find::Ptr{aws_byte_cursor}, first_find::Ptr{aws_byte_cursor})::Cint
 end
 
 """
@@ -2415,7 +2448,7 @@ struct aws_byte_cursor aws_byte_cursor_right_trim_pred( const struct aws_byte_cu
 ```
 """
 function aws_byte_cursor_right_trim_pred(source, predicate)
-    ccall((:aws_byte_cursor_right_trim_pred, libaws_c_common), aws_byte_cursor, (Ptr{aws_byte_cursor}, Ptr{aws_byte_predicate_fn}), source, predicate)
+    @ccall libaws_c_common.aws_byte_cursor_right_trim_pred(source::Ptr{aws_byte_cursor}, predicate::Ptr{aws_byte_predicate_fn})::aws_byte_cursor
 end
 
 """
@@ -2429,7 +2462,7 @@ struct aws_byte_cursor aws_byte_cursor_left_trim_pred( const struct aws_byte_cur
 ```
 """
 function aws_byte_cursor_left_trim_pred(source, predicate)
-    ccall((:aws_byte_cursor_left_trim_pred, libaws_c_common), aws_byte_cursor, (Ptr{aws_byte_cursor}, Ptr{aws_byte_predicate_fn}), source, predicate)
+    @ccall libaws_c_common.aws_byte_cursor_left_trim_pred(source::Ptr{aws_byte_cursor}, predicate::Ptr{aws_byte_predicate_fn})::aws_byte_cursor
 end
 
 """
@@ -2443,7 +2476,7 @@ struct aws_byte_cursor aws_byte_cursor_trim_pred( const struct aws_byte_cursor *
 ```
 """
 function aws_byte_cursor_trim_pred(source, predicate)
-    ccall((:aws_byte_cursor_trim_pred, libaws_c_common), aws_byte_cursor, (Ptr{aws_byte_cursor}, Ptr{aws_byte_predicate_fn}), source, predicate)
+    @ccall libaws_c_common.aws_byte_cursor_trim_pred(source::Ptr{aws_byte_cursor}, predicate::Ptr{aws_byte_predicate_fn})::aws_byte_cursor
 end
 
 """
@@ -2457,7 +2490,7 @@ bool aws_byte_cursor_satisfies_pred(const struct aws_byte_cursor *source, aws_by
 ```
 """
 function aws_byte_cursor_satisfies_pred(source, predicate)
-    ccall((:aws_byte_cursor_satisfies_pred, libaws_c_common), Bool, (Ptr{aws_byte_cursor}, Ptr{aws_byte_predicate_fn}), source, predicate)
+    @ccall libaws_c_common.aws_byte_cursor_satisfies_pred(source::Ptr{aws_byte_cursor}, predicate::Ptr{aws_byte_predicate_fn})::Bool
 end
 
 """
@@ -2473,7 +2506,7 @@ int aws_byte_buf_append(struct aws_byte_buf *to, const struct aws_byte_cursor *f
 ```
 """
 function aws_byte_buf_append(to, from)
-    ccall((:aws_byte_buf_append, libaws_c_common), Cint, (Ptr{aws_byte_buf}, Ptr{aws_byte_cursor}), to, from)
+    @ccall libaws_c_common.aws_byte_buf_append(to::Ptr{aws_byte_buf}, from::Ptr{aws_byte_cursor})::Cint
 end
 
 """
@@ -2489,7 +2522,7 @@ int aws_byte_buf_append_with_lookup( struct aws_byte_buf *AWS_RESTRICT to, const
 ```
 """
 function aws_byte_buf_append_with_lookup(to, from, lookup_table)
-    ccall((:aws_byte_buf_append_with_lookup, libaws_c_common), Cint, (Ptr{aws_byte_buf}, Ptr{aws_byte_cursor}, Ptr{UInt8}), to, from, lookup_table)
+    @ccall libaws_c_common.aws_byte_buf_append_with_lookup(to::Ptr{aws_byte_buf}, from::Ptr{aws_byte_cursor}, lookup_table::Ptr{UInt8})::Cint
 end
 
 """
@@ -2507,7 +2540,7 @@ int aws_byte_buf_append_dynamic(struct aws_byte_buf *to, const struct aws_byte_c
 ```
 """
 function aws_byte_buf_append_dynamic(to, from)
-    ccall((:aws_byte_buf_append_dynamic, libaws_c_common), Cint, (Ptr{aws_byte_buf}, Ptr{aws_byte_cursor}), to, from)
+    @ccall libaws_c_common.aws_byte_buf_append_dynamic(to::Ptr{aws_byte_buf}, from::Ptr{aws_byte_cursor})::Cint
 end
 
 """
@@ -2527,7 +2560,7 @@ int aws_byte_buf_append_dynamic_secure(struct aws_byte_buf *to, const struct aws
 ```
 """
 function aws_byte_buf_append_dynamic_secure(to, from)
-    ccall((:aws_byte_buf_append_dynamic_secure, libaws_c_common), Cint, (Ptr{aws_byte_buf}, Ptr{aws_byte_cursor}), to, from)
+    @ccall libaws_c_common.aws_byte_buf_append_dynamic_secure(to::Ptr{aws_byte_buf}, from::Ptr{aws_byte_cursor})::Cint
 end
 
 """
@@ -2543,7 +2576,7 @@ int aws_byte_buf_append_byte_dynamic(struct aws_byte_buf *buffer, uint8_t value)
 ```
 """
 function aws_byte_buf_append_byte_dynamic(buffer, value)
-    ccall((:aws_byte_buf_append_byte_dynamic, libaws_c_common), Cint, (Ptr{aws_byte_buf}, UInt8), buffer, value)
+    @ccall libaws_c_common.aws_byte_buf_append_byte_dynamic(buffer::Ptr{aws_byte_buf}, value::UInt8)::Cint
 end
 
 """
@@ -2561,7 +2594,7 @@ int aws_byte_buf_append_byte_dynamic_secure(struct aws_byte_buf *buffer, uint8_t
 ```
 """
 function aws_byte_buf_append_byte_dynamic_secure(buffer, value)
-    ccall((:aws_byte_buf_append_byte_dynamic_secure, libaws_c_common), Cint, (Ptr{aws_byte_buf}, UInt8), buffer, value)
+    @ccall libaws_c_common.aws_byte_buf_append_byte_dynamic_secure(buffer::Ptr{aws_byte_buf}, value::UInt8)::Cint
 end
 
 """
@@ -2577,7 +2610,7 @@ int aws_byte_buf_append_and_update(struct aws_byte_buf *to, struct aws_byte_curs
 ```
 """
 function aws_byte_buf_append_and_update(to, from_and_update)
-    ccall((:aws_byte_buf_append_and_update, libaws_c_common), Cint, (Ptr{aws_byte_buf}, Ptr{aws_byte_cursor}), to, from_and_update)
+    @ccall libaws_c_common.aws_byte_buf_append_and_update(to::Ptr{aws_byte_buf}, from_and_update::Ptr{aws_byte_cursor})::Cint
 end
 
 """
@@ -2591,7 +2624,7 @@ int aws_byte_buf_append_null_terminator(struct aws_byte_buf *buf);
 ```
 """
 function aws_byte_buf_append_null_terminator(buf)
-    ccall((:aws_byte_buf_append_null_terminator, libaws_c_common), Cint, (Ptr{aws_byte_buf},), buf)
+    @ccall libaws_c_common.aws_byte_buf_append_null_terminator(buf::Ptr{aws_byte_buf})::Cint
 end
 
 """
@@ -2607,7 +2640,7 @@ int aws_byte_buf_reserve(struct aws_byte_buf *buffer, size_t requested_capacity)
 ```
 """
 function aws_byte_buf_reserve(buffer, requested_capacity)
-    ccall((:aws_byte_buf_reserve, libaws_c_common), Cint, (Ptr{aws_byte_buf}, Csize_t), buffer, requested_capacity)
+    @ccall libaws_c_common.aws_byte_buf_reserve(buffer::Ptr{aws_byte_buf}, requested_capacity::Csize_t)::Cint
 end
 
 """
@@ -2623,7 +2656,7 @@ int aws_byte_buf_reserve_relative(struct aws_byte_buf *buffer, size_t additional
 ```
 """
 function aws_byte_buf_reserve_relative(buffer, additional_length)
-    ccall((:aws_byte_buf_reserve_relative, libaws_c_common), Cint, (Ptr{aws_byte_buf}, Csize_t), buffer, additional_length)
+    @ccall libaws_c_common.aws_byte_buf_reserve_relative(buffer::Ptr{aws_byte_buf}, additional_length::Csize_t)::Cint
 end
 
 """
@@ -2637,7 +2670,7 @@ bool aws_byte_cursor_eq(const struct aws_byte_cursor *a, const struct aws_byte_c
 ```
 """
 function aws_byte_cursor_eq(a, b)
-    ccall((:aws_byte_cursor_eq, libaws_c_common), Bool, (Ptr{aws_byte_cursor}, Ptr{aws_byte_cursor}), a, b)
+    @ccall libaws_c_common.aws_byte_cursor_eq(a::Ptr{aws_byte_cursor}, b::Ptr{aws_byte_cursor})::Bool
 end
 
 """
@@ -2651,7 +2684,7 @@ bool aws_byte_cursor_eq_ignore_case(const struct aws_byte_cursor *a, const struc
 ```
 """
 function aws_byte_cursor_eq_ignore_case(a, b)
-    ccall((:aws_byte_cursor_eq_ignore_case, libaws_c_common), Bool, (Ptr{aws_byte_cursor}, Ptr{aws_byte_cursor}), a, b)
+    @ccall libaws_c_common.aws_byte_cursor_eq_ignore_case(a::Ptr{aws_byte_cursor}, b::Ptr{aws_byte_cursor})::Bool
 end
 
 """
@@ -2665,7 +2698,7 @@ bool aws_byte_cursor_eq_byte_buf(const struct aws_byte_cursor *const a, const st
 ```
 """
 function aws_byte_cursor_eq_byte_buf(a, b)
-    ccall((:aws_byte_cursor_eq_byte_buf, libaws_c_common), Bool, (Ptr{aws_byte_cursor}, Ptr{aws_byte_buf}), a, b)
+    @ccall libaws_c_common.aws_byte_cursor_eq_byte_buf(a::Ptr{aws_byte_cursor}, b::Ptr{aws_byte_buf})::Bool
 end
 
 """
@@ -2679,7 +2712,7 @@ bool aws_byte_cursor_eq_byte_buf_ignore_case(const struct aws_byte_cursor *const
 ```
 """
 function aws_byte_cursor_eq_byte_buf_ignore_case(a, b)
-    ccall((:aws_byte_cursor_eq_byte_buf_ignore_case, libaws_c_common), Bool, (Ptr{aws_byte_cursor}, Ptr{aws_byte_buf}), a, b)
+    @ccall libaws_c_common.aws_byte_cursor_eq_byte_buf_ignore_case(a::Ptr{aws_byte_cursor}, b::Ptr{aws_byte_buf})::Bool
 end
 
 """
@@ -2693,7 +2726,7 @@ bool aws_byte_cursor_eq_c_str(const struct aws_byte_cursor *const cursor, const 
 ```
 """
 function aws_byte_cursor_eq_c_str(cursor, c_str)
-    ccall((:aws_byte_cursor_eq_c_str, libaws_c_common), Bool, (Ptr{aws_byte_cursor}, Ptr{Cchar}), cursor, c_str)
+    @ccall libaws_c_common.aws_byte_cursor_eq_c_str(cursor::Ptr{aws_byte_cursor}, c_str::Ptr{Cchar})::Bool
 end
 
 """
@@ -2707,7 +2740,7 @@ bool aws_byte_cursor_eq_c_str_ignore_case(const struct aws_byte_cursor *const cu
 ```
 """
 function aws_byte_cursor_eq_c_str_ignore_case(cursor, c_str)
-    ccall((:aws_byte_cursor_eq_c_str_ignore_case, libaws_c_common), Bool, (Ptr{aws_byte_cursor}, Ptr{Cchar}), cursor, c_str)
+    @ccall libaws_c_common.aws_byte_cursor_eq_c_str_ignore_case(cursor::Ptr{aws_byte_cursor}, c_str::Ptr{Cchar})::Bool
 end
 
 """
@@ -2721,7 +2754,7 @@ bool aws_byte_cursor_starts_with(const struct aws_byte_cursor *input, const stru
 ```
 """
 function aws_byte_cursor_starts_with(input, prefix)
-    ccall((:aws_byte_cursor_starts_with, libaws_c_common), Bool, (Ptr{aws_byte_cursor}, Ptr{aws_byte_cursor}), input, prefix)
+    @ccall libaws_c_common.aws_byte_cursor_starts_with(input::Ptr{aws_byte_cursor}, prefix::Ptr{aws_byte_cursor})::Bool
 end
 
 """
@@ -2735,7 +2768,7 @@ bool aws_byte_cursor_starts_with_ignore_case(const struct aws_byte_cursor *input
 ```
 """
 function aws_byte_cursor_starts_with_ignore_case(input, prefix)
-    ccall((:aws_byte_cursor_starts_with_ignore_case, libaws_c_common), Bool, (Ptr{aws_byte_cursor}, Ptr{aws_byte_cursor}), input, prefix)
+    @ccall libaws_c_common.aws_byte_cursor_starts_with_ignore_case(input::Ptr{aws_byte_cursor}, prefix::Ptr{aws_byte_cursor})::Bool
 end
 
 """
@@ -2749,7 +2782,7 @@ uint64_t aws_hash_array_ignore_case(const void *array, const size_t len);
 ```
 """
 function aws_hash_array_ignore_case(array, len)
-    ccall((:aws_hash_array_ignore_case, libaws_c_common), UInt64, (Ptr{Cvoid}, Csize_t), array, len)
+    @ccall libaws_c_common.aws_hash_array_ignore_case(array::Ptr{Cvoid}, len::Csize_t)::UInt64
 end
 
 """
@@ -2763,7 +2796,7 @@ uint64_t aws_hash_byte_cursor_ptr_ignore_case(const void *item);
 ```
 """
 function aws_hash_byte_cursor_ptr_ignore_case(item)
-    ccall((:aws_hash_byte_cursor_ptr_ignore_case, libaws_c_common), UInt64, (Ptr{Cvoid},), item)
+    @ccall libaws_c_common.aws_hash_byte_cursor_ptr_ignore_case(item::Ptr{Cvoid})::UInt64
 end
 
 """
@@ -2777,7 +2810,7 @@ const uint8_t *aws_lookup_table_to_lower_get(void);
 ```
 """
 function aws_lookup_table_to_lower_get()
-    ccall((:aws_lookup_table_to_lower_get, libaws_c_common), Ptr{UInt8}, ())
+    @ccall libaws_c_common.aws_lookup_table_to_lower_get()::Ptr{UInt8}
 end
 
 """
@@ -2791,7 +2824,7 @@ const uint8_t *aws_lookup_table_hex_to_num_get(void);
 ```
 """
 function aws_lookup_table_hex_to_num_get()
-    ccall((:aws_lookup_table_hex_to_num_get, libaws_c_common), Ptr{UInt8}, ())
+    @ccall libaws_c_common.aws_lookup_table_hex_to_num_get()::Ptr{UInt8}
 end
 
 """
@@ -2805,7 +2838,7 @@ int aws_byte_cursor_compare_lexical(const struct aws_byte_cursor *lhs, const str
 ```
 """
 function aws_byte_cursor_compare_lexical(lhs, rhs)
-    ccall((:aws_byte_cursor_compare_lexical, libaws_c_common), Cint, (Ptr{aws_byte_cursor}, Ptr{aws_byte_cursor}), lhs, rhs)
+    @ccall libaws_c_common.aws_byte_cursor_compare_lexical(lhs::Ptr{aws_byte_cursor}, rhs::Ptr{aws_byte_cursor})::Cint
 end
 
 """
@@ -2819,7 +2852,7 @@ int aws_byte_cursor_compare_lookup( const struct aws_byte_cursor *lhs, const str
 ```
 """
 function aws_byte_cursor_compare_lookup(lhs, rhs, lookup_table)
-    ccall((:aws_byte_cursor_compare_lookup, libaws_c_common), Cint, (Ptr{aws_byte_cursor}, Ptr{aws_byte_cursor}, Ptr{UInt8}), lhs, rhs, lookup_table)
+    @ccall libaws_c_common.aws_byte_cursor_compare_lookup(lhs::Ptr{aws_byte_cursor}, rhs::Ptr{aws_byte_cursor}, lookup_table::Ptr{UInt8})::Cint
 end
 
 """
@@ -2833,7 +2866,7 @@ struct aws_byte_buf aws_byte_buf_from_c_str(const char *c_str);
 ```
 """
 function aws_byte_buf_from_c_str(c_str)
-    ccall((:aws_byte_buf_from_c_str, libaws_c_common), aws_byte_buf, (Ptr{Cchar},), c_str)
+    @ccall libaws_c_common.aws_byte_buf_from_c_str(c_str::Ptr{Cchar})::aws_byte_buf
 end
 
 """
@@ -2845,7 +2878,7 @@ struct aws_byte_buf aws_byte_buf_from_array(const void *bytes, size_t len);
 ```
 """
 function aws_byte_buf_from_array(bytes, len)
-    ccall((:aws_byte_buf_from_array, libaws_c_common), aws_byte_buf, (Ptr{Cvoid}, Csize_t), bytes, len)
+    @ccall libaws_c_common.aws_byte_buf_from_array(bytes::Ptr{Cvoid}, len::Csize_t)::aws_byte_buf
 end
 
 """
@@ -2857,7 +2890,7 @@ struct aws_byte_buf aws_byte_buf_from_empty_array(const void *bytes, size_t capa
 ```
 """
 function aws_byte_buf_from_empty_array(bytes, capacity)
-    ccall((:aws_byte_buf_from_empty_array, libaws_c_common), aws_byte_buf, (Ptr{Cvoid}, Csize_t), bytes, capacity)
+    @ccall libaws_c_common.aws_byte_buf_from_empty_array(bytes::Ptr{Cvoid}, capacity::Csize_t)::aws_byte_buf
 end
 
 """
@@ -2869,7 +2902,7 @@ struct aws_byte_cursor aws_byte_cursor_from_buf(const struct aws_byte_buf *const
 ```
 """
 function aws_byte_cursor_from_buf(buf)
-    ccall((:aws_byte_cursor_from_buf, libaws_c_common), aws_byte_cursor, (Ptr{aws_byte_buf},), buf)
+    @ccall libaws_c_common.aws_byte_cursor_from_buf(buf::Ptr{aws_byte_buf})::aws_byte_cursor
 end
 
 """
@@ -2881,7 +2914,7 @@ struct aws_byte_cursor aws_byte_cursor_from_c_str(const char *c_str);
 ```
 """
 function aws_byte_cursor_from_c_str(c_str)
-    ccall((:aws_byte_cursor_from_c_str, libaws_c_common), aws_byte_cursor, (Ptr{Cchar},), c_str)
+    @ccall libaws_c_common.aws_byte_cursor_from_c_str(c_str::Ptr{Cchar})::aws_byte_cursor
 end
 
 """
@@ -2893,7 +2926,7 @@ struct aws_byte_cursor aws_byte_cursor_from_array(const void *const bytes, const
 ```
 """
 function aws_byte_cursor_from_array(bytes, len)
-    ccall((:aws_byte_cursor_from_array, libaws_c_common), aws_byte_cursor, (Ptr{Cvoid}, Csize_t), bytes, len)
+    @ccall libaws_c_common.aws_byte_cursor_from_array(bytes::Ptr{Cvoid}, len::Csize_t)::aws_byte_cursor
 end
 
 """
@@ -2909,7 +2942,7 @@ struct aws_byte_cursor aws_byte_cursor_advance(struct aws_byte_cursor *const cur
 ```
 """
 function aws_byte_cursor_advance(cursor, len)
-    ccall((:aws_byte_cursor_advance, libaws_c_common), aws_byte_cursor, (Ptr{aws_byte_cursor}, Csize_t), cursor, len)
+    @ccall libaws_c_common.aws_byte_cursor_advance(cursor::Ptr{aws_byte_cursor}, len::Csize_t)::aws_byte_cursor
 end
 
 """
@@ -2925,7 +2958,7 @@ struct aws_byte_cursor aws_byte_cursor_advance_nospec(struct aws_byte_cursor *co
 ```
 """
 function aws_byte_cursor_advance_nospec(cursor, len)
-    ccall((:aws_byte_cursor_advance_nospec, libaws_c_common), aws_byte_cursor, (Ptr{aws_byte_cursor}, Csize_t), cursor, len)
+    @ccall libaws_c_common.aws_byte_cursor_advance_nospec(cursor::Ptr{aws_byte_cursor}, len::Csize_t)::aws_byte_cursor
 end
 
 """
@@ -2941,7 +2974,7 @@ bool aws_byte_cursor_read( struct aws_byte_cursor *AWS_RESTRICT cur, void *AWS_R
 ```
 """
 function aws_byte_cursor_read(cur, dest, len)
-    ccall((:aws_byte_cursor_read, libaws_c_common), Bool, (Ptr{aws_byte_cursor}, Ptr{Cvoid}, Csize_t), cur, dest, len)
+    @ccall libaws_c_common.aws_byte_cursor_read(cur::Ptr{aws_byte_cursor}, dest::Ptr{Cvoid}, len::Csize_t)::Bool
 end
 
 """
@@ -2957,7 +2990,7 @@ bool aws_byte_cursor_read_and_fill_buffer( struct aws_byte_cursor *AWS_RESTRICT 
 ```
 """
 function aws_byte_cursor_read_and_fill_buffer(cur, dest)
-    ccall((:aws_byte_cursor_read_and_fill_buffer, libaws_c_common), Bool, (Ptr{aws_byte_cursor}, Ptr{aws_byte_buf}), cur, dest)
+    @ccall libaws_c_common.aws_byte_cursor_read_and_fill_buffer(cur::Ptr{aws_byte_cursor}, dest::Ptr{aws_byte_buf})::Bool
 end
 
 """
@@ -2973,7 +3006,7 @@ bool aws_byte_cursor_read_u8(struct aws_byte_cursor *AWS_RESTRICT cur, uint8_t *
 ```
 """
 function aws_byte_cursor_read_u8(cur, var)
-    ccall((:aws_byte_cursor_read_u8, libaws_c_common), Bool, (Ptr{aws_byte_cursor}, Ptr{UInt8}), cur, var)
+    @ccall libaws_c_common.aws_byte_cursor_read_u8(cur::Ptr{aws_byte_cursor}, var::Ptr{UInt8})::Bool
 end
 
 """
@@ -2989,7 +3022,7 @@ bool aws_byte_cursor_read_be16(struct aws_byte_cursor *cur, uint16_t *var);
 ```
 """
 function aws_byte_cursor_read_be16(cur, var)
-    ccall((:aws_byte_cursor_read_be16, libaws_c_common), Bool, (Ptr{aws_byte_cursor}, Ptr{UInt16}), cur, var)
+    @ccall libaws_c_common.aws_byte_cursor_read_be16(cur::Ptr{aws_byte_cursor}, var::Ptr{UInt16})::Bool
 end
 
 """
@@ -3005,7 +3038,7 @@ bool aws_byte_cursor_read_be24(struct aws_byte_cursor *cur, uint32_t *var);
 ```
 """
 function aws_byte_cursor_read_be24(cur, var)
-    ccall((:aws_byte_cursor_read_be24, libaws_c_common), Bool, (Ptr{aws_byte_cursor}, Ptr{UInt32}), cur, var)
+    @ccall libaws_c_common.aws_byte_cursor_read_be24(cur::Ptr{aws_byte_cursor}, var::Ptr{UInt32})::Bool
 end
 
 """
@@ -3021,7 +3054,7 @@ bool aws_byte_cursor_read_be32(struct aws_byte_cursor *cur, uint32_t *var);
 ```
 """
 function aws_byte_cursor_read_be32(cur, var)
-    ccall((:aws_byte_cursor_read_be32, libaws_c_common), Bool, (Ptr{aws_byte_cursor}, Ptr{UInt32}), cur, var)
+    @ccall libaws_c_common.aws_byte_cursor_read_be32(cur::Ptr{aws_byte_cursor}, var::Ptr{UInt32})::Bool
 end
 
 """
@@ -3037,7 +3070,7 @@ bool aws_byte_cursor_read_be64(struct aws_byte_cursor *cur, uint64_t *var);
 ```
 """
 function aws_byte_cursor_read_be64(cur, var)
-    ccall((:aws_byte_cursor_read_be64, libaws_c_common), Bool, (Ptr{aws_byte_cursor}, Ptr{UInt64}), cur, var)
+    @ccall libaws_c_common.aws_byte_cursor_read_be64(cur::Ptr{aws_byte_cursor}, var::Ptr{UInt64})::Bool
 end
 
 """
@@ -3053,7 +3086,7 @@ bool aws_byte_cursor_read_float_be32(struct aws_byte_cursor *cur, float *var);
 ```
 """
 function aws_byte_cursor_read_float_be32(cur, var)
-    ccall((:aws_byte_cursor_read_float_be32, libaws_c_common), Bool, (Ptr{aws_byte_cursor}, Ptr{Cfloat}), cur, var)
+    @ccall libaws_c_common.aws_byte_cursor_read_float_be32(cur::Ptr{aws_byte_cursor}, var::Ptr{Cfloat})::Bool
 end
 
 """
@@ -3069,7 +3102,7 @@ bool aws_byte_cursor_read_float_be64(struct aws_byte_cursor *cur, double *var);
 ```
 """
 function aws_byte_cursor_read_float_be64(cur, var)
-    ccall((:aws_byte_cursor_read_float_be64, libaws_c_common), Bool, (Ptr{aws_byte_cursor}, Ptr{Cdouble}), cur, var)
+    @ccall libaws_c_common.aws_byte_cursor_read_float_be64(cur::Ptr{aws_byte_cursor}, var::Ptr{Cdouble})::Bool
 end
 
 """
@@ -3085,7 +3118,7 @@ bool aws_byte_cursor_read_hex_u8(struct aws_byte_cursor *cur, uint8_t *var);
 ```
 """
 function aws_byte_cursor_read_hex_u8(cur, var)
-    ccall((:aws_byte_cursor_read_hex_u8, libaws_c_common), Bool, (Ptr{aws_byte_cursor}, Ptr{UInt8}), cur, var)
+    @ccall libaws_c_common.aws_byte_cursor_read_hex_u8(cur::Ptr{aws_byte_cursor}, var::Ptr{UInt8})::Bool
 end
 
 """
@@ -3103,7 +3136,7 @@ bool aws_byte_buf_advance( struct aws_byte_buf *const AWS_RESTRICT buffer, struc
 ```
 """
 function aws_byte_buf_advance(buffer, output, len)
-    ccall((:aws_byte_buf_advance, libaws_c_common), Bool, (Ptr{aws_byte_buf}, Ptr{aws_byte_buf}, Csize_t), buffer, output, len)
+    @ccall libaws_c_common.aws_byte_buf_advance(buffer::Ptr{aws_byte_buf}, output::Ptr{aws_byte_buf}, len::Csize_t)::Bool
 end
 
 """
@@ -3119,7 +3152,7 @@ bool aws_byte_buf_write( struct aws_byte_buf *AWS_RESTRICT buf, const uint8_t *A
 ```
 """
 function aws_byte_buf_write(buf, src, len)
-    ccall((:aws_byte_buf_write, libaws_c_common), Bool, (Ptr{aws_byte_buf}, Ptr{UInt8}, Csize_t), buf, src, len)
+    @ccall libaws_c_common.aws_byte_buf_write(buf::Ptr{aws_byte_buf}, src::Ptr{UInt8}, len::Csize_t)::Bool
 end
 
 """
@@ -3135,7 +3168,7 @@ bool aws_byte_buf_write_from_whole_buffer( struct aws_byte_buf *AWS_RESTRICT buf
 ```
 """
 function aws_byte_buf_write_from_whole_buffer(buf, src)
-    ccall((:aws_byte_buf_write_from_whole_buffer, libaws_c_common), Bool, (Ptr{aws_byte_buf}, aws_byte_buf), buf, src)
+    @ccall libaws_c_common.aws_byte_buf_write_from_whole_buffer(buf::Ptr{aws_byte_buf}, src::aws_byte_buf)::Bool
 end
 
 """
@@ -3151,7 +3184,7 @@ bool aws_byte_buf_write_from_whole_cursor( struct aws_byte_buf *AWS_RESTRICT buf
 ```
 """
 function aws_byte_buf_write_from_whole_cursor(buf, src)
-    ccall((:aws_byte_buf_write_from_whole_cursor, libaws_c_common), Bool, (Ptr{aws_byte_buf}, aws_byte_cursor), buf, src)
+    @ccall libaws_c_common.aws_byte_buf_write_from_whole_cursor(buf::Ptr{aws_byte_buf}, src::aws_byte_cursor)::Bool
 end
 
 """
@@ -3171,7 +3204,7 @@ struct aws_byte_cursor aws_byte_buf_write_to_capacity( struct aws_byte_buf *buf,
 ```
 """
 function aws_byte_buf_write_to_capacity(buf, advancing_cursor)
-    ccall((:aws_byte_buf_write_to_capacity, libaws_c_common), aws_byte_cursor, (Ptr{aws_byte_buf}, Ptr{aws_byte_cursor}), buf, advancing_cursor)
+    @ccall libaws_c_common.aws_byte_buf_write_to_capacity(buf::Ptr{aws_byte_buf}, advancing_cursor::Ptr{aws_byte_cursor})::aws_byte_cursor
 end
 
 """
@@ -3189,7 +3222,7 @@ bool aws_byte_buf_write_u8(struct aws_byte_buf *AWS_RESTRICT buf, uint8_t c);
 ```
 """
 function aws_byte_buf_write_u8(buf, c)
-    ccall((:aws_byte_buf_write_u8, libaws_c_common), Bool, (Ptr{aws_byte_buf}, UInt8), buf, c)
+    @ccall libaws_c_common.aws_byte_buf_write_u8(buf::Ptr{aws_byte_buf}, c::UInt8)::Bool
 end
 
 """
@@ -3205,7 +3238,7 @@ bool aws_byte_buf_write_u8_n(struct aws_byte_buf *buf, uint8_t c, size_t count);
 ```
 """
 function aws_byte_buf_write_u8_n(buf, c, count)
-    ccall((:aws_byte_buf_write_u8_n, libaws_c_common), Bool, (Ptr{aws_byte_buf}, UInt8, Csize_t), buf, c, count)
+    @ccall libaws_c_common.aws_byte_buf_write_u8_n(buf::Ptr{aws_byte_buf}, c::UInt8, count::Csize_t)::Bool
 end
 
 """
@@ -3221,7 +3254,7 @@ bool aws_byte_buf_write_be16(struct aws_byte_buf *buf, uint16_t x);
 ```
 """
 function aws_byte_buf_write_be16(buf, x)
-    ccall((:aws_byte_buf_write_be16, libaws_c_common), Bool, (Ptr{aws_byte_buf}, UInt16), buf, x)
+    @ccall libaws_c_common.aws_byte_buf_write_be16(buf::Ptr{aws_byte_buf}, x::UInt16)::Bool
 end
 
 """
@@ -3237,7 +3270,7 @@ bool aws_byte_buf_write_be24(struct aws_byte_buf *buf, uint32_t x);
 ```
 """
 function aws_byte_buf_write_be24(buf, x)
-    ccall((:aws_byte_buf_write_be24, libaws_c_common), Bool, (Ptr{aws_byte_buf}, UInt32), buf, x)
+    @ccall libaws_c_common.aws_byte_buf_write_be24(buf::Ptr{aws_byte_buf}, x::UInt32)::Bool
 end
 
 """
@@ -3253,7 +3286,7 @@ bool aws_byte_buf_write_be32(struct aws_byte_buf *buf, uint32_t x);
 ```
 """
 function aws_byte_buf_write_be32(buf, x)
-    ccall((:aws_byte_buf_write_be32, libaws_c_common), Bool, (Ptr{aws_byte_buf}, UInt32), buf, x)
+    @ccall libaws_c_common.aws_byte_buf_write_be32(buf::Ptr{aws_byte_buf}, x::UInt32)::Bool
 end
 
 """
@@ -3269,7 +3302,7 @@ bool aws_byte_buf_write_float_be32(struct aws_byte_buf *buf, float x);
 ```
 """
 function aws_byte_buf_write_float_be32(buf, x)
-    ccall((:aws_byte_buf_write_float_be32, libaws_c_common), Bool, (Ptr{aws_byte_buf}, Cfloat), buf, x)
+    @ccall libaws_c_common.aws_byte_buf_write_float_be32(buf::Ptr{aws_byte_buf}, x::Cfloat)::Bool
 end
 
 """
@@ -3285,7 +3318,7 @@ bool aws_byte_buf_write_be64(struct aws_byte_buf *buf, uint64_t x);
 ```
 """
 function aws_byte_buf_write_be64(buf, x)
-    ccall((:aws_byte_buf_write_be64, libaws_c_common), Bool, (Ptr{aws_byte_buf}, UInt64), buf, x)
+    @ccall libaws_c_common.aws_byte_buf_write_be64(buf::Ptr{aws_byte_buf}, x::UInt64)::Bool
 end
 
 """
@@ -3301,7 +3334,7 @@ bool aws_byte_buf_write_float_be64(struct aws_byte_buf *buf, double x);
 ```
 """
 function aws_byte_buf_write_float_be64(buf, x)
-    ccall((:aws_byte_buf_write_float_be64, libaws_c_common), Bool, (Ptr{aws_byte_buf}, Cdouble), buf, x)
+    @ccall libaws_c_common.aws_byte_buf_write_float_be64(buf::Ptr{aws_byte_buf}, x::Cdouble)::Bool
 end
 
 """
@@ -3315,7 +3348,7 @@ bool aws_isalnum(uint8_t ch);
 ```
 """
 function aws_isalnum(ch)
-    ccall((:aws_isalnum, libaws_c_common), Bool, (UInt8,), ch)
+    @ccall libaws_c_common.aws_isalnum(ch::UInt8)::Bool
 end
 
 """
@@ -3329,7 +3362,7 @@ bool aws_isalpha(uint8_t ch);
 ```
 """
 function aws_isalpha(ch)
-    ccall((:aws_isalpha, libaws_c_common), Bool, (UInt8,), ch)
+    @ccall libaws_c_common.aws_isalpha(ch::UInt8)::Bool
 end
 
 """
@@ -3345,7 +3378,7 @@ bool aws_isdigit(uint8_t ch);
 ```
 """
 function aws_isdigit(ch)
-    ccall((:aws_isdigit, libaws_c_common), Bool, (UInt8,), ch)
+    @ccall libaws_c_common.aws_isdigit(ch::UInt8)::Bool
 end
 
 """
@@ -3361,7 +3394,7 @@ bool aws_isxdigit(uint8_t ch);
 ```
 """
 function aws_isxdigit(ch)
-    ccall((:aws_isxdigit, libaws_c_common), Bool, (UInt8,), ch)
+    @ccall libaws_c_common.aws_isxdigit(ch::UInt8)::Bool
 end
 
 """
@@ -3375,7 +3408,7 @@ bool aws_isspace(uint8_t ch);
 ```
 """
 function aws_isspace(ch)
-    ccall((:aws_isspace, libaws_c_common), Bool, (UInt8,), ch)
+    @ccall libaws_c_common.aws_isspace(ch::UInt8)::Bool
 end
 
 """
@@ -3393,7 +3426,7 @@ int aws_byte_cursor_utf8_parse_u64(struct aws_byte_cursor cursor, uint64_t *dst)
 ```
 """
 function aws_byte_cursor_utf8_parse_u64(cursor, dst)
-    ccall((:aws_byte_cursor_utf8_parse_u64, libaws_c_common), Cint, (aws_byte_cursor, Ptr{UInt64}), cursor, dst)
+    @ccall libaws_c_common.aws_byte_cursor_utf8_parse_u64(cursor::aws_byte_cursor, dst::Ptr{UInt64})::Cint
 end
 
 """
@@ -3411,7 +3444,7 @@ int aws_byte_cursor_utf8_parse_u64_hex(struct aws_byte_cursor cursor, uint64_t *
 ```
 """
 function aws_byte_cursor_utf8_parse_u64_hex(cursor, dst)
-    ccall((:aws_byte_cursor_utf8_parse_u64_hex, libaws_c_common), Cint, (aws_byte_cursor, Ptr{UInt64}), cursor, dst)
+    @ccall libaws_c_common.aws_byte_cursor_utf8_parse_u64_hex(cursor::aws_byte_cursor, dst::Ptr{UInt64})::Cint
 end
 
 struct aws_linked_list_node
@@ -3430,7 +3463,7 @@ AWS_STATIC_IMPL void aws_linked_list_node_reset(struct aws_linked_list_node *nod
 ```
 """
 function aws_linked_list_node_reset(node)
-    ccall((:aws_linked_list_node_reset, libaws_c_common), Cvoid, (Ptr{aws_linked_list_node},), node)
+    @ccall libaws_c_common.aws_linked_list_node_reset(node::Ptr{aws_linked_list_node})::Cvoid
 end
 
 struct aws_linked_list
@@ -3449,7 +3482,7 @@ AWS_STATIC_IMPL bool aws_linked_list_empty(const struct aws_linked_list *list);
 ```
 """
 function aws_linked_list_empty(list)
-    ccall((:aws_linked_list_empty, libaws_c_common), Bool, (Ptr{aws_linked_list},), list)
+    @ccall libaws_c_common.aws_linked_list_empty(list::Ptr{aws_linked_list})::Bool
 end
 
 """
@@ -3463,7 +3496,7 @@ AWS_STATIC_IMPL bool aws_linked_list_is_valid(const struct aws_linked_list *list
 ```
 """
 function aws_linked_list_is_valid(list)
-    ccall((:aws_linked_list_is_valid, libaws_c_common), Bool, (Ptr{aws_linked_list},), list)
+    @ccall libaws_c_common.aws_linked_list_is_valid(list::Ptr{aws_linked_list})::Bool
 end
 
 """
@@ -3477,7 +3510,7 @@ AWS_STATIC_IMPL bool aws_linked_list_node_next_is_valid(const struct aws_linked_
 ```
 """
 function aws_linked_list_node_next_is_valid(node)
-    ccall((:aws_linked_list_node_next_is_valid, libaws_c_common), Bool, (Ptr{aws_linked_list_node},), node)
+    @ccall libaws_c_common.aws_linked_list_node_next_is_valid(node::Ptr{aws_linked_list_node})::Bool
 end
 
 """
@@ -3491,7 +3524,7 @@ AWS_STATIC_IMPL bool aws_linked_list_node_prev_is_valid(const struct aws_linked_
 ```
 """
 function aws_linked_list_node_prev_is_valid(node)
-    ccall((:aws_linked_list_node_prev_is_valid, libaws_c_common), Bool, (Ptr{aws_linked_list_node},), node)
+    @ccall libaws_c_common.aws_linked_list_node_prev_is_valid(node::Ptr{aws_linked_list_node})::Bool
 end
 
 """
@@ -3507,7 +3540,7 @@ AWS_STATIC_IMPL bool aws_linked_list_is_valid_deep(const struct aws_linked_list 
 ```
 """
 function aws_linked_list_is_valid_deep(list)
-    ccall((:aws_linked_list_is_valid_deep, libaws_c_common), Bool, (Ptr{aws_linked_list},), list)
+    @ccall libaws_c_common.aws_linked_list_is_valid_deep(list::Ptr{aws_linked_list})::Bool
 end
 
 """
@@ -3521,7 +3554,7 @@ AWS_STATIC_IMPL void aws_linked_list_init(struct aws_linked_list *list);
 ```
 """
 function aws_linked_list_init(list)
-    ccall((:aws_linked_list_init, libaws_c_common), Cvoid, (Ptr{aws_linked_list},), list)
+    @ccall libaws_c_common.aws_linked_list_init(list::Ptr{aws_linked_list})::Cvoid
 end
 
 """
@@ -3535,7 +3568,7 @@ AWS_STATIC_IMPL struct aws_linked_list_node *aws_linked_list_begin(const struct 
 ```
 """
 function aws_linked_list_begin(list)
-    ccall((:aws_linked_list_begin, libaws_c_common), Ptr{aws_linked_list_node}, (Ptr{aws_linked_list},), list)
+    @ccall libaws_c_common.aws_linked_list_begin(list::Ptr{aws_linked_list})::Ptr{aws_linked_list_node}
 end
 
 """
@@ -3549,7 +3582,7 @@ AWS_STATIC_IMPL const struct aws_linked_list_node *aws_linked_list_end(const str
 ```
 """
 function aws_linked_list_end(list)
-    ccall((:aws_linked_list_end, libaws_c_common), Ptr{aws_linked_list_node}, (Ptr{aws_linked_list},), list)
+    @ccall libaws_c_common.aws_linked_list_end(list::Ptr{aws_linked_list})::Ptr{aws_linked_list_node}
 end
 
 """
@@ -3563,7 +3596,7 @@ AWS_STATIC_IMPL struct aws_linked_list_node *aws_linked_list_rbegin(const struct
 ```
 """
 function aws_linked_list_rbegin(list)
-    ccall((:aws_linked_list_rbegin, libaws_c_common), Ptr{aws_linked_list_node}, (Ptr{aws_linked_list},), list)
+    @ccall libaws_c_common.aws_linked_list_rbegin(list::Ptr{aws_linked_list})::Ptr{aws_linked_list_node}
 end
 
 """
@@ -3577,7 +3610,7 @@ AWS_STATIC_IMPL const struct aws_linked_list_node *aws_linked_list_rend(const st
 ```
 """
 function aws_linked_list_rend(list)
-    ccall((:aws_linked_list_rend, libaws_c_common), Ptr{aws_linked_list_node}, (Ptr{aws_linked_list},), list)
+    @ccall libaws_c_common.aws_linked_list_rend(list::Ptr{aws_linked_list})::Ptr{aws_linked_list_node}
 end
 
 """
@@ -3591,7 +3624,7 @@ AWS_STATIC_IMPL struct aws_linked_list_node *aws_linked_list_next(const struct a
 ```
 """
 function aws_linked_list_next(node)
-    ccall((:aws_linked_list_next, libaws_c_common), Ptr{aws_linked_list_node}, (Ptr{aws_linked_list_node},), node)
+    @ccall libaws_c_common.aws_linked_list_next(node::Ptr{aws_linked_list_node})::Ptr{aws_linked_list_node}
 end
 
 """
@@ -3605,7 +3638,7 @@ AWS_STATIC_IMPL struct aws_linked_list_node *aws_linked_list_prev(const struct a
 ```
 """
 function aws_linked_list_prev(node)
-    ccall((:aws_linked_list_prev, libaws_c_common), Ptr{aws_linked_list_node}, (Ptr{aws_linked_list_node},), node)
+    @ccall libaws_c_common.aws_linked_list_prev(node::Ptr{aws_linked_list_node})::Ptr{aws_linked_list_node}
 end
 
 """
@@ -3619,7 +3652,7 @@ AWS_STATIC_IMPL void aws_linked_list_insert_after( struct aws_linked_list_node *
 ```
 """
 function aws_linked_list_insert_after(after, to_add)
-    ccall((:aws_linked_list_insert_after, libaws_c_common), Cvoid, (Ptr{aws_linked_list_node}, Ptr{aws_linked_list_node}), after, to_add)
+    @ccall libaws_c_common.aws_linked_list_insert_after(after::Ptr{aws_linked_list_node}, to_add::Ptr{aws_linked_list_node})::Cvoid
 end
 
 """
@@ -3633,7 +3666,7 @@ AWS_STATIC_IMPL void aws_linked_list_swap_nodes(struct aws_linked_list_node *a, 
 ```
 """
 function aws_linked_list_swap_nodes(a, b)
-    ccall((:aws_linked_list_swap_nodes, libaws_c_common), Cvoid, (Ptr{aws_linked_list_node}, Ptr{aws_linked_list_node}), a, b)
+    @ccall libaws_c_common.aws_linked_list_swap_nodes(a::Ptr{aws_linked_list_node}, b::Ptr{aws_linked_list_node})::Cvoid
 end
 
 """
@@ -3647,7 +3680,7 @@ AWS_STATIC_IMPL void aws_linked_list_insert_before( struct aws_linked_list_node 
 ```
 """
 function aws_linked_list_insert_before(before, to_add)
-    ccall((:aws_linked_list_insert_before, libaws_c_common), Cvoid, (Ptr{aws_linked_list_node}, Ptr{aws_linked_list_node}), before, to_add)
+    @ccall libaws_c_common.aws_linked_list_insert_before(before::Ptr{aws_linked_list_node}, to_add::Ptr{aws_linked_list_node})::Cvoid
 end
 
 """
@@ -3661,7 +3694,7 @@ AWS_STATIC_IMPL void aws_linked_list_remove(struct aws_linked_list_node *node);
 ```
 """
 function aws_linked_list_remove(node)
-    ccall((:aws_linked_list_remove, libaws_c_common), Cvoid, (Ptr{aws_linked_list_node},), node)
+    @ccall libaws_c_common.aws_linked_list_remove(node::Ptr{aws_linked_list_node})::Cvoid
 end
 
 """
@@ -3675,7 +3708,7 @@ AWS_STATIC_IMPL void aws_linked_list_push_back(struct aws_linked_list *list, str
 ```
 """
 function aws_linked_list_push_back(list, node)
-    ccall((:aws_linked_list_push_back, libaws_c_common), Cvoid, (Ptr{aws_linked_list}, Ptr{aws_linked_list_node}), list, node)
+    @ccall libaws_c_common.aws_linked_list_push_back(list::Ptr{aws_linked_list}, node::Ptr{aws_linked_list_node})::Cvoid
 end
 
 """
@@ -3689,7 +3722,7 @@ AWS_STATIC_IMPL struct aws_linked_list_node *aws_linked_list_back(const struct a
 ```
 """
 function aws_linked_list_back(list)
-    ccall((:aws_linked_list_back, libaws_c_common), Ptr{aws_linked_list_node}, (Ptr{aws_linked_list},), list)
+    @ccall libaws_c_common.aws_linked_list_back(list::Ptr{aws_linked_list})::Ptr{aws_linked_list_node}
 end
 
 """
@@ -3703,7 +3736,7 @@ AWS_STATIC_IMPL struct aws_linked_list_node *aws_linked_list_pop_back(struct aws
 ```
 """
 function aws_linked_list_pop_back(list)
-    ccall((:aws_linked_list_pop_back, libaws_c_common), Ptr{aws_linked_list_node}, (Ptr{aws_linked_list},), list)
+    @ccall libaws_c_common.aws_linked_list_pop_back(list::Ptr{aws_linked_list})::Ptr{aws_linked_list_node}
 end
 
 """
@@ -3717,7 +3750,7 @@ AWS_STATIC_IMPL void aws_linked_list_push_front(struct aws_linked_list *list, st
 ```
 """
 function aws_linked_list_push_front(list, node)
-    ccall((:aws_linked_list_push_front, libaws_c_common), Cvoid, (Ptr{aws_linked_list}, Ptr{aws_linked_list_node}), list, node)
+    @ccall libaws_c_common.aws_linked_list_push_front(list::Ptr{aws_linked_list}, node::Ptr{aws_linked_list_node})::Cvoid
 end
 
 """
@@ -3731,7 +3764,7 @@ AWS_STATIC_IMPL struct aws_linked_list_node *aws_linked_list_front(const struct 
 ```
 """
 function aws_linked_list_front(list)
-    ccall((:aws_linked_list_front, libaws_c_common), Ptr{aws_linked_list_node}, (Ptr{aws_linked_list},), list)
+    @ccall libaws_c_common.aws_linked_list_front(list::Ptr{aws_linked_list})::Ptr{aws_linked_list_node}
 end
 
 """
@@ -3745,7 +3778,7 @@ AWS_STATIC_IMPL struct aws_linked_list_node *aws_linked_list_pop_front(struct aw
 ```
 """
 function aws_linked_list_pop_front(list)
-    ccall((:aws_linked_list_pop_front, libaws_c_common), Ptr{aws_linked_list_node}, (Ptr{aws_linked_list},), list)
+    @ccall libaws_c_common.aws_linked_list_pop_front(list::Ptr{aws_linked_list})::Ptr{aws_linked_list_node}
 end
 
 """
@@ -3757,7 +3790,7 @@ AWS_STATIC_IMPL void aws_linked_list_swap_contents( struct aws_linked_list *AWS_
 ```
 """
 function aws_linked_list_swap_contents(a, b)
-    ccall((:aws_linked_list_swap_contents, libaws_c_common), Cvoid, (Ptr{aws_linked_list}, Ptr{aws_linked_list}), a, b)
+    @ccall libaws_c_common.aws_linked_list_swap_contents(a::Ptr{aws_linked_list}, b::Ptr{aws_linked_list})::Cvoid
 end
 
 """
@@ -3773,7 +3806,7 @@ AWS_STATIC_IMPL void aws_linked_list_move_all_back( struct aws_linked_list *AWS_
 ```
 """
 function aws_linked_list_move_all_back(dst, src)
-    ccall((:aws_linked_list_move_all_back, libaws_c_common), Cvoid, (Ptr{aws_linked_list}, Ptr{aws_linked_list}), dst, src)
+    @ccall libaws_c_common.aws_linked_list_move_all_back(dst::Ptr{aws_linked_list}, src::Ptr{aws_linked_list})::Cvoid
 end
 
 """
@@ -3789,7 +3822,7 @@ AWS_STATIC_IMPL void aws_linked_list_move_all_front( struct aws_linked_list *AWS
 ```
 """
 function aws_linked_list_move_all_front(dst, src)
-    ccall((:aws_linked_list_move_all_front, libaws_c_common), Cvoid, (Ptr{aws_linked_list}, Ptr{aws_linked_list}), dst, src)
+    @ccall libaws_c_common.aws_linked_list_move_all_front(dst::Ptr{aws_linked_list}, src::Ptr{aws_linked_list})::Cvoid
 end
 
 struct aws_cache_vtable
@@ -3869,7 +3902,7 @@ void aws_cache_base_default_destroy(struct aws_cache *cache);
 ```
 """
 function aws_cache_base_default_destroy(cache)
-    ccall((:aws_cache_base_default_destroy, libaws_c_common), Cvoid, (Ptr{aws_cache},), cache)
+    @ccall libaws_c_common.aws_cache_base_default_destroy(cache::Ptr{aws_cache})::Cvoid
 end
 
 """
@@ -3881,7 +3914,7 @@ int aws_cache_base_default_find(struct aws_cache *cache, const void *key, void *
 ```
 """
 function aws_cache_base_default_find(cache, key, p_value)
-    ccall((:aws_cache_base_default_find, libaws_c_common), Cint, (Ptr{aws_cache}, Ptr{Cvoid}, Ptr{Ptr{Cvoid}}), cache, key, p_value)
+    @ccall libaws_c_common.aws_cache_base_default_find(cache::Ptr{aws_cache}, key::Ptr{Cvoid}, p_value::Ptr{Ptr{Cvoid}})::Cint
 end
 
 """
@@ -3893,7 +3926,7 @@ int aws_cache_base_default_remove(struct aws_cache *cache, const void *key);
 ```
 """
 function aws_cache_base_default_remove(cache, key)
-    ccall((:aws_cache_base_default_remove, libaws_c_common), Cint, (Ptr{aws_cache}, Ptr{Cvoid}), cache, key)
+    @ccall libaws_c_common.aws_cache_base_default_remove(cache::Ptr{aws_cache}, key::Ptr{Cvoid})::Cint
 end
 
 """
@@ -3905,7 +3938,7 @@ void aws_cache_base_default_clear(struct aws_cache *cache);
 ```
 """
 function aws_cache_base_default_clear(cache)
-    ccall((:aws_cache_base_default_clear, libaws_c_common), Cvoid, (Ptr{aws_cache},), cache)
+    @ccall libaws_c_common.aws_cache_base_default_clear(cache::Ptr{aws_cache})::Cvoid
 end
 
 """
@@ -3917,7 +3950,7 @@ size_t aws_cache_base_default_get_element_count(const struct aws_cache *cache);
 ```
 """
 function aws_cache_base_default_get_element_count(cache)
-    ccall((:aws_cache_base_default_get_element_count, libaws_c_common), Csize_t, (Ptr{aws_cache},), cache)
+    @ccall libaws_c_common.aws_cache_base_default_get_element_count(cache::Ptr{aws_cache})::Csize_t
 end
 
 """
@@ -3931,7 +3964,7 @@ void aws_cache_destroy(struct aws_cache *cache);
 ```
 """
 function aws_cache_destroy(cache)
-    ccall((:aws_cache_destroy, libaws_c_common), Cvoid, (Ptr{aws_cache},), cache)
+    @ccall libaws_c_common.aws_cache_destroy(cache::Ptr{aws_cache})::Cvoid
 end
 
 """
@@ -3947,7 +3980,7 @@ int aws_cache_find(struct aws_cache *cache, const void *key, void **p_value);
 ```
 """
 function aws_cache_find(cache, key, p_value)
-    ccall((:aws_cache_find, libaws_c_common), Cint, (Ptr{aws_cache}, Ptr{Cvoid}, Ptr{Ptr{Cvoid}}), cache, key, p_value)
+    @ccall libaws_c_common.aws_cache_find(cache::Ptr{aws_cache}, key::Ptr{Cvoid}, p_value::Ptr{Ptr{Cvoid}})::Cint
 end
 
 """
@@ -3961,7 +3994,7 @@ int aws_cache_put(struct aws_cache *cache, const void *key, void *p_value);
 ```
 """
 function aws_cache_put(cache, key, p_value)
-    ccall((:aws_cache_put, libaws_c_common), Cint, (Ptr{aws_cache}, Ptr{Cvoid}, Ptr{Cvoid}), cache, key, p_value)
+    @ccall libaws_c_common.aws_cache_put(cache::Ptr{aws_cache}, key::Ptr{Cvoid}, p_value::Ptr{Cvoid})::Cint
 end
 
 """
@@ -3975,7 +4008,7 @@ int aws_cache_remove(struct aws_cache *cache, const void *key);
 ```
 """
 function aws_cache_remove(cache, key)
-    ccall((:aws_cache_remove, libaws_c_common), Cint, (Ptr{aws_cache}, Ptr{Cvoid}), cache, key)
+    @ccall libaws_c_common.aws_cache_remove(cache::Ptr{aws_cache}, key::Ptr{Cvoid})::Cint
 end
 
 """
@@ -3989,7 +4022,7 @@ void aws_cache_clear(struct aws_cache *cache);
 ```
 """
 function aws_cache_clear(cache)
-    ccall((:aws_cache_clear, libaws_c_common), Cvoid, (Ptr{aws_cache},), cache)
+    @ccall libaws_c_common.aws_cache_clear(cache::Ptr{aws_cache})::Cvoid
 end
 
 """
@@ -4003,7 +4036,7 @@ size_t aws_cache_get_element_count(const struct aws_cache *cache);
 ```
 """
 function aws_cache_get_element_count(cache)
-    ccall((:aws_cache_get_element_count, libaws_c_common), Csize_t, (Ptr{aws_cache},), cache)
+    @ccall libaws_c_common.aws_cache_get_element_count(cache::Ptr{aws_cache})::Csize_t
 end
 
 @cenum aws_timestamp_unit::UInt32 begin
@@ -4024,7 +4057,7 @@ AWS_STATIC_IMPL uint64_t aws_timestamp_convert( uint64_t timestamp, enum aws_tim
 ```
 """
 function aws_timestamp_convert(timestamp, convert_from, convert_to, remainder)
-    ccall((:aws_timestamp_convert, libaws_c_common), UInt64, (UInt64, aws_timestamp_unit, aws_timestamp_unit, Ptr{UInt64}), timestamp, convert_from, convert_to, remainder)
+    @ccall libaws_c_common.aws_timestamp_convert(timestamp::UInt64, convert_from::aws_timestamp_unit, convert_to::aws_timestamp_unit, remainder::Ptr{UInt64})::UInt64
 end
 
 """
@@ -4038,7 +4071,7 @@ AWS_STATIC_IMPL uint64_t aws_timestamp_convert_u64(uint64_t ticks, uint64_t old_
 ```
 """
 function aws_timestamp_convert_u64(ticks, old_frequency, new_frequency, remainder)
-    ccall((:aws_timestamp_convert_u64, libaws_c_common), UInt64, (UInt64, UInt64, UInt64, Ptr{UInt64}), ticks, old_frequency, new_frequency, remainder)
+    @ccall libaws_c_common.aws_timestamp_convert_u64(ticks::UInt64, old_frequency::UInt64, new_frequency::UInt64, remainder::Ptr{UInt64})::UInt64
 end
 
 """
@@ -4052,7 +4085,7 @@ int aws_high_res_clock_get_ticks(uint64_t *timestamp);
 ```
 """
 function aws_high_res_clock_get_ticks(timestamp)
-    ccall((:aws_high_res_clock_get_ticks, libaws_c_common), Cint, (Ptr{UInt64},), timestamp)
+    @ccall libaws_c_common.aws_high_res_clock_get_ticks(timestamp::Ptr{UInt64})::Cint
 end
 
 """
@@ -4066,7 +4099,7 @@ int aws_sys_clock_get_ticks(uint64_t *timestamp);
 ```
 """
 function aws_sys_clock_get_ticks(timestamp)
-    ccall((:aws_sys_clock_get_ticks, libaws_c_common), Cint, (Ptr{UInt64},), timestamp)
+    @ccall libaws_c_common.aws_sys_clock_get_ticks(timestamp::Ptr{UInt64})::Cint
 end
 
 @cenum aws_cli_options_has_arg::UInt32 begin
@@ -4115,7 +4148,7 @@ int aws_cli_getopt_long( int argc, char *const argv[], const char *optstring, co
 ```
 """
 function aws_cli_getopt_long(argc, argv, optstring, longopts, longindex)
-    ccall((:aws_cli_getopt_long, libaws_c_common), Cint, (Cint, Ptr{Ptr{Cchar}}, Ptr{Cchar}, Ptr{aws_cli_option}, Ptr{Cint}), argc, argv, optstring, longopts, longindex)
+    @ccall libaws_c_common.aws_cli_getopt_long(argc::Cint, argv::Ptr{Ptr{Cchar}}, optstring::Ptr{Cchar}, longopts::Ptr{aws_cli_option}, longindex::Ptr{Cint})::Cint
 end
 
 """
@@ -4129,7 +4162,7 @@ void aws_cli_reset_state(void);
 ```
 """
 function aws_cli_reset_state()
-    ccall((:aws_cli_reset_state, libaws_c_common), Cvoid, ())
+    @ccall libaws_c_common.aws_cli_reset_state()::Cvoid
 end
 
 """
@@ -4151,7 +4184,7 @@ int aws_cli_dispatch_on_subcommand( int argc, char *const argv[], struct aws_cli
 ```
 """
 function aws_cli_dispatch_on_subcommand(argc, argv, dispatch_table, table_length, user_data)
-    ccall((:aws_cli_dispatch_on_subcommand, libaws_c_common), Cint, (Cint, Ptr{Ptr{Cchar}}, Ptr{aws_cli_subcommand_dispatch}, Cint, Ptr{Cvoid}), argc, argv, dispatch_table, table_length, user_data)
+    @ccall libaws_c_common.aws_cli_dispatch_on_subcommand(argc::Cint, argv::Ptr{Ptr{Cchar}}, dispatch_table::Ptr{aws_cli_subcommand_dispatch}, table_length::Cint, user_data::Ptr{Cvoid})::Cint
 end
 
 """
@@ -4165,7 +4198,7 @@ void aws_common_library_init(struct aws_allocator *allocator);
 ```
 """
 function aws_common_library_init(allocator)
-    ccall((:aws_common_library_init, libaws_c_common), Cvoid, (Ptr{aws_allocator},), allocator)
+    @ccall libaws_c_common.aws_common_library_init(allocator::Ptr{aws_allocator})::Cvoid
 end
 
 """
@@ -4179,7 +4212,7 @@ void aws_common_library_clean_up(void);
 ```
 """
 function aws_common_library_clean_up()
-    ccall((:aws_common_library_clean_up, libaws_c_common), Cvoid, ())
+    @ccall libaws_c_common.aws_common_library_clean_up()::Cvoid
 end
 
 """
@@ -4191,7 +4224,7 @@ void aws_common_fatal_assert_library_initialized(void);
 ```
 """
 function aws_common_fatal_assert_library_initialized()
-    ccall((:aws_common_fatal_assert_library_initialized, libaws_c_common), Cvoid, ())
+    @ccall libaws_c_common.aws_common_fatal_assert_library_initialized()::Cvoid
 end
 
 # typedef bool ( aws_condition_predicate_fn ) ( void * )
@@ -4213,7 +4246,7 @@ int aws_condition_variable_init(struct aws_condition_variable *condition_variabl
 ```
 """
 function aws_condition_variable_init(condition_variable)
-    ccall((:aws_condition_variable_init, libaws_c_common), Cint, (Ptr{aws_condition_variable},), condition_variable)
+    @ccall libaws_c_common.aws_condition_variable_init(condition_variable::Ptr{aws_condition_variable})::Cint
 end
 
 """
@@ -4227,7 +4260,7 @@ void aws_condition_variable_clean_up(struct aws_condition_variable *condition_va
 ```
 """
 function aws_condition_variable_clean_up(condition_variable)
-    ccall((:aws_condition_variable_clean_up, libaws_c_common), Cvoid, (Ptr{aws_condition_variable},), condition_variable)
+    @ccall libaws_c_common.aws_condition_variable_clean_up(condition_variable::Ptr{aws_condition_variable})::Cvoid
 end
 
 """
@@ -4241,7 +4274,7 @@ int aws_condition_variable_notify_one(struct aws_condition_variable *condition_v
 ```
 """
 function aws_condition_variable_notify_one(condition_variable)
-    ccall((:aws_condition_variable_notify_one, libaws_c_common), Cint, (Ptr{aws_condition_variable},), condition_variable)
+    @ccall libaws_c_common.aws_condition_variable_notify_one(condition_variable::Ptr{aws_condition_variable})::Cint
 end
 
 """
@@ -4255,7 +4288,7 @@ int aws_condition_variable_notify_all(struct aws_condition_variable *condition_v
 ```
 """
 function aws_condition_variable_notify_all(condition_variable)
-    ccall((:aws_condition_variable_notify_all, libaws_c_common), Cint, (Ptr{aws_condition_variable},), condition_variable)
+    @ccall libaws_c_common.aws_condition_variable_notify_all(condition_variable::Ptr{aws_condition_variable})::Cint
 end
 
 struct aws_mutex
@@ -4274,7 +4307,7 @@ int aws_condition_variable_wait(struct aws_condition_variable *condition_variabl
 ```
 """
 function aws_condition_variable_wait(condition_variable, mutex)
-    ccall((:aws_condition_variable_wait, libaws_c_common), Cint, (Ptr{aws_condition_variable}, Ptr{aws_mutex}), condition_variable, mutex)
+    @ccall libaws_c_common.aws_condition_variable_wait(condition_variable::Ptr{aws_condition_variable}, mutex::Ptr{aws_mutex})::Cint
 end
 
 """
@@ -4288,7 +4321,7 @@ int aws_condition_variable_wait_pred( struct aws_condition_variable *condition_v
 ```
 """
 function aws_condition_variable_wait_pred(condition_variable, mutex, pred, pred_ctx)
-    ccall((:aws_condition_variable_wait_pred, libaws_c_common), Cint, (Ptr{aws_condition_variable}, Ptr{aws_mutex}, Ptr{aws_condition_predicate_fn}, Ptr{Cvoid}), condition_variable, mutex, pred, pred_ctx)
+    @ccall libaws_c_common.aws_condition_variable_wait_pred(condition_variable::Ptr{aws_condition_variable}, mutex::Ptr{aws_mutex}, pred::Ptr{aws_condition_predicate_fn}, pred_ctx::Ptr{Cvoid})::Cint
 end
 
 """
@@ -4302,7 +4335,7 @@ int aws_condition_variable_wait_for( struct aws_condition_variable *condition_va
 ```
 """
 function aws_condition_variable_wait_for(condition_variable, mutex, time_to_wait)
-    ccall((:aws_condition_variable_wait_for, libaws_c_common), Cint, (Ptr{aws_condition_variable}, Ptr{aws_mutex}, Int64), condition_variable, mutex, time_to_wait)
+    @ccall libaws_c_common.aws_condition_variable_wait_for(condition_variable::Ptr{aws_condition_variable}, mutex::Ptr{aws_mutex}, time_to_wait::Int64)::Cint
 end
 
 """
@@ -4316,7 +4349,7 @@ int aws_condition_variable_wait_for_pred( struct aws_condition_variable *conditi
 ```
 """
 function aws_condition_variable_wait_for_pred(condition_variable, mutex, time_to_wait, pred, pred_ctx)
-    ccall((:aws_condition_variable_wait_for_pred, libaws_c_common), Cint, (Ptr{aws_condition_variable}, Ptr{aws_mutex}, Int64, Ptr{aws_condition_predicate_fn}, Ptr{Cvoid}), condition_variable, mutex, time_to_wait, pred, pred_ctx)
+    @ccall libaws_c_common.aws_condition_variable_wait_for_pred(condition_variable::Ptr{aws_condition_variable}, mutex::Ptr{aws_mutex}, time_to_wait::Int64, pred::Ptr{aws_condition_predicate_fn}, pred_ctx::Ptr{Cvoid})::Cint
 end
 
 @cenum aws_cpu_feature_name::UInt32 begin
@@ -4327,7 +4360,8 @@ end
     AWS_CPU_FEATURE_AVX512 = 4
     AWS_CPU_FEATURE_ARM_CRC = 5
     AWS_CPU_FEATURE_BMI2 = 6
-    AWS_CPU_FEATURE_COUNT = 7
+    AWS_CPU_FEATURE_VPCLMULQDQ = 7
+    AWS_CPU_FEATURE_COUNT = 8
 end
 
 """
@@ -4341,10 +4375,42 @@ bool aws_cpu_has_feature(enum aws_cpu_feature_name feature_name);
 ```
 """
 function aws_cpu_has_feature(feature_name)
-    ccall((:aws_cpu_has_feature, libaws_c_common), Bool, (aws_cpu_feature_name,), feature_name)
+    @ccall libaws_c_common.aws_cpu_has_feature(feature_name::aws_cpu_feature_name)::Bool
 end
 
-@cenum __JL_Ctag_267::UInt32 begin
+mutable struct aws_cross_process_lock end
+
+"""
+    aws_cross_process_lock_try_acquire(allocator, instance_nonce)
+
+Attempts to acquire a system-wide (not per process or per user) lock scoped by instance\\_nonce. For any given unique nonce, a lock will be returned by the first caller. Subsequent calls will return NULL and raise AWS\\_ERROR\\_MUTEX\\_CALLER\\_NOT\\_OWNER until the either the process owning the lock exits or the program owning the lock calls [`aws_cross_process_lock_release`](@ref)() explicitly.
+
+If the process exits before the lock is released, the kernel will unlock it for the next consumer.
+
+### Prototype
+```c
+struct aws_cross_process_lock *aws_cross_process_lock_try_acquire( struct aws_allocator *allocator, struct aws_byte_cursor instance_nonce);
+```
+"""
+function aws_cross_process_lock_try_acquire(allocator, instance_nonce)
+    @ccall libaws_c_common.aws_cross_process_lock_try_acquire(allocator::Ptr{aws_allocator}, instance_nonce::aws_byte_cursor)::Ptr{aws_cross_process_lock}
+end
+
+"""
+    aws_cross_process_lock_release(instance_lock)
+
+Releases the lock so the next caller (may be another process) can get an instance of the lock.
+
+### Prototype
+```c
+void aws_cross_process_lock_release(struct aws_cross_process_lock *instance_lock);
+```
+"""
+function aws_cross_process_lock_release(instance_lock)
+    @ccall libaws_c_common.aws_cross_process_lock_release(instance_lock::Ptr{aws_cross_process_lock})::Cvoid
+end
+
+@cenum __JL_Ctag_84::UInt32 begin
     AWS_DATE_TIME_STR_MAX_LEN = 100
     AWS_DATE_TIME_STR_MAX_BASIC_LEN = 20
 end
@@ -4401,7 +4467,7 @@ void aws_date_time_init_now(struct aws_date_time *dt);
 ```
 """
 function aws_date_time_init_now(dt)
-    ccall((:aws_date_time_init_now, libaws_c_common), Cvoid, (Ptr{aws_date_time},), dt)
+    @ccall libaws_c_common.aws_date_time_init_now(dt::Ptr{aws_date_time})::Cvoid
 end
 
 """
@@ -4415,7 +4481,7 @@ void aws_date_time_init_epoch_millis(struct aws_date_time *dt, uint64_t ms_since
 ```
 """
 function aws_date_time_init_epoch_millis(dt, ms_since_epoch)
-    ccall((:aws_date_time_init_epoch_millis, libaws_c_common), Cvoid, (Ptr{aws_date_time}, UInt64), dt, ms_since_epoch)
+    @ccall libaws_c_common.aws_date_time_init_epoch_millis(dt::Ptr{aws_date_time}, ms_since_epoch::UInt64)::Cvoid
 end
 
 """
@@ -4429,7 +4495,7 @@ void aws_date_time_init_epoch_secs(struct aws_date_time *dt, double sec_ms);
 ```
 """
 function aws_date_time_init_epoch_secs(dt, sec_ms)
-    ccall((:aws_date_time_init_epoch_secs, libaws_c_common), Cvoid, (Ptr{aws_date_time}, Cdouble), dt, sec_ms)
+    @ccall libaws_c_common.aws_date_time_init_epoch_secs(dt::Ptr{aws_date_time}, sec_ms::Cdouble)::Cvoid
 end
 
 """
@@ -4437,9 +4503,11 @@ end
 
 Initializes dt to be the time represented by date\\_str in format 'fmt'. Returns [`AWS_OP_SUCCESS`](@ref) if the string was successfully parsed, returns [`AWS_OP_ERR`](@ref) if parsing failed.
 
+The parser is lenient regarding AWS\\_DATE\\_FORMAT\\_ISO\\_8601 vs AWS\\_DATE\\_FORMAT\\_ISO\\_8601\\_BASIC. Regardless of which you pass in, both "2002-10-02T08:05:09Z" and "20021002T080509Z" would be accepted.
+
 Notes for AWS\\_DATE\\_FORMAT\\_RFC822: If no time zone information is provided, it is assumed to be local time (please don't do this).
 
-If the time zone is something other than something indicating Universal Time (e.g. Z, UT, UTC, or GMT) or an offset from UTC (e.g. +0100, -0700), parsing will fail.
+Only time zones indicating Universal Time (e.g. Z, UT, UTC, or GMT), or offsets from UTC (e.g. +0100, -0700), are accepted.
 
 Really, it's just better if you always use Universal Time.
 
@@ -4449,7 +4517,7 @@ int aws_date_time_init_from_str( struct aws_date_time *dt, const struct aws_byte
 ```
 """
 function aws_date_time_init_from_str(dt, date_str, fmt)
-    ccall((:aws_date_time_init_from_str, libaws_c_common), Cint, (Ptr{aws_date_time}, Ptr{aws_byte_buf}, aws_date_format), dt, date_str, fmt)
+    @ccall libaws_c_common.aws_date_time_init_from_str(dt::Ptr{aws_date_time}, date_str::Ptr{aws_byte_buf}, fmt::aws_date_format)::Cint
 end
 
 """
@@ -4463,7 +4531,7 @@ int aws_date_time_init_from_str_cursor( struct aws_date_time *dt, const struct a
 ```
 """
 function aws_date_time_init_from_str_cursor(dt, date_str_cursor, fmt)
-    ccall((:aws_date_time_init_from_str_cursor, libaws_c_common), Cint, (Ptr{aws_date_time}, Ptr{aws_byte_cursor}, aws_date_format), dt, date_str_cursor, fmt)
+    @ccall libaws_c_common.aws_date_time_init_from_str_cursor(dt::Ptr{aws_date_time}, date_str_cursor::Ptr{aws_byte_cursor}, fmt::aws_date_format)::Cint
 end
 
 """
@@ -4477,7 +4545,7 @@ int aws_date_time_to_local_time_str( const struct aws_date_time *dt, enum aws_da
 ```
 """
 function aws_date_time_to_local_time_str(dt, fmt, output_buf)
-    ccall((:aws_date_time_to_local_time_str, libaws_c_common), Cint, (Ptr{aws_date_time}, aws_date_format, Ptr{aws_byte_buf}), dt, fmt, output_buf)
+    @ccall libaws_c_common.aws_date_time_to_local_time_str(dt::Ptr{aws_date_time}, fmt::aws_date_format, output_buf::Ptr{aws_byte_buf})::Cint
 end
 
 """
@@ -4491,7 +4559,7 @@ int aws_date_time_to_utc_time_str( const struct aws_date_time *dt, enum aws_date
 ```
 """
 function aws_date_time_to_utc_time_str(dt, fmt, output_buf)
-    ccall((:aws_date_time_to_utc_time_str, libaws_c_common), Cint, (Ptr{aws_date_time}, aws_date_format, Ptr{aws_byte_buf}), dt, fmt, output_buf)
+    @ccall libaws_c_common.aws_date_time_to_utc_time_str(dt::Ptr{aws_date_time}, fmt::aws_date_format, output_buf::Ptr{aws_byte_buf})::Cint
 end
 
 """
@@ -4505,7 +4573,7 @@ int aws_date_time_to_local_time_short_str( const struct aws_date_time *dt, enum 
 ```
 """
 function aws_date_time_to_local_time_short_str(dt, fmt, output_buf)
-    ccall((:aws_date_time_to_local_time_short_str, libaws_c_common), Cint, (Ptr{aws_date_time}, aws_date_format, Ptr{aws_byte_buf}), dt, fmt, output_buf)
+    @ccall libaws_c_common.aws_date_time_to_local_time_short_str(dt::Ptr{aws_date_time}, fmt::aws_date_format, output_buf::Ptr{aws_byte_buf})::Cint
 end
 
 """
@@ -4519,7 +4587,7 @@ int aws_date_time_to_utc_time_short_str( const struct aws_date_time *dt, enum aw
 ```
 """
 function aws_date_time_to_utc_time_short_str(dt, fmt, output_buf)
-    ccall((:aws_date_time_to_utc_time_short_str, libaws_c_common), Cint, (Ptr{aws_date_time}, aws_date_format, Ptr{aws_byte_buf}), dt, fmt, output_buf)
+    @ccall libaws_c_common.aws_date_time_to_utc_time_short_str(dt::Ptr{aws_date_time}, fmt::aws_date_format, output_buf::Ptr{aws_byte_buf})::Cint
 end
 
 """
@@ -4531,7 +4599,7 @@ double aws_date_time_as_epoch_secs(const struct aws_date_time *dt);
 ```
 """
 function aws_date_time_as_epoch_secs(dt)
-    ccall((:aws_date_time_as_epoch_secs, libaws_c_common), Cdouble, (Ptr{aws_date_time},), dt)
+    @ccall libaws_c_common.aws_date_time_as_epoch_secs(dt::Ptr{aws_date_time})::Cdouble
 end
 
 """
@@ -4543,7 +4611,7 @@ uint64_t aws_date_time_as_nanos(const struct aws_date_time *dt);
 ```
 """
 function aws_date_time_as_nanos(dt)
-    ccall((:aws_date_time_as_nanos, libaws_c_common), UInt64, (Ptr{aws_date_time},), dt)
+    @ccall libaws_c_common.aws_date_time_as_nanos(dt::Ptr{aws_date_time})::UInt64
 end
 
 """
@@ -4555,7 +4623,7 @@ uint64_t aws_date_time_as_millis(const struct aws_date_time *dt);
 ```
 """
 function aws_date_time_as_millis(dt)
-    ccall((:aws_date_time_as_millis, libaws_c_common), UInt64, (Ptr{aws_date_time},), dt)
+    @ccall libaws_c_common.aws_date_time_as_millis(dt::Ptr{aws_date_time})::UInt64
 end
 
 """
@@ -4567,7 +4635,7 @@ uint16_t aws_date_time_year(const struct aws_date_time *dt, bool local_time);
 ```
 """
 function aws_date_time_year(dt, local_time)
-    ccall((:aws_date_time_year, libaws_c_common), UInt16, (Ptr{aws_date_time}, Bool), dt, local_time)
+    @ccall libaws_c_common.aws_date_time_year(dt::Ptr{aws_date_time}, local_time::Bool)::UInt16
 end
 
 """
@@ -4579,7 +4647,7 @@ enum aws_date_month aws_date_time_month(const struct aws_date_time *dt, bool loc
 ```
 """
 function aws_date_time_month(dt, local_time)
-    ccall((:aws_date_time_month, libaws_c_common), aws_date_month, (Ptr{aws_date_time}, Bool), dt, local_time)
+    @ccall libaws_c_common.aws_date_time_month(dt::Ptr{aws_date_time}, local_time::Bool)::aws_date_month
 end
 
 """
@@ -4591,7 +4659,7 @@ uint8_t aws_date_time_month_day(const struct aws_date_time *dt, bool local_time)
 ```
 """
 function aws_date_time_month_day(dt, local_time)
-    ccall((:aws_date_time_month_day, libaws_c_common), UInt8, (Ptr{aws_date_time}, Bool), dt, local_time)
+    @ccall libaws_c_common.aws_date_time_month_day(dt::Ptr{aws_date_time}, local_time::Bool)::UInt8
 end
 
 """
@@ -4603,7 +4671,7 @@ enum aws_date_day_of_week aws_date_time_day_of_week(const struct aws_date_time *
 ```
 """
 function aws_date_time_day_of_week(dt, local_time)
-    ccall((:aws_date_time_day_of_week, libaws_c_common), aws_date_day_of_week, (Ptr{aws_date_time}, Bool), dt, local_time)
+    @ccall libaws_c_common.aws_date_time_day_of_week(dt::Ptr{aws_date_time}, local_time::Bool)::aws_date_day_of_week
 end
 
 """
@@ -4615,7 +4683,7 @@ uint8_t aws_date_time_hour(const struct aws_date_time *dt, bool local_time);
 ```
 """
 function aws_date_time_hour(dt, local_time)
-    ccall((:aws_date_time_hour, libaws_c_common), UInt8, (Ptr{aws_date_time}, Bool), dt, local_time)
+    @ccall libaws_c_common.aws_date_time_hour(dt::Ptr{aws_date_time}, local_time::Bool)::UInt8
 end
 
 """
@@ -4627,7 +4695,7 @@ uint8_t aws_date_time_minute(const struct aws_date_time *dt, bool local_time);
 ```
 """
 function aws_date_time_minute(dt, local_time)
-    ccall((:aws_date_time_minute, libaws_c_common), UInt8, (Ptr{aws_date_time}, Bool), dt, local_time)
+    @ccall libaws_c_common.aws_date_time_minute(dt::Ptr{aws_date_time}, local_time::Bool)::UInt8
 end
 
 """
@@ -4639,7 +4707,7 @@ uint8_t aws_date_time_second(const struct aws_date_time *dt, bool local_time);
 ```
 """
 function aws_date_time_second(dt, local_time)
-    ccall((:aws_date_time_second, libaws_c_common), UInt8, (Ptr{aws_date_time}, Bool), dt, local_time)
+    @ccall libaws_c_common.aws_date_time_second(dt::Ptr{aws_date_time}, local_time::Bool)::UInt8
 end
 
 """
@@ -4651,7 +4719,7 @@ bool aws_date_time_dst(const struct aws_date_time *dt, bool local_time);
 ```
 """
 function aws_date_time_dst(dt, local_time)
-    ccall((:aws_date_time_dst, libaws_c_common), Bool, (Ptr{aws_date_time}, Bool), dt, local_time)
+    @ccall libaws_c_common.aws_date_time_dst(dt::Ptr{aws_date_time}, local_time::Bool)::Bool
 end
 
 """
@@ -4665,7 +4733,7 @@ time_t aws_date_time_diff(const struct aws_date_time *a, const struct aws_date_t
 ```
 """
 function aws_date_time_diff(a, b)
-    ccall((:aws_date_time_diff, libaws_c_common), time_t, (Ptr{aws_date_time}, Ptr{aws_date_time}), a, b)
+    @ccall libaws_c_common.aws_date_time_diff(a::Ptr{aws_date_time}, b::Ptr{aws_date_time})::time_t
 end
 
 """
@@ -4679,7 +4747,7 @@ int aws_device_random_u64(uint64_t *output);
 ```
 """
 function aws_device_random_u64(output)
-    ccall((:aws_device_random_u64, libaws_c_common), Cint, (Ptr{UInt64},), output)
+    @ccall libaws_c_common.aws_device_random_u64(output::Ptr{UInt64})::Cint
 end
 
 """
@@ -4693,7 +4761,7 @@ int aws_device_random_u32(uint32_t *output);
 ```
 """
 function aws_device_random_u32(output)
-    ccall((:aws_device_random_u32, libaws_c_common), Cint, (Ptr{UInt32},), output)
+    @ccall libaws_c_common.aws_device_random_u32(output::Ptr{UInt32})::Cint
 end
 
 """
@@ -4707,7 +4775,7 @@ int aws_device_random_u16(uint16_t *output);
 ```
 """
 function aws_device_random_u16(output)
-    ccall((:aws_device_random_u16, libaws_c_common), Cint, (Ptr{UInt16},), output)
+    @ccall libaws_c_common.aws_device_random_u16(output::Ptr{UInt16})::Cint
 end
 
 """
@@ -4721,7 +4789,7 @@ int aws_device_random_u8(uint8_t *output);
 ```
 """
 function aws_device_random_u8(output)
-    ccall((:aws_device_random_u8, libaws_c_common), Cint, (Ptr{UInt8},), output)
+    @ccall libaws_c_common.aws_device_random_u8(output::Ptr{UInt8})::Cint
 end
 
 """
@@ -4735,7 +4803,7 @@ int aws_device_random_buffer(struct aws_byte_buf *output);
 ```
 """
 function aws_device_random_buffer(output)
-    ccall((:aws_device_random_buffer, libaws_c_common), Cint, (Ptr{aws_byte_buf},), output)
+    @ccall libaws_c_common.aws_device_random_buffer(output::Ptr{aws_byte_buf})::Cint
 end
 
 """
@@ -4749,7 +4817,7 @@ int aws_device_random_buffer_append(struct aws_byte_buf *output, size_t n);
 ```
 """
 function aws_device_random_buffer_append(output, n)
-    ccall((:aws_device_random_buffer_append, libaws_c_common), Cint, (Ptr{aws_byte_buf}, Csize_t), output, n)
+    @ccall libaws_c_common.aws_device_random_buffer_append(output::Ptr{aws_byte_buf}, n::Csize_t)::Cint
 end
 
 """
@@ -4761,7 +4829,7 @@ int aws_hex_compute_encoded_len(size_t to_encode_len, size_t *encoded_length);
 ```
 """
 function aws_hex_compute_encoded_len(to_encode_len, encoded_length)
-    ccall((:aws_hex_compute_encoded_len, libaws_c_common), Cint, (Csize_t, Ptr{Csize_t}), to_encode_len, encoded_length)
+    @ccall libaws_c_common.aws_hex_compute_encoded_len(to_encode_len::Csize_t, encoded_length::Ptr{Csize_t})::Cint
 end
 
 """
@@ -4773,7 +4841,7 @@ int aws_hex_encode(const struct aws_byte_cursor *AWS_RESTRICT to_encode, struct 
 ```
 """
 function aws_hex_encode(to_encode, output)
-    ccall((:aws_hex_encode, libaws_c_common), Cint, (Ptr{aws_byte_cursor}, Ptr{aws_byte_buf}), to_encode, output)
+    @ccall libaws_c_common.aws_hex_encode(to_encode::Ptr{aws_byte_cursor}, output::Ptr{aws_byte_buf})::Cint
 end
 
 """
@@ -4785,7 +4853,7 @@ int aws_hex_encode_append_dynamic( const struct aws_byte_cursor *AWS_RESTRICT to
 ```
 """
 function aws_hex_encode_append_dynamic(to_encode, output)
-    ccall((:aws_hex_encode_append_dynamic, libaws_c_common), Cint, (Ptr{aws_byte_cursor}, Ptr{aws_byte_buf}), to_encode, output)
+    @ccall libaws_c_common.aws_hex_encode_append_dynamic(to_encode::Ptr{aws_byte_cursor}, output::Ptr{aws_byte_buf})::Cint
 end
 
 """
@@ -4797,7 +4865,7 @@ int aws_hex_compute_decoded_len(size_t to_decode_len, size_t *decoded_len);
 ```
 """
 function aws_hex_compute_decoded_len(to_decode_len, decoded_len)
-    ccall((:aws_hex_compute_decoded_len, libaws_c_common), Cint, (Csize_t, Ptr{Csize_t}), to_decode_len, decoded_len)
+    @ccall libaws_c_common.aws_hex_compute_decoded_len(to_decode_len::Csize_t, decoded_len::Ptr{Csize_t})::Cint
 end
 
 """
@@ -4809,7 +4877,7 @@ int aws_hex_decode(const struct aws_byte_cursor *AWS_RESTRICT to_decode, struct 
 ```
 """
 function aws_hex_decode(to_decode, output)
-    ccall((:aws_hex_decode, libaws_c_common), Cint, (Ptr{aws_byte_cursor}, Ptr{aws_byte_buf}), to_decode, output)
+    @ccall libaws_c_common.aws_hex_decode(to_decode::Ptr{aws_byte_cursor}, output::Ptr{aws_byte_buf})::Cint
 end
 
 """
@@ -4821,7 +4889,7 @@ int aws_base64_compute_encoded_len(size_t to_encode_len, size_t *encoded_len);
 ```
 """
 function aws_base64_compute_encoded_len(to_encode_len, encoded_len)
-    ccall((:aws_base64_compute_encoded_len, libaws_c_common), Cint, (Csize_t, Ptr{Csize_t}), to_encode_len, encoded_len)
+    @ccall libaws_c_common.aws_base64_compute_encoded_len(to_encode_len::Csize_t, encoded_len::Ptr{Csize_t})::Cint
 end
 
 """
@@ -4833,7 +4901,7 @@ int aws_base64_encode(const struct aws_byte_cursor *AWS_RESTRICT to_encode, stru
 ```
 """
 function aws_base64_encode(to_encode, output)
-    ccall((:aws_base64_encode, libaws_c_common), Cint, (Ptr{aws_byte_cursor}, Ptr{aws_byte_buf}), to_encode, output)
+    @ccall libaws_c_common.aws_base64_encode(to_encode::Ptr{aws_byte_cursor}, output::Ptr{aws_byte_buf})::Cint
 end
 
 """
@@ -4845,7 +4913,7 @@ int aws_base64_compute_decoded_len(const struct aws_byte_cursor *AWS_RESTRICT to
 ```
 """
 function aws_base64_compute_decoded_len(to_decode, decoded_len)
-    ccall((:aws_base64_compute_decoded_len, libaws_c_common), Cint, (Ptr{aws_byte_cursor}, Ptr{Csize_t}), to_decode, decoded_len)
+    @ccall libaws_c_common.aws_base64_compute_decoded_len(to_decode::Ptr{aws_byte_cursor}, decoded_len::Ptr{Csize_t})::Cint
 end
 
 """
@@ -4857,7 +4925,7 @@ int aws_base64_decode(const struct aws_byte_cursor *AWS_RESTRICT to_decode, stru
 ```
 """
 function aws_base64_decode(to_decode, output)
-    ccall((:aws_base64_decode, libaws_c_common), Cint, (Ptr{aws_byte_cursor}, Ptr{aws_byte_buf}), to_decode, output)
+    @ccall libaws_c_common.aws_base64_decode(to_decode::Ptr{aws_byte_cursor}, output::Ptr{aws_byte_buf})::Cint
 end
 
 """
@@ -4869,7 +4937,7 @@ AWS_STATIC_IMPL void aws_write_u64(uint64_t value, uint8_t *buffer);
 ```
 """
 function aws_write_u64(value, buffer)
-    ccall((:aws_write_u64, libaws_c_common), Cvoid, (UInt64, Ptr{UInt8}), value, buffer)
+    @ccall libaws_c_common.aws_write_u64(value::UInt64, buffer::Ptr{UInt8})::Cvoid
 end
 
 """
@@ -4881,7 +4949,7 @@ AWS_STATIC_IMPL uint64_t aws_read_u64(const uint8_t *buffer);
 ```
 """
 function aws_read_u64(buffer)
-    ccall((:aws_read_u64, libaws_c_common), UInt64, (Ptr{UInt8},), buffer)
+    @ccall libaws_c_common.aws_read_u64(buffer::Ptr{UInt8})::UInt64
 end
 
 """
@@ -4893,7 +4961,7 @@ AWS_STATIC_IMPL void aws_write_u32(uint32_t value, uint8_t *buffer);
 ```
 """
 function aws_write_u32(value, buffer)
-    ccall((:aws_write_u32, libaws_c_common), Cvoid, (UInt32, Ptr{UInt8}), value, buffer)
+    @ccall libaws_c_common.aws_write_u32(value::UInt32, buffer::Ptr{UInt8})::Cvoid
 end
 
 """
@@ -4905,7 +4973,7 @@ AWS_STATIC_IMPL uint32_t aws_read_u32(const uint8_t *buffer);
 ```
 """
 function aws_read_u32(buffer)
-    ccall((:aws_read_u32, libaws_c_common), UInt32, (Ptr{UInt8},), buffer)
+    @ccall libaws_c_common.aws_read_u32(buffer::Ptr{UInt8})::UInt32
 end
 
 """
@@ -4917,7 +4985,7 @@ AWS_STATIC_IMPL void aws_write_u24(uint32_t value, uint8_t *buffer);
 ```
 """
 function aws_write_u24(value, buffer)
-    ccall((:aws_write_u24, libaws_c_common), Cvoid, (UInt32, Ptr{UInt8}), value, buffer)
+    @ccall libaws_c_common.aws_write_u24(value::UInt32, buffer::Ptr{UInt8})::Cvoid
 end
 
 """
@@ -4929,7 +4997,7 @@ AWS_STATIC_IMPL uint32_t aws_read_u24(const uint8_t *buffer);
 ```
 """
 function aws_read_u24(buffer)
-    ccall((:aws_read_u24, libaws_c_common), UInt32, (Ptr{UInt8},), buffer)
+    @ccall libaws_c_common.aws_read_u24(buffer::Ptr{UInt8})::UInt32
 end
 
 """
@@ -4941,7 +5009,7 @@ AWS_STATIC_IMPL void aws_write_u16(uint16_t value, uint8_t *buffer);
 ```
 """
 function aws_write_u16(value, buffer)
-    ccall((:aws_write_u16, libaws_c_common), Cvoid, (UInt16, Ptr{UInt8}), value, buffer)
+    @ccall libaws_c_common.aws_write_u16(value::UInt16, buffer::Ptr{UInt8})::Cvoid
 end
 
 """
@@ -4953,7 +5021,7 @@ AWS_STATIC_IMPL uint16_t aws_read_u16(const uint8_t *buffer);
 ```
 """
 function aws_read_u16(buffer)
-    ccall((:aws_read_u16, libaws_c_common), UInt16, (Ptr{UInt8},), buffer)
+    @ccall libaws_c_common.aws_read_u16(buffer::Ptr{UInt8})::UInt16
 end
 
 @cenum aws_text_encoding::UInt32 begin
@@ -4973,7 +5041,7 @@ AWS_STATIC_IMPL enum aws_text_encoding aws_text_detect_encoding(const uint8_t *b
 ```
 """
 function aws_text_detect_encoding(bytes, size)
-    ccall((:aws_text_detect_encoding, libaws_c_common), aws_text_encoding, (Ptr{UInt8}, Csize_t), bytes, size)
+    @ccall libaws_c_common.aws_text_detect_encoding(bytes::Ptr{UInt8}, size::Csize_t)::aws_text_encoding
 end
 
 """
@@ -4985,7 +5053,7 @@ AWS_STATIC_IMPL bool aws_text_is_utf8(const uint8_t *bytes, size_t size);
 ```
 """
 function aws_text_is_utf8(bytes, size)
-    ccall((:aws_text_is_utf8, libaws_c_common), Bool, (Ptr{UInt8}, Csize_t), bytes, size)
+    @ccall libaws_c_common.aws_text_is_utf8(bytes::Ptr{UInt8}, size::Csize_t)::Bool
 end
 
 struct aws_utf8_decoder_options
@@ -5009,7 +5077,7 @@ int aws_decode_utf8(struct aws_byte_cursor bytes, const struct aws_utf8_decoder_
 ```
 """
 function aws_decode_utf8(bytes, options)
-    ccall((:aws_decode_utf8, libaws_c_common), Cint, (aws_byte_cursor, Ptr{aws_utf8_decoder_options}), bytes, options)
+    @ccall libaws_c_common.aws_decode_utf8(bytes::aws_byte_cursor, options::Ptr{aws_utf8_decoder_options})::Cint
 end
 
 mutable struct aws_utf8_decoder end
@@ -5030,7 +5098,7 @@ struct aws_utf8_decoder *aws_utf8_decoder_new( struct aws_allocator *allocator, 
 ```
 """
 function aws_utf8_decoder_new(allocator, options)
-    ccall((:aws_utf8_decoder_new, libaws_c_common), Ptr{aws_utf8_decoder}, (Ptr{aws_allocator}, Ptr{aws_utf8_decoder_options}), allocator, options)
+    @ccall libaws_c_common.aws_utf8_decoder_new(allocator::Ptr{aws_allocator}, options::Ptr{aws_utf8_decoder_options})::Ptr{aws_utf8_decoder}
 end
 
 """
@@ -5042,7 +5110,7 @@ void aws_utf8_decoder_destroy(struct aws_utf8_decoder *decoder);
 ```
 """
 function aws_utf8_decoder_destroy(decoder)
-    ccall((:aws_utf8_decoder_destroy, libaws_c_common), Cvoid, (Ptr{aws_utf8_decoder},), decoder)
+    @ccall libaws_c_common.aws_utf8_decoder_destroy(decoder::Ptr{aws_utf8_decoder})::Cvoid
 end
 
 """
@@ -5054,7 +5122,7 @@ void aws_utf8_decoder_reset(struct aws_utf8_decoder *decoder);
 ```
 """
 function aws_utf8_decoder_reset(decoder)
-    ccall((:aws_utf8_decoder_reset, libaws_c_common), Cvoid, (Ptr{aws_utf8_decoder},), decoder)
+    @ccall libaws_c_common.aws_utf8_decoder_reset(decoder::Ptr{aws_utf8_decoder})::Cvoid
 end
 
 """
@@ -5070,7 +5138,7 @@ int aws_utf8_decoder_update(struct aws_utf8_decoder *decoder, struct aws_byte_cu
 ```
 """
 function aws_utf8_decoder_update(decoder, bytes)
-    ccall((:aws_utf8_decoder_update, libaws_c_common), Cint, (Ptr{aws_utf8_decoder}, aws_byte_cursor), decoder, bytes)
+    @ccall libaws_c_common.aws_utf8_decoder_update(decoder::Ptr{aws_utf8_decoder}, bytes::aws_byte_cursor)::Cint
 end
 
 """
@@ -5084,7 +5152,7 @@ int aws_utf8_decoder_finalize(struct aws_utf8_decoder *decoder);
 ```
 """
 function aws_utf8_decoder_finalize(decoder)
-    ccall((:aws_utf8_decoder_finalize, libaws_c_common), Cint, (Ptr{aws_utf8_decoder},), decoder)
+    @ccall libaws_c_common.aws_utf8_decoder_finalize(decoder::Ptr{aws_utf8_decoder})::Cint
 end
 
 struct aws_string
@@ -5102,7 +5170,7 @@ int aws_get_environment_value( struct aws_allocator *allocator, const struct aws
 ```
 """
 function aws_get_environment_value(allocator, variable_name, value_out)
-    ccall((:aws_get_environment_value, libaws_c_common), Cint, (Ptr{aws_allocator}, Ptr{aws_string}, Ptr{Ptr{aws_string}}), allocator, variable_name, value_out)
+    @ccall libaws_c_common.aws_get_environment_value(allocator::Ptr{aws_allocator}, variable_name::Ptr{aws_string}, value_out::Ptr{Ptr{aws_string}})::Cint
 end
 
 """
@@ -5114,7 +5182,7 @@ int aws_set_environment_value(const struct aws_string *variable_name, const stru
 ```
 """
 function aws_set_environment_value(variable_name, value)
-    ccall((:aws_set_environment_value, libaws_c_common), Cint, (Ptr{aws_string}, Ptr{aws_string}), variable_name, value)
+    @ccall libaws_c_common.aws_set_environment_value(variable_name::Ptr{aws_string}, value::Ptr{aws_string})::Cint
 end
 
 """
@@ -5126,7 +5194,7 @@ int aws_unset_environment_value(const struct aws_string *variable_name);
 ```
 """
 function aws_unset_environment_value(variable_name)
-    ccall((:aws_unset_environment_value, libaws_c_common), Cint, (Ptr{aws_string},), variable_name)
+    @ccall libaws_c_common.aws_unset_environment_value(variable_name::Ptr{aws_string})::Cint
 end
 
 struct aws_error_info
@@ -5154,7 +5222,7 @@ int aws_last_error(void);
 ```
 """
 function aws_last_error()
-    ccall((:aws_last_error, libaws_c_common), Cint, ())
+    @ccall libaws_c_common.aws_last_error()::Cint
 end
 
 """
@@ -5166,7 +5234,7 @@ const char *aws_error_str(int err);
 ```
 """
 function aws_error_str(err)
-    ccall((:aws_error_str, libaws_c_common), Ptr{Cchar}, (Cint,), err)
+    @ccall libaws_c_common.aws_error_str(err::Cint)::Ptr{Cchar}
 end
 
 """
@@ -5178,7 +5246,7 @@ const char *aws_error_name(int err);
 ```
 """
 function aws_error_name(err)
-    ccall((:aws_error_name, libaws_c_common), Ptr{Cchar}, (Cint,), err)
+    @ccall libaws_c_common.aws_error_name(err::Cint)::Ptr{Cchar}
 end
 
 """
@@ -5190,7 +5258,7 @@ const char *aws_error_lib_name(int err);
 ```
 """
 function aws_error_lib_name(err)
-    ccall((:aws_error_lib_name, libaws_c_common), Ptr{Cchar}, (Cint,), err)
+    @ccall libaws_c_common.aws_error_lib_name(err::Cint)::Ptr{Cchar}
 end
 
 """
@@ -5202,7 +5270,7 @@ const char *aws_error_debug_str(int err);
 ```
 """
 function aws_error_debug_str(err)
-    ccall((:aws_error_debug_str, libaws_c_common), Ptr{Cchar}, (Cint,), err)
+    @ccall libaws_c_common.aws_error_debug_str(err::Cint)::Ptr{Cchar}
 end
 
 """
@@ -5214,7 +5282,7 @@ void aws_raise_error_private(int err);
 ```
 """
 function aws_raise_error_private(err)
-    ccall((:aws_raise_error_private, libaws_c_common), Cvoid, (Cint,), err)
+    @ccall libaws_c_common.aws_raise_error_private(err::Cint)::Cvoid
 end
 
 """
@@ -5226,7 +5294,7 @@ void aws_reset_error(void);
 ```
 """
 function aws_reset_error()
-    ccall((:aws_reset_error, libaws_c_common), Cvoid, ())
+    @ccall libaws_c_common.aws_reset_error()::Cvoid
 end
 
 """
@@ -5238,7 +5306,7 @@ void aws_restore_error(int err);
 ```
 """
 function aws_restore_error(err)
-    ccall((:aws_restore_error, libaws_c_common), Cvoid, (Cint,), err)
+    @ccall libaws_c_common.aws_restore_error(err::Cint)::Cvoid
 end
 
 """
@@ -5250,7 +5318,7 @@ aws_error_handler_fn *aws_set_global_error_handler_fn(aws_error_handler_fn *hand
 ```
 """
 function aws_set_global_error_handler_fn(handler, ctx)
-    ccall((:aws_set_global_error_handler_fn, libaws_c_common), Ptr{aws_error_handler_fn}, (Ptr{aws_error_handler_fn}, Ptr{Cvoid}), handler, ctx)
+    @ccall libaws_c_common.aws_set_global_error_handler_fn(handler::Ptr{aws_error_handler_fn}, ctx::Ptr{Cvoid})::Ptr{aws_error_handler_fn}
 end
 
 """
@@ -5262,7 +5330,7 @@ aws_error_handler_fn *aws_set_thread_local_error_handler_fn(aws_error_handler_fn
 ```
 """
 function aws_set_thread_local_error_handler_fn(handler, ctx)
-    ccall((:aws_set_thread_local_error_handler_fn, libaws_c_common), Ptr{aws_error_handler_fn}, (Ptr{aws_error_handler_fn}, Ptr{Cvoid}), handler, ctx)
+    @ccall libaws_c_common.aws_set_thread_local_error_handler_fn(handler::Ptr{aws_error_handler_fn}, ctx::Ptr{Cvoid})::Ptr{aws_error_handler_fn}
 end
 
 """
@@ -5276,7 +5344,7 @@ void aws_register_error_info(const struct aws_error_info_list *error_info);
 ```
 """
 function aws_register_error_info(error_info)
-    ccall((:aws_register_error_info, libaws_c_common), Cvoid, (Ptr{aws_error_info_list},), error_info)
+    @ccall libaws_c_common.aws_register_error_info(error_info::Ptr{aws_error_info_list})::Cvoid
 end
 
 """
@@ -5288,7 +5356,21 @@ void aws_unregister_error_info(const struct aws_error_info_list *error_info);
 ```
 """
 function aws_unregister_error_info(error_info)
-    ccall((:aws_unregister_error_info, libaws_c_common), Cvoid, (Ptr{aws_error_info_list},), error_info)
+    @ccall libaws_c_common.aws_unregister_error_info(error_info::Ptr{aws_error_info_list})::Cvoid
+end
+
+"""
+    aws_translate_and_raise_io_error_or(error_no, fallback_aws_error_code)
+
+Convert a c library io error into an aws error, and raise it. If no conversion is found, fallback\\_aws\\_error\\_code is raised. Always returns [`AWS_OP_ERR`](@ref).
+
+### Prototype
+```c
+int aws_translate_and_raise_io_error_or(int error_no, int fallback_aws_error_code);
+```
+"""
+function aws_translate_and_raise_io_error_or(error_no, fallback_aws_error_code)
+    @ccall libaws_c_common.aws_translate_and_raise_io_error_or(error_no::Cint, fallback_aws_error_code::Cint)::Cint
 end
 
 """
@@ -5302,7 +5384,7 @@ int aws_translate_and_raise_io_error(int error_no);
 ```
 """
 function aws_translate_and_raise_io_error(error_no)
-    ccall((:aws_translate_and_raise_io_error, libaws_c_common), Cint, (Cint,), error_no)
+    @ccall libaws_c_common.aws_translate_and_raise_io_error(error_no::Cint)::Cint
 end
 
 @cenum aws_common_error::UInt32 begin
@@ -5363,6 +5445,9 @@ end
     AWS_ERROR_INVALID_UTF8 = 54
     AWS_ERROR_GET_HOME_DIRECTORY_FAILED = 55
     AWS_ERROR_INVALID_XML = 56
+    AWS_ERROR_FILE_OPEN_FAILURE = 57
+    AWS_ERROR_FILE_READ_FAILURE = 58
+    AWS_ERROR_FILE_WRITE_FAILURE = 59
     AWS_ERROR_END_COMMON_RANGE = 1023
 end
 
@@ -5378,7 +5463,7 @@ Prototype for a hash table equality check function pointer.
 
 This type is usually used for a function that compares two hash table keys, but note that the same type is used for a function that compares two hash table values in [`aws_hash_table_eq`](@ref).
 
-Equality functions used in a hash table must be reflexive (i.e., a == b if and only if b == a), and must be consistent with the hash function in use.
+Equality functions used in a hash table must be be reflexive (a == a), symmetric (a == b => b == a), transitive (a == b, b == c => a == c) and consistent (result does not change with time).
 """
 const aws_hash_callback_eq_fn = Cvoid
 
@@ -5393,7 +5478,7 @@ struct aws_cache *aws_cache_new_fifo( struct aws_allocator *allocator, aws_hash_
 ```
 """
 function aws_cache_new_fifo(allocator, hash_fn, equals_fn, destroy_key_fn, destroy_value_fn, max_items)
-    ccall((:aws_cache_new_fifo, libaws_c_common), Ptr{aws_cache}, (Ptr{aws_allocator}, Ptr{aws_hash_fn}, Ptr{aws_hash_callback_eq_fn}, Ptr{aws_hash_callback_destroy_fn}, Ptr{aws_hash_callback_destroy_fn}, Csize_t), allocator, hash_fn, equals_fn, destroy_key_fn, destroy_value_fn, max_items)
+    @ccall libaws_c_common.aws_cache_new_fifo(allocator::Ptr{aws_allocator}, hash_fn::Ptr{aws_hash_fn}, equals_fn::Ptr{aws_hash_callback_eq_fn}, destroy_key_fn::Ptr{aws_hash_callback_destroy_fn}, destroy_value_fn::Ptr{aws_hash_callback_destroy_fn}, max_items::Csize_t)::Ptr{aws_cache}
 end
 
 mutable struct aws_directory_iterator end
@@ -5430,7 +5515,7 @@ FILE *aws_fopen(const char *file_path, const char *mode);
 ```
 """
 function aws_fopen(file_path, mode)
-    ccall((:aws_fopen, libaws_c_common), Ptr{Libc.FILE}, (Ptr{Cchar}, Ptr{Cchar}), file_path, mode)
+    @ccall libaws_c_common.aws_fopen(file_path::Ptr{Cchar}, mode::Ptr{Cchar})::Ptr{Libc.FILE}
 end
 
 """
@@ -5444,7 +5529,7 @@ FILE *aws_fopen_safe(const struct aws_string *file_path, const struct aws_string
 ```
 """
 function aws_fopen_safe(file_path, mode)
-    ccall((:aws_fopen_safe, libaws_c_common), Ptr{Libc.FILE}, (Ptr{aws_string}, Ptr{aws_string}), file_path, mode)
+    @ccall libaws_c_common.aws_fopen_safe(file_path::Ptr{aws_string}, mode::Ptr{aws_string})::Ptr{Libc.FILE}
 end
 
 """
@@ -5460,7 +5545,7 @@ int aws_directory_create(const struct aws_string *dir_path);
 ```
 """
 function aws_directory_create(dir_path)
-    ccall((:aws_directory_create, libaws_c_common), Cint, (Ptr{aws_string},), dir_path)
+    @ccall libaws_c_common.aws_directory_create(dir_path::Ptr{aws_string})::Cint
 end
 
 """
@@ -5474,7 +5559,7 @@ bool aws_directory_exists(const struct aws_string *dir_path);
 ```
 """
 function aws_directory_exists(dir_path)
-    ccall((:aws_directory_exists, libaws_c_common), Bool, (Ptr{aws_string},), dir_path)
+    @ccall libaws_c_common.aws_directory_exists(dir_path::Ptr{aws_string})::Bool
 end
 
 """
@@ -5488,7 +5573,7 @@ int aws_directory_delete(const struct aws_string *dir_path, bool recursive);
 ```
 """
 function aws_directory_delete(dir_path, recursive)
-    ccall((:aws_directory_delete, libaws_c_common), Cint, (Ptr{aws_string}, Bool), dir_path, recursive)
+    @ccall libaws_c_common.aws_directory_delete(dir_path::Ptr{aws_string}, recursive::Bool)::Cint
 end
 
 """
@@ -5502,7 +5587,7 @@ int aws_file_delete(const struct aws_string *file_path);
 ```
 """
 function aws_file_delete(file_path)
-    ccall((:aws_file_delete, libaws_c_common), Cint, (Ptr{aws_string},), file_path)
+    @ccall libaws_c_common.aws_file_delete(file_path::Ptr{aws_string})::Cint
 end
 
 """
@@ -5516,7 +5601,7 @@ int aws_directory_or_file_move(const struct aws_string *from, const struct aws_s
 ```
 """
 function aws_directory_or_file_move(from, to)
-    ccall((:aws_directory_or_file_move, libaws_c_common), Cint, (Ptr{aws_string}, Ptr{aws_string}), from, to)
+    @ccall libaws_c_common.aws_directory_or_file_move(from::Ptr{aws_string}, to::Ptr{aws_string})::Cint
 end
 
 """
@@ -5536,7 +5621,7 @@ int aws_directory_traverse( struct aws_allocator *allocator, const struct aws_st
 ```
 """
 function aws_directory_traverse(allocator, path, recursive, on_entry, user_data)
-    ccall((:aws_directory_traverse, libaws_c_common), Cint, (Ptr{aws_allocator}, Ptr{aws_string}, Bool, Ptr{aws_on_directory_entry}, Ptr{Cvoid}), allocator, path, recursive, on_entry, user_data)
+    @ccall libaws_c_common.aws_directory_traverse(allocator::Ptr{aws_allocator}, path::Ptr{aws_string}, recursive::Bool, on_entry::Ptr{aws_on_directory_entry}, user_data::Ptr{Cvoid})::Cint
 end
 
 """
@@ -5550,7 +5635,7 @@ struct aws_directory_iterator *aws_directory_entry_iterator_new( struct aws_allo
 ```
 """
 function aws_directory_entry_iterator_new(allocator, path)
-    ccall((:aws_directory_entry_iterator_new, libaws_c_common), Ptr{aws_directory_iterator}, (Ptr{aws_allocator}, Ptr{aws_string}), allocator, path)
+    @ccall libaws_c_common.aws_directory_entry_iterator_new(allocator::Ptr{aws_allocator}, path::Ptr{aws_string})::Ptr{aws_directory_iterator}
 end
 
 """
@@ -5564,7 +5649,7 @@ int aws_directory_entry_iterator_next(struct aws_directory_iterator *iterator);
 ```
 """
 function aws_directory_entry_iterator_next(iterator)
-    ccall((:aws_directory_entry_iterator_next, libaws_c_common), Cint, (Ptr{aws_directory_iterator},), iterator)
+    @ccall libaws_c_common.aws_directory_entry_iterator_next(iterator::Ptr{aws_directory_iterator})::Cint
 end
 
 """
@@ -5578,7 +5663,7 @@ int aws_directory_entry_iterator_previous(struct aws_directory_iterator *iterato
 ```
 """
 function aws_directory_entry_iterator_previous(iterator)
-    ccall((:aws_directory_entry_iterator_previous, libaws_c_common), Cint, (Ptr{aws_directory_iterator},), iterator)
+    @ccall libaws_c_common.aws_directory_entry_iterator_previous(iterator::Ptr{aws_directory_iterator})::Cint
 end
 
 """
@@ -5592,7 +5677,7 @@ void aws_directory_entry_iterator_destroy(struct aws_directory_iterator *iterato
 ```
 """
 function aws_directory_entry_iterator_destroy(iterator)
-    ccall((:aws_directory_entry_iterator_destroy, libaws_c_common), Cvoid, (Ptr{aws_directory_iterator},), iterator)
+    @ccall libaws_c_common.aws_directory_entry_iterator_destroy(iterator::Ptr{aws_directory_iterator})::Cvoid
 end
 
 """
@@ -5606,7 +5691,7 @@ const struct aws_directory_entry *aws_directory_entry_iterator_get_value( const 
 ```
 """
 function aws_directory_entry_iterator_get_value(iterator)
-    ccall((:aws_directory_entry_iterator_get_value, libaws_c_common), Ptr{aws_directory_entry}, (Ptr{aws_directory_iterator},), iterator)
+    @ccall libaws_c_common.aws_directory_entry_iterator_get_value(iterator::Ptr{aws_directory_iterator})::Ptr{aws_directory_entry}
 end
 
 """
@@ -5620,7 +5705,7 @@ bool aws_is_any_directory_separator(char value);
 ```
 """
 function aws_is_any_directory_separator(value)
-    ccall((:aws_is_any_directory_separator, libaws_c_common), Bool, (Cchar,), value)
+    @ccall libaws_c_common.aws_is_any_directory_separator(value::Cchar)::Bool
 end
 
 """
@@ -5634,7 +5719,7 @@ char aws_get_platform_directory_separator(void);
 ```
 """
 function aws_get_platform_directory_separator()
-    ccall((:aws_get_platform_directory_separator, libaws_c_common), Cchar, ())
+    @ccall libaws_c_common.aws_get_platform_directory_separator()::Cchar
 end
 
 """
@@ -5650,7 +5735,7 @@ void aws_normalize_directory_separator(struct aws_byte_buf *path);
 ```
 """
 function aws_normalize_directory_separator(path)
-    ccall((:aws_normalize_directory_separator, libaws_c_common), Cvoid, (Ptr{aws_byte_buf},), path)
+    @ccall libaws_c_common.aws_normalize_directory_separator(path::Ptr{aws_byte_buf})::Cvoid
 end
 
 """
@@ -5664,7 +5749,7 @@ struct aws_string *aws_get_home_directory(struct aws_allocator *allocator);
 ```
 """
 function aws_get_home_directory(allocator)
-    ccall((:aws_get_home_directory, libaws_c_common), Ptr{aws_string}, (Ptr{aws_allocator},), allocator)
+    @ccall libaws_c_common.aws_get_home_directory(allocator::Ptr{aws_allocator})::Ptr{aws_string}
 end
 
 """
@@ -5678,7 +5763,7 @@ bool aws_path_exists(const struct aws_string *path);
 ```
 """
 function aws_path_exists(path)
-    ccall((:aws_path_exists, libaws_c_common), Bool, (Ptr{aws_string},), path)
+    @ccall libaws_c_common.aws_path_exists(path::Ptr{aws_string})::Bool
 end
 
 """
@@ -5690,7 +5775,7 @@ int aws_fseek(FILE *file, int64_t offset, int whence);
 ```
 """
 function aws_fseek(file, offset, whence)
-    ccall((:aws_fseek, libaws_c_common), Cint, (Ptr{Libc.FILE}, Int64, Cint), file, offset, whence)
+    @ccall libaws_c_common.aws_fseek(file::Ptr{Libc.FILE}, offset::Int64, whence::Cint)::Cint
 end
 
 """
@@ -5702,10 +5787,10 @@ int aws_file_get_length(FILE *file, int64_t *length);
 ```
 """
 function aws_file_get_length(file, length)
-    ccall((:aws_file_get_length, libaws_c_common), Cint, (Ptr{Libc.FILE}, Ptr{Int64}), file, length)
+    @ccall libaws_c_common.aws_file_get_length(file::Ptr{Libc.FILE}, length::Ptr{Int64})::Cint
 end
 
-@cenum __JL_Ctag_418::UInt32 begin
+@cenum __JL_Ctag_127::UInt32 begin
     AWS_COMMON_HASH_TABLE_ITER_CONTINUE = 1
     AWS_COMMON_HASH_TABLE_ITER_DELETE = 2
     AWS_COMMON_HASH_TABLE_ITER_ERROR = 4
@@ -5751,7 +5836,7 @@ int aws_hash_table_init( struct aws_hash_table *map, struct aws_allocator *alloc
 ```
 """
 function aws_hash_table_init(map, alloc, size, hash_fn, equals_fn, destroy_key_fn, destroy_value_fn)
-    ccall((:aws_hash_table_init, libaws_c_common), Cint, (Ptr{aws_hash_table}, Ptr{aws_allocator}, Csize_t, Ptr{aws_hash_fn}, Ptr{aws_hash_callback_eq_fn}, Ptr{aws_hash_callback_destroy_fn}, Ptr{aws_hash_callback_destroy_fn}), map, alloc, size, hash_fn, equals_fn, destroy_key_fn, destroy_value_fn)
+    @ccall libaws_c_common.aws_hash_table_init(map::Ptr{aws_hash_table}, alloc::Ptr{aws_allocator}, size::Csize_t, hash_fn::Ptr{aws_hash_fn}, equals_fn::Ptr{aws_hash_callback_eq_fn}, destroy_key_fn::Ptr{aws_hash_callback_destroy_fn}, destroy_value_fn::Ptr{aws_hash_callback_destroy_fn})::Cint
 end
 
 """
@@ -5767,7 +5852,7 @@ void aws_hash_table_clean_up(struct aws_hash_table *map);
 ```
 """
 function aws_hash_table_clean_up(map)
-    ccall((:aws_hash_table_clean_up, libaws_c_common), Cvoid, (Ptr{aws_hash_table},), map)
+    @ccall libaws_c_common.aws_hash_table_clean_up(map::Ptr{aws_hash_table})::Cvoid
 end
 
 """
@@ -5783,7 +5868,7 @@ void aws_hash_table_swap(struct aws_hash_table *AWS_RESTRICT a, struct aws_hash_
 ```
 """
 function aws_hash_table_swap(a, b)
-    ccall((:aws_hash_table_swap, libaws_c_common), Cvoid, (Ptr{aws_hash_table}, Ptr{aws_hash_table}), a, b)
+    @ccall libaws_c_common.aws_hash_table_swap(a::Ptr{aws_hash_table}, b::Ptr{aws_hash_table})::Cvoid
 end
 
 """
@@ -5799,7 +5884,7 @@ void aws_hash_table_move(struct aws_hash_table *AWS_RESTRICT to, struct aws_hash
 ```
 """
 function aws_hash_table_move(to, from)
-    ccall((:aws_hash_table_move, libaws_c_common), Cvoid, (Ptr{aws_hash_table}, Ptr{aws_hash_table}), to, from)
+    @ccall libaws_c_common.aws_hash_table_move(to::Ptr{aws_hash_table}, from::Ptr{aws_hash_table})::Cvoid
 end
 
 """
@@ -5813,7 +5898,7 @@ size_t aws_hash_table_get_entry_count(const struct aws_hash_table *map);
 ```
 """
 function aws_hash_table_get_entry_count(map)
-    ccall((:aws_hash_table_get_entry_count, libaws_c_common), Csize_t, (Ptr{aws_hash_table},), map)
+    @ccall libaws_c_common.aws_hash_table_get_entry_count(map::Ptr{aws_hash_table})::Csize_t
 end
 
 """
@@ -5829,7 +5914,7 @@ struct aws_hash_iter aws_hash_iter_begin(const struct aws_hash_table *map);
 ```
 """
 function aws_hash_iter_begin(map)
-    ccall((:aws_hash_iter_begin, libaws_c_common), aws_hash_iter, (Ptr{aws_hash_table},), map)
+    @ccall libaws_c_common.aws_hash_iter_begin(map::Ptr{aws_hash_table})::aws_hash_iter
 end
 
 """
@@ -5843,7 +5928,7 @@ bool aws_hash_iter_done(const struct aws_hash_iter *iter);
 ```
 """
 function aws_hash_iter_done(iter)
-    ccall((:aws_hash_iter_done, libaws_c_common), Bool, (Ptr{aws_hash_iter},), iter)
+    @ccall libaws_c_common.aws_hash_iter_done(iter::Ptr{aws_hash_iter})::Bool
 end
 
 """
@@ -5863,7 +5948,7 @@ void aws_hash_iter_next(struct aws_hash_iter *iter);
 ```
 """
 function aws_hash_iter_next(iter)
-    ccall((:aws_hash_iter_next, libaws_c_common), Cvoid, (Ptr{aws_hash_iter},), iter)
+    @ccall libaws_c_common.aws_hash_iter_next(iter::Ptr{aws_hash_iter})::Cvoid
 end
 
 """
@@ -5879,7 +5964,7 @@ void aws_hash_iter_delete(struct aws_hash_iter *iter, bool destroy_contents);
 ```
 """
 function aws_hash_iter_delete(iter, destroy_contents)
-    ccall((:aws_hash_iter_delete, libaws_c_common), Cvoid, (Ptr{aws_hash_iter}, Bool), iter, destroy_contents)
+    @ccall libaws_c_common.aws_hash_iter_delete(iter::Ptr{aws_hash_iter}, destroy_contents::Bool)::Cvoid
 end
 
 """
@@ -5897,7 +5982,7 @@ int aws_hash_table_find(const struct aws_hash_table *map, const void *key, struc
 ```
 """
 function aws_hash_table_find(map, key, p_elem)
-    ccall((:aws_hash_table_find, libaws_c_common), Cint, (Ptr{aws_hash_table}, Ptr{Cvoid}, Ptr{Ptr{aws_hash_element}}), map, key, p_elem)
+    @ccall libaws_c_common.aws_hash_table_find(map::Ptr{aws_hash_table}, key::Ptr{Cvoid}, p_elem::Ptr{Ptr{aws_hash_element}})::Cint
 end
 
 """
@@ -5915,7 +6000,7 @@ int aws_hash_table_create( struct aws_hash_table *map, const void *key, struct a
 ```
 """
 function aws_hash_table_create(map, key, p_elem, was_created)
-    ccall((:aws_hash_table_create, libaws_c_common), Cint, (Ptr{aws_hash_table}, Ptr{Cvoid}, Ptr{Ptr{aws_hash_element}}, Ptr{Cint}), map, key, p_elem, was_created)
+    @ccall libaws_c_common.aws_hash_table_create(map::Ptr{aws_hash_table}, key::Ptr{Cvoid}, p_elem::Ptr{Ptr{aws_hash_element}}, was_created::Ptr{Cint})::Cint
 end
 
 """
@@ -5925,7 +6010,7 @@ Inserts a new element at key, with the given value. If another element exists at
 
 If was\\_created is non-NULL, *was\\_created is set to 0 if an existing element was found, or 1 is a new element was created.
 
-Returns [`AWS_OP_SUCCESS`](@ref) if an item was found or created. Raises AWS\\_ERROR\\_OOM if hash table expansion was required and memory
+Returns [`AWS_OP_SUCCESS`](@ref) if an item was found or created. Raises AWS\\_ERROR\\_OOM if hash table expansion was required and memory allocation failed.
 
 ### Prototype
 ```c
@@ -5933,7 +6018,7 @@ int aws_hash_table_put(struct aws_hash_table *map, const void *key, void *value,
 ```
 """
 function aws_hash_table_put(map, key, value, was_created)
-    ccall((:aws_hash_table_put, libaws_c_common), Cint, (Ptr{aws_hash_table}, Ptr{Cvoid}, Ptr{Cvoid}, Ptr{Cint}), map, key, value, was_created)
+    @ccall libaws_c_common.aws_hash_table_put(map::Ptr{aws_hash_table}, key::Ptr{Cvoid}, value::Ptr{Cvoid}, was_created::Ptr{Cint})::Cint
 end
 
 """
@@ -5951,7 +6036,7 @@ int aws_hash_table_remove( struct aws_hash_table *map, const void *key, struct a
 ```
 """
 function aws_hash_table_remove(map, key, p_value, was_present)
-    ccall((:aws_hash_table_remove, libaws_c_common), Cint, (Ptr{aws_hash_table}, Ptr{Cvoid}, Ptr{aws_hash_element}, Ptr{Cint}), map, key, p_value, was_present)
+    @ccall libaws_c_common.aws_hash_table_remove(map::Ptr{aws_hash_table}, key::Ptr{Cvoid}, p_value::Ptr{aws_hash_element}, was_present::Ptr{Cint})::Cint
 end
 
 """
@@ -5969,7 +6054,7 @@ int aws_hash_table_remove_element(struct aws_hash_table *map, struct aws_hash_el
 ```
 """
 function aws_hash_table_remove_element(map, p_value)
-    ccall((:aws_hash_table_remove_element, libaws_c_common), Cint, (Ptr{aws_hash_table}, Ptr{aws_hash_element}), map, p_value)
+    @ccall libaws_c_common.aws_hash_table_remove_element(map::Ptr{aws_hash_table}, p_value::Ptr{aws_hash_element})::Cint
 end
 
 """
@@ -5993,7 +6078,7 @@ int aws_hash_table_foreach( struct aws_hash_table *map, int (*callback)(void *co
 ```
 """
 function aws_hash_table_foreach(map, callback, context)
-    ccall((:aws_hash_table_foreach, libaws_c_common), Cint, (Ptr{aws_hash_table}, Ptr{Cvoid}, Ptr{Cvoid}), map, callback, context)
+    @ccall libaws_c_common.aws_hash_table_foreach(map::Ptr{aws_hash_table}, callback::Ptr{Cvoid}, context::Ptr{Cvoid})::Cint
 end
 
 """
@@ -6007,7 +6092,7 @@ bool aws_hash_table_eq( const struct aws_hash_table *a, const struct aws_hash_ta
 ```
 """
 function aws_hash_table_eq(a, b, value_eq)
-    ccall((:aws_hash_table_eq, libaws_c_common), Bool, (Ptr{aws_hash_table}, Ptr{aws_hash_table}, Ptr{aws_hash_callback_eq_fn}), a, b, value_eq)
+    @ccall libaws_c_common.aws_hash_table_eq(a::Ptr{aws_hash_table}, b::Ptr{aws_hash_table}, value_eq::Ptr{aws_hash_callback_eq_fn})::Bool
 end
 
 """
@@ -6021,7 +6106,7 @@ void aws_hash_table_clear(struct aws_hash_table *map);
 ```
 """
 function aws_hash_table_clear(map)
-    ccall((:aws_hash_table_clear, libaws_c_common), Cvoid, (Ptr{aws_hash_table},), map)
+    @ccall libaws_c_common.aws_hash_table_clear(map::Ptr{aws_hash_table})::Cvoid
 end
 
 """
@@ -6035,7 +6120,7 @@ uint64_t aws_hash_c_string(const void *item);
 ```
 """
 function aws_hash_c_string(item)
-    ccall((:aws_hash_c_string, libaws_c_common), UInt64, (Ptr{Cvoid},), item)
+    @ccall libaws_c_common.aws_hash_c_string(item::Ptr{Cvoid})::UInt64
 end
 
 """
@@ -6049,7 +6134,7 @@ uint64_t aws_hash_string(const void *item);
 ```
 """
 function aws_hash_string(item)
-    ccall((:aws_hash_string, libaws_c_common), UInt64, (Ptr{Cvoid},), item)
+    @ccall libaws_c_common.aws_hash_string(item::Ptr{Cvoid})::UInt64
 end
 
 """
@@ -6063,7 +6148,7 @@ uint64_t aws_hash_byte_cursor_ptr(const void *item);
 ```
 """
 function aws_hash_byte_cursor_ptr(item)
-    ccall((:aws_hash_byte_cursor_ptr, libaws_c_common), UInt64, (Ptr{Cvoid},), item)
+    @ccall libaws_c_common.aws_hash_byte_cursor_ptr(item::Ptr{Cvoid})::UInt64
 end
 
 """
@@ -6077,7 +6162,7 @@ uint64_t aws_hash_ptr(const void *item);
 ```
 """
 function aws_hash_ptr(item)
-    ccall((:aws_hash_ptr, libaws_c_common), UInt64, (Ptr{Cvoid},), item)
+    @ccall libaws_c_common.aws_hash_ptr(item::Ptr{Cvoid})::UInt64
 end
 
 """
@@ -6089,7 +6174,7 @@ uint64_t aws_hash_combine(uint64_t item1, uint64_t item2);
 ```
 """
 function aws_hash_combine(item1, item2)
-    ccall((:aws_hash_combine, libaws_c_common), UInt64, (UInt64, UInt64), item1, item2)
+    @ccall libaws_c_common.aws_hash_combine(item1::UInt64, item2::UInt64)::UInt64
 end
 
 """
@@ -6103,7 +6188,7 @@ bool aws_hash_callback_c_str_eq(const void *a, const void *b);
 ```
 """
 function aws_hash_callback_c_str_eq(a, b)
-    ccall((:aws_hash_callback_c_str_eq, libaws_c_common), Bool, (Ptr{Cvoid}, Ptr{Cvoid}), a, b)
+    @ccall libaws_c_common.aws_hash_callback_c_str_eq(a::Ptr{Cvoid}, b::Ptr{Cvoid})::Bool
 end
 
 """
@@ -6117,7 +6202,7 @@ bool aws_hash_callback_string_eq(const void *a, const void *b);
 ```
 """
 function aws_hash_callback_string_eq(a, b)
-    ccall((:aws_hash_callback_string_eq, libaws_c_common), Bool, (Ptr{Cvoid}, Ptr{Cvoid}), a, b)
+    @ccall libaws_c_common.aws_hash_callback_string_eq(a::Ptr{Cvoid}, b::Ptr{Cvoid})::Bool
 end
 
 """
@@ -6131,7 +6216,7 @@ void aws_hash_callback_string_destroy(void *a);
 ```
 """
 function aws_hash_callback_string_destroy(a)
-    ccall((:aws_hash_callback_string_destroy, libaws_c_common), Cvoid, (Ptr{Cvoid},), a)
+    @ccall libaws_c_common.aws_hash_callback_string_destroy(a::Ptr{Cvoid})::Cvoid
 end
 
 """
@@ -6145,7 +6230,7 @@ bool aws_ptr_eq(const void *a, const void *b);
 ```
 """
 function aws_ptr_eq(a, b)
-    ccall((:aws_ptr_eq, libaws_c_common), Bool, (Ptr{Cvoid}, Ptr{Cvoid}), a, b)
+    @ccall libaws_c_common.aws_ptr_eq(a::Ptr{Cvoid}, b::Ptr{Cvoid})::Bool
 end
 
 """
@@ -6159,7 +6244,7 @@ bool aws_hash_table_is_valid(const struct aws_hash_table *map);
 ```
 """
 function aws_hash_table_is_valid(map)
-    ccall((:aws_hash_table_is_valid, libaws_c_common), Bool, (Ptr{aws_hash_table},), map)
+    @ccall libaws_c_common.aws_hash_table_is_valid(map::Ptr{aws_hash_table})::Bool
 end
 
 """
@@ -6173,7 +6258,7 @@ bool aws_hash_iter_is_valid(const struct aws_hash_iter *iter);
 ```
 """
 function aws_hash_iter_is_valid(iter)
-    ccall((:aws_hash_iter_is_valid, libaws_c_common), Bool, (Ptr{aws_hash_iter},), iter)
+    @ccall libaws_c_common.aws_hash_iter_is_valid(iter::Ptr{aws_hash_iter})::Bool
 end
 
 mutable struct aws_json_value end
@@ -6196,7 +6281,7 @@ struct aws_json_value *aws_json_value_new_string(struct aws_allocator *allocator
 ```
 """
 function aws_json_value_new_string(allocator, string)
-    ccall((:aws_json_value_new_string, libaws_c_common), Ptr{aws_json_value}, (Ptr{aws_allocator}, aws_byte_cursor), allocator, string)
+    @ccall libaws_c_common.aws_json_value_new_string(allocator::Ptr{aws_allocator}, string::aws_byte_cursor)::Ptr{aws_json_value}
 end
 
 """
@@ -6217,7 +6302,7 @@ struct aws_json_value *aws_json_value_new_number(struct aws_allocator *allocator
 ```
 """
 function aws_json_value_new_number(allocator, number)
-    ccall((:aws_json_value_new_number, libaws_c_common), Ptr{aws_json_value}, (Ptr{aws_allocator}, Cdouble), allocator, number)
+    @ccall libaws_c_common.aws_json_value_new_number(allocator::Ptr{aws_allocator}, number::Cdouble)::Ptr{aws_json_value}
 end
 
 """
@@ -6237,7 +6322,7 @@ struct aws_json_value *aws_json_value_new_array(struct aws_allocator *allocator)
 ```
 """
 function aws_json_value_new_array(allocator)
-    ccall((:aws_json_value_new_array, libaws_c_common), Ptr{aws_json_value}, (Ptr{aws_allocator},), allocator)
+    @ccall libaws_c_common.aws_json_value_new_array(allocator::Ptr{aws_allocator})::Ptr{aws_json_value}
 end
 
 """
@@ -6258,7 +6343,7 @@ struct aws_json_value *aws_json_value_new_boolean(struct aws_allocator *allocato
 ```
 """
 function aws_json_value_new_boolean(allocator, boolean)
-    ccall((:aws_json_value_new_boolean, libaws_c_common), Ptr{aws_json_value}, (Ptr{aws_allocator}, Bool), allocator, boolean)
+    @ccall libaws_c_common.aws_json_value_new_boolean(allocator::Ptr{aws_allocator}, boolean::Bool)::Ptr{aws_json_value}
 end
 
 """
@@ -6278,7 +6363,7 @@ struct aws_json_value *aws_json_value_new_null(struct aws_allocator *allocator);
 ```
 """
 function aws_json_value_new_null(allocator)
-    ccall((:aws_json_value_new_null, libaws_c_common), Ptr{aws_json_value}, (Ptr{aws_allocator},), allocator)
+    @ccall libaws_c_common.aws_json_value_new_null(allocator::Ptr{aws_allocator})::Ptr{aws_json_value}
 end
 
 """
@@ -6298,7 +6383,7 @@ struct aws_json_value *aws_json_value_new_object(struct aws_allocator *allocator
 ```
 """
 function aws_json_value_new_object(allocator)
-    ccall((:aws_json_value_new_object, libaws_c_common), Ptr{aws_json_value}, (Ptr{aws_allocator},), allocator)
+    @ccall libaws_c_common.aws_json_value_new_object(allocator::Ptr{aws_allocator})::Ptr{aws_json_value}
 end
 
 """
@@ -6317,7 +6402,7 @@ int aws_json_value_get_string(const struct aws_json_value *value, struct aws_byt
 ```
 """
 function aws_json_value_get_string(value, output)
-    ccall((:aws_json_value_get_string, libaws_c_common), Cint, (Ptr{aws_json_value}, Ptr{aws_byte_cursor}), value, output)
+    @ccall libaws_c_common.aws_json_value_get_string(value::Ptr{aws_json_value}, output::Ptr{aws_byte_cursor})::Cint
 end
 
 """
@@ -6336,7 +6421,7 @@ int aws_json_value_get_number(const struct aws_json_value *value, double *output
 ```
 """
 function aws_json_value_get_number(value, output)
-    ccall((:aws_json_value_get_number, libaws_c_common), Cint, (Ptr{aws_json_value}, Ptr{Cdouble}), value, output)
+    @ccall libaws_c_common.aws_json_value_get_number(value::Ptr{aws_json_value}, output::Ptr{Cdouble})::Cint
 end
 
 """
@@ -6355,7 +6440,7 @@ int aws_json_value_get_boolean(const struct aws_json_value *value, bool *output)
 ```
 """
 function aws_json_value_get_boolean(value, output)
-    ccall((:aws_json_value_get_boolean, libaws_c_common), Cint, (Ptr{aws_json_value}, Ptr{Bool}), value, output)
+    @ccall libaws_c_common.aws_json_value_get_boolean(value::Ptr{aws_json_value}, output::Ptr{Bool})::Cint
 end
 
 """
@@ -6377,7 +6462,7 @@ int aws_json_value_add_to_object( struct aws_json_value *object, struct aws_byte
 ```
 """
 function aws_json_value_add_to_object(object, key, value)
-    ccall((:aws_json_value_add_to_object, libaws_c_common), Cint, (Ptr{aws_json_value}, aws_byte_cursor, Ptr{aws_json_value}), object, key, value)
+    @ccall libaws_c_common.aws_json_value_add_to_object(object::Ptr{aws_json_value}, key::aws_byte_cursor, value::Ptr{aws_json_value})::Cint
 end
 
 """
@@ -6396,7 +6481,7 @@ struct aws_json_value *aws_json_value_get_from_object(const struct aws_json_valu
 ```
 """
 function aws_json_value_get_from_object(object, key)
-    ccall((:aws_json_value_get_from_object, libaws_c_common), Ptr{aws_json_value}, (Ptr{aws_json_value}, aws_byte_cursor), object, key)
+    @ccall libaws_c_common.aws_json_value_get_from_object(object::Ptr{aws_json_value}, key::aws_byte_cursor)::Ptr{aws_json_value}
 end
 
 """
@@ -6415,7 +6500,7 @@ bool aws_json_value_has_key(const struct aws_json_value *object, struct aws_byte
 ```
 """
 function aws_json_value_has_key(object, key)
-    ccall((:aws_json_value_has_key, libaws_c_common), Bool, (Ptr{aws_json_value}, aws_byte_cursor), object, key)
+    @ccall libaws_c_common.aws_json_value_has_key(object::Ptr{aws_json_value}, key::aws_byte_cursor)::Bool
 end
 
 """
@@ -6434,7 +6519,7 @@ int aws_json_value_remove_from_object(struct aws_json_value *object, struct aws_
 ```
 """
 function aws_json_value_remove_from_object(object, key)
-    ccall((:aws_json_value_remove_from_object, libaws_c_common), Cint, (Ptr{aws_json_value}, aws_byte_cursor), object, key)
+    @ccall libaws_c_common.aws_json_value_remove_from_object(object::Ptr{aws_json_value}, key::aws_byte_cursor)::Cint
 end
 
 # typedef int ( aws_json_on_member_encountered_const_fn ) ( const struct aws_byte_cursor * key , const struct aws_json_value * value , bool * out_should_continue , void * user_data )
@@ -6460,7 +6545,7 @@ int aws_json_const_iterate_object( const struct aws_json_value *object, aws_json
 ```
 """
 function aws_json_const_iterate_object(object, on_member, user_data)
-    ccall((:aws_json_const_iterate_object, libaws_c_common), Cint, (Ptr{aws_json_value}, Ptr{aws_json_on_member_encountered_const_fn}, Ptr{Cvoid}), object, on_member, user_data)
+    @ccall libaws_c_common.aws_json_const_iterate_object(object::Ptr{aws_json_value}, on_member::Ptr{aws_json_on_member_encountered_const_fn}, user_data::Ptr{Cvoid})::Cint
 end
 
 """
@@ -6481,7 +6566,7 @@ int aws_json_value_add_array_element(struct aws_json_value *array, const struct 
 ```
 """
 function aws_json_value_add_array_element(array, value)
-    ccall((:aws_json_value_add_array_element, libaws_c_common), Cint, (Ptr{aws_json_value}, Ptr{aws_json_value}), array, value)
+    @ccall libaws_c_common.aws_json_value_add_array_element(array::Ptr{aws_json_value}, value::Ptr{aws_json_value})::Cint
 end
 
 """
@@ -6500,7 +6585,7 @@ struct aws_json_value *aws_json_get_array_element(const struct aws_json_value *a
 ```
 """
 function aws_json_get_array_element(array, index)
-    ccall((:aws_json_get_array_element, libaws_c_common), Ptr{aws_json_value}, (Ptr{aws_json_value}, Csize_t), array, index)
+    @ccall libaws_c_common.aws_json_get_array_element(array::Ptr{aws_json_value}, index::Csize_t)::Ptr{aws_json_value}
 end
 
 """
@@ -6518,7 +6603,7 @@ size_t aws_json_get_array_size(const struct aws_json_value *array);
 ```
 """
 function aws_json_get_array_size(array)
-    ccall((:aws_json_get_array_size, libaws_c_common), Csize_t, (Ptr{aws_json_value},), array)
+    @ccall libaws_c_common.aws_json_get_array_size(array::Ptr{aws_json_value})::Csize_t
 end
 
 """
@@ -6537,7 +6622,7 @@ int aws_json_value_remove_array_element(struct aws_json_value *array, size_t ind
 ```
 """
 function aws_json_value_remove_array_element(array, index)
-    ccall((:aws_json_value_remove_array_element, libaws_c_common), Cint, (Ptr{aws_json_value}, Csize_t), array, index)
+    @ccall libaws_c_common.aws_json_value_remove_array_element(array::Ptr{aws_json_value}, index::Csize_t)::Cint
 end
 
 # typedef int ( aws_json_on_value_encountered_const_fn ) ( size_t index , const struct aws_json_value * value , bool * out_should_continue , void * user_data )
@@ -6563,7 +6648,7 @@ int aws_json_const_iterate_array( const struct aws_json_value *array, aws_json_o
 ```
 """
 function aws_json_const_iterate_array(array, on_value, user_data)
-    ccall((:aws_json_const_iterate_array, libaws_c_common), Cint, (Ptr{aws_json_value}, Ptr{aws_json_on_value_encountered_const_fn}, Ptr{Cvoid}), array, on_value, user_data)
+    @ccall libaws_c_common.aws_json_const_iterate_array(array::Ptr{aws_json_value}, on_value::Ptr{aws_json_on_value_encountered_const_fn}, user_data::Ptr{Cvoid})::Cint
 end
 
 """
@@ -6583,7 +6668,7 @@ bool aws_json_value_compare(const struct aws_json_value *a, const struct aws_jso
 ```
 """
 function aws_json_value_compare(a, b, is_case_sensitive)
-    ccall((:aws_json_value_compare, libaws_c_common), Bool, (Ptr{aws_json_value}, Ptr{aws_json_value}, Bool), a, b, is_case_sensitive)
+    @ccall libaws_c_common.aws_json_value_compare(a::Ptr{aws_json_value}, b::Ptr{aws_json_value}, is_case_sensitive::Bool)::Bool
 end
 
 """
@@ -6601,7 +6686,7 @@ struct aws_json_value *aws_json_value_duplicate(const struct aws_json_value *val
 ```
 """
 function aws_json_value_duplicate(value)
-    ccall((:aws_json_value_duplicate, libaws_c_common), Ptr{aws_json_value}, (Ptr{aws_json_value},), value)
+    @ccall libaws_c_common.aws_json_value_duplicate(value::Ptr{aws_json_value})::Ptr{aws_json_value}
 end
 
 """
@@ -6619,7 +6704,7 @@ bool aws_json_value_is_string(const struct aws_json_value *value);
 ```
 """
 function aws_json_value_is_string(value)
-    ccall((:aws_json_value_is_string, libaws_c_common), Bool, (Ptr{aws_json_value},), value)
+    @ccall libaws_c_common.aws_json_value_is_string(value::Ptr{aws_json_value})::Bool
 end
 
 """
@@ -6637,7 +6722,7 @@ bool aws_json_value_is_number(const struct aws_json_value *value);
 ```
 """
 function aws_json_value_is_number(value)
-    ccall((:aws_json_value_is_number, libaws_c_common), Bool, (Ptr{aws_json_value},), value)
+    @ccall libaws_c_common.aws_json_value_is_number(value::Ptr{aws_json_value})::Bool
 end
 
 """
@@ -6655,7 +6740,7 @@ bool aws_json_value_is_array(const struct aws_json_value *value);
 ```
 """
 function aws_json_value_is_array(value)
-    ccall((:aws_json_value_is_array, libaws_c_common), Bool, (Ptr{aws_json_value},), value)
+    @ccall libaws_c_common.aws_json_value_is_array(value::Ptr{aws_json_value})::Bool
 end
 
 """
@@ -6673,7 +6758,7 @@ bool aws_json_value_is_boolean(const struct aws_json_value *value);
 ```
 """
 function aws_json_value_is_boolean(value)
-    ccall((:aws_json_value_is_boolean, libaws_c_common), Bool, (Ptr{aws_json_value},), value)
+    @ccall libaws_c_common.aws_json_value_is_boolean(value::Ptr{aws_json_value})::Bool
 end
 
 """
@@ -6691,7 +6776,7 @@ bool aws_json_value_is_null(const struct aws_json_value *value);
 ```
 """
 function aws_json_value_is_null(value)
-    ccall((:aws_json_value_is_null, libaws_c_common), Bool, (Ptr{aws_json_value},), value)
+    @ccall libaws_c_common.aws_json_value_is_null(value::Ptr{aws_json_value})::Bool
 end
 
 """
@@ -6709,7 +6794,7 @@ bool aws_json_value_is_object(const struct aws_json_value *value);
 ```
 """
 function aws_json_value_is_object(value)
-    ccall((:aws_json_value_is_object, libaws_c_common), Bool, (Ptr{aws_json_value},), value)
+    @ccall libaws_c_common.aws_json_value_is_object(value::Ptr{aws_json_value})::Bool
 end
 
 """
@@ -6727,7 +6812,7 @@ void aws_json_value_destroy(struct aws_json_value *value);
 ```
 """
 function aws_json_value_destroy(value)
-    ccall((:aws_json_value_destroy, libaws_c_common), Cvoid, (Ptr{aws_json_value},), value)
+    @ccall libaws_c_common.aws_json_value_destroy(value::Ptr{aws_json_value})::Cvoid
 end
 
 """
@@ -6750,7 +6835,7 @@ int aws_byte_buf_append_json_string(const struct aws_json_value *value, struct a
 ```
 """
 function aws_byte_buf_append_json_string(value, output)
-    ccall((:aws_byte_buf_append_json_string, libaws_c_common), Cint, (Ptr{aws_json_value}, Ptr{aws_byte_buf}), value, output)
+    @ccall libaws_c_common.aws_byte_buf_append_json_string(value::Ptr{aws_json_value}, output::Ptr{aws_byte_buf})::Cint
 end
 
 """
@@ -6766,14 +6851,14 @@ Note: When you are finished with the [`aws_byte_buf`](@ref), you must call "[`aw
 * `value`: The [`aws_json_value`](@ref) to format.
 * `output`: The destination for the JSON string
 ### Returns
-[`AWS_OP_SUCCESS`](@ref) if the JSON string was allocated to output without any errors Will return AWS\\_ERROR\\_INVALID\\_ARGUMENT if the value passed is not an [`aws_json_value`](@ref) or if there aws an error appending the JSON into the byte buffer.
+[`AWS_OP_SUCCESS`](@ref) if the JSON string was allocated to output without any errors Will return [`AWS_OP_ERR`](@ref) if the value passed is not an [`aws_json_value`](@ref) or if there aws an error appending the JSON into the byte buffer.
 ### Prototype
 ```c
 int aws_byte_buf_append_json_string_formatted(const struct aws_json_value *value, struct aws_byte_buf *output);
 ```
 """
 function aws_byte_buf_append_json_string_formatted(value, output)
-    ccall((:aws_byte_buf_append_json_string_formatted, libaws_c_common), Cint, (Ptr{aws_json_value}, Ptr{aws_byte_buf}), value, output)
+    @ccall libaws_c_common.aws_byte_buf_append_json_string_formatted(value::Ptr{aws_json_value}, output::Ptr{aws_byte_buf})::Cint
 end
 
 """
@@ -6792,7 +6877,7 @@ struct aws_json_value *aws_json_value_new_from_string(struct aws_allocator *allo
 ```
 """
 function aws_json_value_new_from_string(allocator, string)
-    ccall((:aws_json_value_new_from_string, libaws_c_common), Ptr{aws_json_value}, (Ptr{aws_allocator}, aws_byte_cursor), allocator, string)
+    @ccall libaws_c_common.aws_json_value_new_from_string(allocator::Ptr{aws_allocator}, string::aws_byte_cursor)::Ptr{aws_json_value}
 end
 
 """
@@ -6806,7 +6891,7 @@ struct aws_cache *aws_cache_new_lifo( struct aws_allocator *allocator, aws_hash_
 ```
 """
 function aws_cache_new_lifo(allocator, hash_fn, equals_fn, destroy_key_fn, destroy_value_fn, max_items)
-    ccall((:aws_cache_new_lifo, libaws_c_common), Ptr{aws_cache}, (Ptr{aws_allocator}, Ptr{aws_hash_fn}, Ptr{aws_hash_callback_eq_fn}, Ptr{aws_hash_callback_destroy_fn}, Ptr{aws_hash_callback_destroy_fn}, Csize_t), allocator, hash_fn, equals_fn, destroy_key_fn, destroy_value_fn, max_items)
+    @ccall libaws_c_common.aws_cache_new_lifo(allocator::Ptr{aws_allocator}, hash_fn::Ptr{aws_hash_fn}, equals_fn::Ptr{aws_hash_callback_eq_fn}, destroy_key_fn::Ptr{aws_hash_callback_destroy_fn}, destroy_value_fn::Ptr{aws_hash_callback_destroy_fn}, max_items::Csize_t)::Ptr{aws_cache}
 end
 
 """
@@ -6832,7 +6917,7 @@ int aws_linked_hash_table_init( struct aws_linked_hash_table *table, struct aws_
 ```
 """
 function aws_linked_hash_table_init(table, allocator, hash_fn, equals_fn, destroy_key_fn, destroy_value_fn, initial_item_count)
-    ccall((:aws_linked_hash_table_init, libaws_c_common), Cint, (Ptr{aws_linked_hash_table}, Ptr{aws_allocator}, Ptr{aws_hash_fn}, Ptr{aws_hash_callback_eq_fn}, Ptr{aws_hash_callback_destroy_fn}, Ptr{aws_hash_callback_destroy_fn}, Csize_t), table, allocator, hash_fn, equals_fn, destroy_key_fn, destroy_value_fn, initial_item_count)
+    @ccall libaws_c_common.aws_linked_hash_table_init(table::Ptr{aws_linked_hash_table}, allocator::Ptr{aws_allocator}, hash_fn::Ptr{aws_hash_fn}, equals_fn::Ptr{aws_hash_callback_eq_fn}, destroy_key_fn::Ptr{aws_hash_callback_destroy_fn}, destroy_value_fn::Ptr{aws_hash_callback_destroy_fn}, initial_item_count::Csize_t)::Cint
 end
 
 """
@@ -6846,7 +6931,7 @@ void aws_linked_hash_table_clean_up(struct aws_linked_hash_table *table);
 ```
 """
 function aws_linked_hash_table_clean_up(table)
-    ccall((:aws_linked_hash_table_clean_up, libaws_c_common), Cvoid, (Ptr{aws_linked_hash_table},), table)
+    @ccall libaws_c_common.aws_linked_hash_table_clean_up(table::Ptr{aws_linked_hash_table})::Cvoid
 end
 
 """
@@ -6862,7 +6947,7 @@ int aws_linked_hash_table_find(struct aws_linked_hash_table *table, const void *
 ```
 """
 function aws_linked_hash_table_find(table, key, p_value)
-    ccall((:aws_linked_hash_table_find, libaws_c_common), Cint, (Ptr{aws_linked_hash_table}, Ptr{Cvoid}, Ptr{Ptr{Cvoid}}), table, key, p_value)
+    @ccall libaws_c_common.aws_linked_hash_table_find(table::Ptr{aws_linked_hash_table}, key::Ptr{Cvoid}, p_value::Ptr{Ptr{Cvoid}})::Cint
 end
 
 """
@@ -6878,7 +6963,7 @@ int aws_linked_hash_table_find_and_move_to_back(struct aws_linked_hash_table *ta
 ```
 """
 function aws_linked_hash_table_find_and_move_to_back(table, key, p_value)
-    ccall((:aws_linked_hash_table_find_and_move_to_back, libaws_c_common), Cint, (Ptr{aws_linked_hash_table}, Ptr{Cvoid}, Ptr{Ptr{Cvoid}}), table, key, p_value)
+    @ccall libaws_c_common.aws_linked_hash_table_find_and_move_to_back(table::Ptr{aws_linked_hash_table}, key::Ptr{Cvoid}, p_value::Ptr{Ptr{Cvoid}})::Cint
 end
 
 """
@@ -6892,7 +6977,7 @@ int aws_linked_hash_table_put(struct aws_linked_hash_table *table, const void *k
 ```
 """
 function aws_linked_hash_table_put(table, key, p_value)
-    ccall((:aws_linked_hash_table_put, libaws_c_common), Cint, (Ptr{aws_linked_hash_table}, Ptr{Cvoid}, Ptr{Cvoid}), table, key, p_value)
+    @ccall libaws_c_common.aws_linked_hash_table_put(table::Ptr{aws_linked_hash_table}, key::Ptr{Cvoid}, p_value::Ptr{Cvoid})::Cint
 end
 
 """
@@ -6906,7 +6991,7 @@ int aws_linked_hash_table_remove(struct aws_linked_hash_table *table, const void
 ```
 """
 function aws_linked_hash_table_remove(table, key)
-    ccall((:aws_linked_hash_table_remove, libaws_c_common), Cint, (Ptr{aws_linked_hash_table}, Ptr{Cvoid}), table, key)
+    @ccall libaws_c_common.aws_linked_hash_table_remove(table::Ptr{aws_linked_hash_table}, key::Ptr{Cvoid})::Cint
 end
 
 """
@@ -6920,7 +7005,7 @@ void aws_linked_hash_table_clear(struct aws_linked_hash_table *table);
 ```
 """
 function aws_linked_hash_table_clear(table)
-    ccall((:aws_linked_hash_table_clear, libaws_c_common), Cvoid, (Ptr{aws_linked_hash_table},), table)
+    @ccall libaws_c_common.aws_linked_hash_table_clear(table::Ptr{aws_linked_hash_table})::Cvoid
 end
 
 """
@@ -6934,7 +7019,7 @@ size_t aws_linked_hash_table_get_element_count(const struct aws_linked_hash_tabl
 ```
 """
 function aws_linked_hash_table_get_element_count(table)
-    ccall((:aws_linked_hash_table_get_element_count, libaws_c_common), Csize_t, (Ptr{aws_linked_hash_table},), table)
+    @ccall libaws_c_common.aws_linked_hash_table_get_element_count(table::Ptr{aws_linked_hash_table})::Csize_t
 end
 
 """
@@ -6950,7 +7035,7 @@ void aws_linked_hash_table_move_node_to_end_of_list( struct aws_linked_hash_tabl
 ```
 """
 function aws_linked_hash_table_move_node_to_end_of_list(table, node)
-    ccall((:aws_linked_hash_table_move_node_to_end_of_list, libaws_c_common), Cvoid, (Ptr{aws_linked_hash_table}, Ptr{aws_linked_hash_table_node}), table, node)
+    @ccall libaws_c_common.aws_linked_hash_table_move_node_to_end_of_list(table::Ptr{aws_linked_hash_table}, node::Ptr{aws_linked_hash_table_node})::Cvoid
 end
 
 """
@@ -6966,7 +7051,7 @@ const struct aws_linked_list *aws_linked_hash_table_get_iteration_list(const str
 ```
 """
 function aws_linked_hash_table_get_iteration_list(table)
-    ccall((:aws_linked_hash_table_get_iteration_list, libaws_c_common), Ptr{aws_linked_list}, (Ptr{aws_linked_hash_table},), table)
+    @ccall libaws_c_common.aws_linked_hash_table_get_iteration_list(table::Ptr{aws_linked_hash_table})::Ptr{aws_linked_list}
 end
 
 """
@@ -6980,7 +7065,7 @@ AWS_STATIC_IMPL const uint8_t *aws_string_bytes(const struct aws_string *str);
 ```
 """
 function aws_string_bytes(str)
-    ccall((:aws_string_bytes, libaws_c_common), Ptr{UInt8}, (Ptr{aws_string},), str)
+    @ccall libaws_c_common.aws_string_bytes(str::Ptr{aws_string})::Ptr{UInt8}
 end
 
 """
@@ -6994,7 +7079,7 @@ AWS_STATIC_IMPL const char *aws_string_c_str(const struct aws_string *str);
 ```
 """
 function aws_string_c_str(str)
-    ccall((:aws_string_c_str, libaws_c_common), Ptr{Cchar}, (Ptr{aws_string},), str)
+    @ccall libaws_c_common.aws_string_c_str(str::Ptr{aws_string})::Ptr{Cchar}
 end
 
 """
@@ -7008,7 +7093,7 @@ AWS_STATIC_IMPL bool aws_string_is_valid(const struct aws_string *str);
 ```
 """
 function aws_string_is_valid(str)
-    ccall((:aws_string_is_valid, libaws_c_common), Bool, (Ptr{aws_string},), str)
+    @ccall libaws_c_common.aws_string_is_valid(str::Ptr{aws_string})::Bool
 end
 
 """
@@ -7022,7 +7107,7 @@ AWS_STATIC_IMPL bool aws_c_string_is_valid(const char *str);
 ```
 """
 function aws_c_string_is_valid(str)
-    ccall((:aws_c_string_is_valid, libaws_c_common), Bool, (Ptr{Cchar},), str)
+    @ccall libaws_c_common.aws_c_string_is_valid(str::Ptr{Cchar})::Bool
 end
 
 """
@@ -7036,7 +7121,7 @@ AWS_STATIC_IMPL bool aws_char_is_space(uint8_t c);
 ```
 """
 function aws_char_is_space(c)
-    ccall((:aws_char_is_space, libaws_c_common), Bool, (UInt8,), c)
+    @ccall libaws_c_common.aws_char_is_space(c::UInt8)::Bool
 end
 
 # typedef int ( aws_log_channel_send_fn ) ( struct aws_log_channel * channel , struct aws_string * output )
@@ -7083,7 +7168,7 @@ int aws_log_channel_init_foreground( struct aws_log_channel *channel, struct aws
 ```
 """
 function aws_log_channel_init_foreground(channel, allocator, writer)
-    ccall((:aws_log_channel_init_foreground, libaws_c_common), Cint, (Ptr{aws_log_channel}, Ptr{aws_allocator}, Ptr{aws_log_writer}), channel, allocator, writer)
+    @ccall libaws_c_common.aws_log_channel_init_foreground(channel::Ptr{aws_log_channel}, allocator::Ptr{aws_allocator}, writer::Ptr{aws_log_writer})::Cint
 end
 
 """
@@ -7095,7 +7180,7 @@ int aws_log_channel_init_background( struct aws_log_channel *channel, struct aws
 ```
 """
 function aws_log_channel_init_background(channel, allocator, writer)
-    ccall((:aws_log_channel_init_background, libaws_c_common), Cint, (Ptr{aws_log_channel}, Ptr{aws_allocator}, Ptr{aws_log_writer}), channel, allocator, writer)
+    @ccall libaws_c_common.aws_log_channel_init_background(channel::Ptr{aws_log_channel}, allocator::Ptr{aws_allocator}, writer::Ptr{aws_log_writer})::Cint
 end
 
 """
@@ -7107,7 +7192,7 @@ void aws_log_channel_clean_up(struct aws_log_channel *channel);
 ```
 """
 function aws_log_channel_clean_up(channel)
-    ccall((:aws_log_channel_clean_up, libaws_c_common), Cvoid, (Ptr{aws_log_channel},), channel)
+    @ccall libaws_c_common.aws_log_channel_clean_up(channel::Ptr{aws_log_channel})::Cvoid
 end
 
 # typedef int ( aws_log_formatter_format_fn ) ( struct aws_log_formatter * formatter , struct aws_string * * formatted_output , enum aws_log_level level , aws_log_subject_t subject , const char * format , va_list args )
@@ -7169,7 +7254,7 @@ int aws_log_formatter_init_default( struct aws_log_formatter *formatter, struct 
 ```
 """
 function aws_log_formatter_init_default(formatter, allocator, options)
-    ccall((:aws_log_formatter_init_default, libaws_c_common), Cint, (Ptr{aws_log_formatter}, Ptr{aws_allocator}, Ptr{aws_log_formatter_standard_options}), formatter, allocator, options)
+    @ccall libaws_c_common.aws_log_formatter_init_default(formatter::Ptr{aws_log_formatter}, allocator::Ptr{aws_allocator}, options::Ptr{aws_log_formatter_standard_options})::Cint
 end
 
 """
@@ -7181,7 +7266,7 @@ void aws_log_formatter_clean_up(struct aws_log_formatter *formatter);
 ```
 """
 function aws_log_formatter_clean_up(formatter)
-    ccall((:aws_log_formatter_clean_up, libaws_c_common), Cvoid, (Ptr{aws_log_formatter},), formatter)
+    @ccall libaws_c_common.aws_log_formatter_clean_up(formatter::Ptr{aws_log_formatter})::Cvoid
 end
 
 struct aws_log_writer_file_options
@@ -7198,7 +7283,7 @@ int aws_log_writer_init_stdout(struct aws_log_writer *writer, struct aws_allocat
 ```
 """
 function aws_log_writer_init_stdout(writer, allocator)
-    ccall((:aws_log_writer_init_stdout, libaws_c_common), Cint, (Ptr{aws_log_writer}, Ptr{aws_allocator}), writer, allocator)
+    @ccall libaws_c_common.aws_log_writer_init_stdout(writer::Ptr{aws_log_writer}, allocator::Ptr{aws_allocator})::Cint
 end
 
 """
@@ -7210,7 +7295,7 @@ int aws_log_writer_init_stderr(struct aws_log_writer *writer, struct aws_allocat
 ```
 """
 function aws_log_writer_init_stderr(writer, allocator)
-    ccall((:aws_log_writer_init_stderr, libaws_c_common), Cint, (Ptr{aws_log_writer}, Ptr{aws_allocator}), writer, allocator)
+    @ccall libaws_c_common.aws_log_writer_init_stderr(writer::Ptr{aws_log_writer}, allocator::Ptr{aws_allocator})::Cint
 end
 
 """
@@ -7222,7 +7307,7 @@ int aws_log_writer_init_file( struct aws_log_writer *writer, struct aws_allocato
 ```
 """
 function aws_log_writer_init_file(writer, allocator, options)
-    ccall((:aws_log_writer_init_file, libaws_c_common), Cint, (Ptr{aws_log_writer}, Ptr{aws_allocator}, Ptr{aws_log_writer_file_options}), writer, allocator, options)
+    @ccall libaws_c_common.aws_log_writer_init_file(writer::Ptr{aws_log_writer}, allocator::Ptr{aws_allocator}, options::Ptr{aws_log_writer_file_options})::Cint
 end
 
 """
@@ -7234,7 +7319,7 @@ void aws_log_writer_clean_up(struct aws_log_writer *writer);
 ```
 """
 function aws_log_writer_clean_up(writer)
-    ccall((:aws_log_writer_clean_up, libaws_c_common), Cvoid, (Ptr{aws_log_writer},), writer)
+    @ccall libaws_c_common.aws_log_writer_clean_up(writer::Ptr{aws_log_writer})::Cvoid
 end
 
 """
@@ -7284,7 +7369,7 @@ struct aws_logger *aws_logger_get(void);
 ```
 """
 function aws_logger_get()
-    ccall((:aws_logger_get, libaws_c_common), Ptr{aws_logger}, ())
+    @ccall libaws_c_common.aws_logger_get()::Ptr{aws_logger}
 end
 
 """
@@ -7298,7 +7383,7 @@ Log subject is an enum similar to aws error: each library has its own value-spac
 """
 const aws_log_subject_t = UInt32
 
-@cenum __JL_Ctag_635::UInt32 begin
+@cenum __JL_Ctag_194::UInt32 begin
     AWS_LOG_SUBJECT_STRIDE_BITS = 10
 end
 
@@ -7356,7 +7441,7 @@ void aws_logger_set(struct aws_logger *logger);
 ```
 """
 function aws_logger_set(logger)
-    ccall((:aws_logger_set, libaws_c_common), Cvoid, (Ptr{aws_logger},), logger)
+    @ccall libaws_c_common.aws_logger_set(logger::Ptr{aws_logger})::Cvoid
 end
 
 """
@@ -7375,7 +7460,7 @@ struct aws_logger *aws_logger_get_conditional(aws_log_subject_t subject, enum aw
 ```
 """
 function aws_logger_get_conditional(subject, level)
-    ccall((:aws_logger_get_conditional, libaws_c_common), Ptr{aws_logger}, (aws_log_subject_t, aws_log_level), subject, level)
+    @ccall libaws_c_common.aws_logger_get_conditional(subject::aws_log_subject_t, level::aws_log_level)::Ptr{aws_logger}
 end
 
 """
@@ -7389,7 +7474,7 @@ void aws_logger_clean_up(struct aws_logger *logger);
 ```
 """
 function aws_logger_clean_up(logger)
-    ccall((:aws_logger_clean_up, libaws_c_common), Cvoid, (Ptr{aws_logger},), logger)
+    @ccall libaws_c_common.aws_logger_clean_up(logger::Ptr{aws_logger})::Cvoid
 end
 
 """
@@ -7408,7 +7493,7 @@ int aws_logger_set_log_level(struct aws_logger *logger, enum aws_log_level level
 ```
 """
 function aws_logger_set_log_level(logger, level)
-    ccall((:aws_logger_set_log_level, libaws_c_common), Cint, (Ptr{aws_logger}, aws_log_level), logger, level)
+    @ccall libaws_c_common.aws_logger_set_log_level(logger::Ptr{aws_logger}, level::aws_log_level)::Cint
 end
 
 """
@@ -7424,7 +7509,7 @@ int aws_log_level_to_string(enum aws_log_level log_level, const char **level_str
 ```
 """
 function aws_log_level_to_string(log_level, level_string)
-    ccall((:aws_log_level_to_string, libaws_c_common), Cint, (aws_log_level, Ptr{Ptr{Cchar}}), log_level, level_string)
+    @ccall libaws_c_common.aws_log_level_to_string(log_level::aws_log_level, level_string::Ptr{Ptr{Cchar}})::Cint
 end
 
 """
@@ -7438,7 +7523,7 @@ int aws_string_to_log_level(const char *level_string, enum aws_log_level *log_le
 ```
 """
 function aws_string_to_log_level(level_string, log_level)
-    ccall((:aws_string_to_log_level, libaws_c_common), Cint, (Ptr{Cchar}, Ptr{aws_log_level}), level_string, log_level)
+    @ccall libaws_c_common.aws_string_to_log_level(level_string::Ptr{Cchar}, log_level::Ptr{aws_log_level})::Cint
 end
 
 const aws_thread_id_t = pthread_t
@@ -7454,7 +7539,7 @@ int aws_thread_id_t_to_string(aws_thread_id_t thread_id, char *buffer, size_t bu
 ```
 """
 function aws_thread_id_t_to_string(thread_id, buffer, bufsz)
-    ccall((:aws_thread_id_t_to_string, libaws_c_common), Cint, (aws_thread_id_t, Ptr{Cchar}, Csize_t), thread_id, buffer, bufsz)
+    @ccall libaws_c_common.aws_thread_id_t_to_string(thread_id::aws_thread_id_t, buffer::Ptr{Cchar}, bufsz::Csize_t)::Cint
 end
 
 """
@@ -7468,7 +7553,7 @@ const char *aws_log_subject_name(aws_log_subject_t subject);
 ```
 """
 function aws_log_subject_name(subject)
-    ccall((:aws_log_subject_name, libaws_c_common), Ptr{Cchar}, (aws_log_subject_t,), subject)
+    @ccall libaws_c_common.aws_log_subject_name(subject::aws_log_subject_t)::Ptr{Cchar}
 end
 
 """
@@ -7482,7 +7567,7 @@ void aws_register_log_subject_info_list(struct aws_log_subject_info_list *log_su
 ```
 """
 function aws_register_log_subject_info_list(log_subject_list)
-    ccall((:aws_register_log_subject_info_list, libaws_c_common), Cvoid, (Ptr{aws_log_subject_info_list},), log_subject_list)
+    @ccall libaws_c_common.aws_register_log_subject_info_list(log_subject_list::Ptr{aws_log_subject_info_list})::Cvoid
 end
 
 """
@@ -7496,7 +7581,7 @@ void aws_unregister_log_subject_info_list(struct aws_log_subject_info_list *log_
 ```
 """
 function aws_unregister_log_subject_info_list(log_subject_list)
-    ccall((:aws_unregister_log_subject_info_list, libaws_c_common), Cvoid, (Ptr{aws_log_subject_info_list},), log_subject_list)
+    @ccall libaws_c_common.aws_unregister_log_subject_info_list(log_subject_list::Ptr{aws_log_subject_info_list})::Cvoid
 end
 
 """
@@ -7508,7 +7593,7 @@ int aws_logger_init_standard( struct aws_logger *logger, struct aws_allocator *a
 ```
 """
 function aws_logger_init_standard(logger, allocator, options)
-    ccall((:aws_logger_init_standard, libaws_c_common), Cint, (Ptr{aws_logger}, Ptr{aws_allocator}, Ptr{aws_logger_standard_options}), logger, allocator, options)
+    @ccall libaws_c_common.aws_logger_init_standard(logger::Ptr{aws_logger}, allocator::Ptr{aws_allocator}, options::Ptr{aws_logger_standard_options})::Cint
 end
 
 """
@@ -7520,7 +7605,7 @@ int aws_logger_init_from_external( struct aws_logger *logger, struct aws_allocat
 ```
 """
 function aws_logger_init_from_external(logger, allocator, formatter, channel, writer, level)
-    ccall((:aws_logger_init_from_external, libaws_c_common), Cint, (Ptr{aws_logger}, Ptr{aws_allocator}, Ptr{aws_log_formatter}, Ptr{aws_log_channel}, Ptr{aws_log_writer}, aws_log_level), logger, allocator, formatter, channel, writer, level)
+    @ccall libaws_c_common.aws_logger_init_from_external(logger::Ptr{aws_logger}, allocator::Ptr{aws_allocator}, formatter::Ptr{aws_log_formatter}, channel::Ptr{aws_log_channel}, writer::Ptr{aws_log_writer}, level::aws_log_level)::Cint
 end
 
 """
@@ -7532,7 +7617,7 @@ int aws_logger_init_noalloc( struct aws_logger *logger, struct aws_allocator *al
 ```
 """
 function aws_logger_init_noalloc(logger, allocator, options)
-    ccall((:aws_logger_init_noalloc, libaws_c_common), Cint, (Ptr{aws_logger}, Ptr{aws_allocator}, Ptr{aws_logger_standard_options}), logger, allocator, options)
+    @ccall libaws_c_common.aws_logger_init_noalloc(logger::Ptr{aws_logger}, allocator::Ptr{aws_allocator}, options::Ptr{aws_logger_standard_options})::Cint
 end
 
 """
@@ -7546,7 +7631,7 @@ struct aws_cache *aws_cache_new_lru( struct aws_allocator *allocator, aws_hash_f
 ```
 """
 function aws_cache_new_lru(allocator, hash_fn, equals_fn, destroy_key_fn, destroy_value_fn, max_items)
-    ccall((:aws_cache_new_lru, libaws_c_common), Ptr{aws_cache}, (Ptr{aws_allocator}, Ptr{aws_hash_fn}, Ptr{aws_hash_callback_eq_fn}, Ptr{aws_hash_callback_destroy_fn}, Ptr{aws_hash_callback_destroy_fn}, Csize_t), allocator, hash_fn, equals_fn, destroy_key_fn, destroy_value_fn, max_items)
+    @ccall libaws_c_common.aws_cache_new_lru(allocator::Ptr{aws_allocator}, hash_fn::Ptr{aws_hash_fn}, equals_fn::Ptr{aws_hash_callback_eq_fn}, destroy_key_fn::Ptr{aws_hash_callback_destroy_fn}, destroy_value_fn::Ptr{aws_hash_callback_destroy_fn}, max_items::Csize_t)::Ptr{aws_cache}
 end
 
 """
@@ -7560,7 +7645,7 @@ void *aws_lru_cache_use_lru_element(struct aws_cache *cache);
 ```
 """
 function aws_lru_cache_use_lru_element(cache)
-    ccall((:aws_lru_cache_use_lru_element, libaws_c_common), Ptr{Cvoid}, (Ptr{aws_cache},), cache)
+    @ccall libaws_c_common.aws_lru_cache_use_lru_element(cache::Ptr{aws_cache})::Ptr{Cvoid}
 end
 
 """
@@ -7574,7 +7659,7 @@ void *aws_lru_cache_get_mru_element(const struct aws_cache *cache);
 ```
 """
 function aws_lru_cache_get_mru_element(cache)
-    ccall((:aws_lru_cache_get_mru_element, libaws_c_common), Ptr{Cvoid}, (Ptr{aws_cache},), cache)
+    @ccall libaws_c_common.aws_lru_cache_get_mru_element(cache::Ptr{aws_cache})::Ptr{Cvoid}
 end
 
 const static_assertion_at_line_60 = NTuple{1, Cchar}
@@ -7583,7 +7668,7 @@ const static_assertion_at_line_61 = NTuple{1, Cchar}
 
 const static_assertion_at_line_62 = NTuple{1, Cchar}
 
-@cenum __JL_Ctag_656::UInt32 begin
+@cenum __JL_Ctag_201::UInt32 begin
     AWS_CACHE_LINE = 64
 end
 
@@ -7598,7 +7683,7 @@ int aws_mutex_init(struct aws_mutex *mutex);
 ```
 """
 function aws_mutex_init(mutex)
-    ccall((:aws_mutex_init, libaws_c_common), Cint, (Ptr{aws_mutex},), mutex)
+    @ccall libaws_c_common.aws_mutex_init(mutex::Ptr{aws_mutex})::Cint
 end
 
 """
@@ -7612,7 +7697,7 @@ void aws_mutex_clean_up(struct aws_mutex *mutex);
 ```
 """
 function aws_mutex_clean_up(mutex)
-    ccall((:aws_mutex_clean_up, libaws_c_common), Cvoid, (Ptr{aws_mutex},), mutex)
+    @ccall libaws_c_common.aws_mutex_clean_up(mutex::Ptr{aws_mutex})::Cvoid
 end
 
 """
@@ -7626,7 +7711,7 @@ int aws_mutex_lock(struct aws_mutex *mutex);
 ```
 """
 function aws_mutex_lock(mutex)
-    ccall((:aws_mutex_lock, libaws_c_common), Cint, (Ptr{aws_mutex},), mutex)
+    @ccall libaws_c_common.aws_mutex_lock(mutex::Ptr{aws_mutex})::Cint
 end
 
 """
@@ -7640,7 +7725,7 @@ int aws_mutex_try_lock(struct aws_mutex *mutex);
 ```
 """
 function aws_mutex_try_lock(mutex)
-    ccall((:aws_mutex_try_lock, libaws_c_common), Cint, (Ptr{aws_mutex},), mutex)
+    @ccall libaws_c_common.aws_mutex_try_lock(mutex::Ptr{aws_mutex})::Cint
 end
 
 """
@@ -7654,7 +7739,7 @@ int aws_mutex_unlock(struct aws_mutex *mutex);
 ```
 """
 function aws_mutex_unlock(mutex)
-    ccall((:aws_mutex_unlock, libaws_c_common), Cint, (Ptr{aws_mutex},), mutex)
+    @ccall libaws_c_common.aws_mutex_unlock(mutex::Ptr{aws_mutex})::Cint
 end
 
 # typedef int ( aws_priority_queue_compare_fn ) ( const void * a , const void * b )
@@ -7681,7 +7766,7 @@ int aws_priority_queue_init_dynamic( struct aws_priority_queue *queue, struct aw
 ```
 """
 function aws_priority_queue_init_dynamic(queue, alloc, default_size, item_size, pred)
-    ccall((:aws_priority_queue_init_dynamic, libaws_c_common), Cint, (Ptr{aws_priority_queue}, Ptr{aws_allocator}, Csize_t, Csize_t, Ptr{aws_priority_queue_compare_fn}), queue, alloc, default_size, item_size, pred)
+    @ccall libaws_c_common.aws_priority_queue_init_dynamic(queue::Ptr{aws_priority_queue}, alloc::Ptr{aws_allocator}, default_size::Csize_t, item_size::Csize_t, pred::Ptr{aws_priority_queue_compare_fn})::Cint
 end
 
 """
@@ -7699,7 +7784,7 @@ void aws_priority_queue_init_static( struct aws_priority_queue *queue, void *hea
 ```
 """
 function aws_priority_queue_init_static(queue, heap, item_count, item_size, pred)
-    ccall((:aws_priority_queue_init_static, libaws_c_common), Cvoid, (Ptr{aws_priority_queue}, Ptr{Cvoid}, Csize_t, Csize_t, Ptr{aws_priority_queue_compare_fn}), queue, heap, item_count, item_size, pred)
+    @ccall libaws_c_common.aws_priority_queue_init_static(queue::Ptr{aws_priority_queue}, heap::Ptr{Cvoid}, item_count::Csize_t, item_size::Csize_t, pred::Ptr{aws_priority_queue_compare_fn})::Cvoid
 end
 
 """
@@ -7713,7 +7798,7 @@ bool aws_priority_queue_backpointer_index_valid(const struct aws_priority_queue 
 ```
 """
 function aws_priority_queue_backpointer_index_valid(queue, index)
-    ccall((:aws_priority_queue_backpointer_index_valid, libaws_c_common), Bool, (Ptr{aws_priority_queue}, Csize_t), queue, index)
+    @ccall libaws_c_common.aws_priority_queue_backpointer_index_valid(queue::Ptr{aws_priority_queue}, index::Csize_t)::Bool
 end
 
 """
@@ -7727,7 +7812,7 @@ bool aws_priority_queue_backpointers_valid_deep(const struct aws_priority_queue 
 ```
 """
 function aws_priority_queue_backpointers_valid_deep(queue)
-    ccall((:aws_priority_queue_backpointers_valid_deep, libaws_c_common), Bool, (Ptr{aws_priority_queue},), queue)
+    @ccall libaws_c_common.aws_priority_queue_backpointers_valid_deep(queue::Ptr{aws_priority_queue})::Bool
 end
 
 """
@@ -7741,7 +7826,7 @@ bool aws_priority_queue_backpointers_valid(const struct aws_priority_queue *cons
 ```
 """
 function aws_priority_queue_backpointers_valid(queue)
-    ccall((:aws_priority_queue_backpointers_valid, libaws_c_common), Bool, (Ptr{aws_priority_queue},), queue)
+    @ccall libaws_c_common.aws_priority_queue_backpointers_valid(queue::Ptr{aws_priority_queue})::Bool
 end
 
 """
@@ -7755,7 +7840,7 @@ bool aws_priority_queue_is_valid(const struct aws_priority_queue *const queue);
 ```
 """
 function aws_priority_queue_is_valid(queue)
-    ccall((:aws_priority_queue_is_valid, libaws_c_common), Bool, (Ptr{aws_priority_queue},), queue)
+    @ccall libaws_c_common.aws_priority_queue_is_valid(queue::Ptr{aws_priority_queue})::Bool
 end
 
 """
@@ -7769,7 +7854,7 @@ void aws_priority_queue_clean_up(struct aws_priority_queue *queue);
 ```
 """
 function aws_priority_queue_clean_up(queue)
-    ccall((:aws_priority_queue_clean_up, libaws_c_common), Cvoid, (Ptr{aws_priority_queue},), queue)
+    @ccall libaws_c_common.aws_priority_queue_clean_up(queue::Ptr{aws_priority_queue})::Cvoid
 end
 
 """
@@ -7783,7 +7868,7 @@ int aws_priority_queue_push(struct aws_priority_queue *queue, void *item);
 ```
 """
 function aws_priority_queue_push(queue, item)
-    ccall((:aws_priority_queue_push, libaws_c_common), Cint, (Ptr{aws_priority_queue}, Ptr{Cvoid}), queue, item)
+    @ccall libaws_c_common.aws_priority_queue_push(queue::Ptr{aws_priority_queue}, item::Ptr{Cvoid})::Cint
 end
 
 """
@@ -7801,7 +7886,7 @@ int aws_priority_queue_push_ref( struct aws_priority_queue *queue, void *item, s
 ```
 """
 function aws_priority_queue_push_ref(queue, item, backpointer)
-    ccall((:aws_priority_queue_push_ref, libaws_c_common), Cint, (Ptr{aws_priority_queue}, Ptr{Cvoid}, Ptr{aws_priority_queue_node}), queue, item, backpointer)
+    @ccall libaws_c_common.aws_priority_queue_push_ref(queue::Ptr{aws_priority_queue}, item::Ptr{Cvoid}, backpointer::Ptr{aws_priority_queue_node})::Cint
 end
 
 """
@@ -7815,7 +7900,7 @@ int aws_priority_queue_pop(struct aws_priority_queue *queue, void *item);
 ```
 """
 function aws_priority_queue_pop(queue, item)
-    ccall((:aws_priority_queue_pop, libaws_c_common), Cint, (Ptr{aws_priority_queue}, Ptr{Cvoid}), queue, item)
+    @ccall libaws_c_common.aws_priority_queue_pop(queue::Ptr{aws_priority_queue}, item::Ptr{Cvoid})::Cint
 end
 
 """
@@ -7829,7 +7914,7 @@ int aws_priority_queue_remove(struct aws_priority_queue *queue, void *item, cons
 ```
 """
 function aws_priority_queue_remove(queue, item, node)
-    ccall((:aws_priority_queue_remove, libaws_c_common), Cint, (Ptr{aws_priority_queue}, Ptr{Cvoid}, Ptr{aws_priority_queue_node}), queue, item, node)
+    @ccall libaws_c_common.aws_priority_queue_remove(queue::Ptr{aws_priority_queue}, item::Ptr{Cvoid}, node::Ptr{aws_priority_queue_node})::Cint
 end
 
 """
@@ -7843,7 +7928,21 @@ int aws_priority_queue_top(const struct aws_priority_queue *queue, void **item);
 ```
 """
 function aws_priority_queue_top(queue, item)
-    ccall((:aws_priority_queue_top, libaws_c_common), Cint, (Ptr{aws_priority_queue}, Ptr{Ptr{Cvoid}}), queue, item)
+    @ccall libaws_c_common.aws_priority_queue_top(queue::Ptr{aws_priority_queue}, item::Ptr{Ptr{Cvoid}})::Cint
+end
+
+"""
+    aws_priority_queue_clear(queue)
+
+Removes all elements from the queue, but does not free internal memory.
+
+### Prototype
+```c
+void aws_priority_queue_clear(struct aws_priority_queue *queue);
+```
+"""
+function aws_priority_queue_clear(queue)
+    @ccall libaws_c_common.aws_priority_queue_clear(queue::Ptr{aws_priority_queue})::Cvoid
 end
 
 """
@@ -7857,7 +7956,7 @@ size_t aws_priority_queue_size(const struct aws_priority_queue *queue);
 ```
 """
 function aws_priority_queue_size(queue)
-    ccall((:aws_priority_queue_size, libaws_c_common), Csize_t, (Ptr{aws_priority_queue},), queue)
+    @ccall libaws_c_common.aws_priority_queue_size(queue::Ptr{aws_priority_queue})::Csize_t
 end
 
 """
@@ -7871,7 +7970,41 @@ size_t aws_priority_queue_capacity(const struct aws_priority_queue *queue);
 ```
 """
 function aws_priority_queue_capacity(queue)
-    ccall((:aws_priority_queue_capacity, libaws_c_common), Csize_t, (Ptr{aws_priority_queue},), queue)
+    @ccall libaws_c_common.aws_priority_queue_capacity(queue::Ptr{aws_priority_queue})::Csize_t
+end
+
+"""
+    aws_priority_queue_node_init(node)
+
+Initializes a queue node to a default value that indicates the node is not in the queue.
+
+### Parameters
+* `node`: priority queue node to initialize with a default value
+### Prototype
+```c
+void aws_priority_queue_node_init(struct aws_priority_queue_node *node);
+```
+"""
+function aws_priority_queue_node_init(node)
+    @ccall libaws_c_common.aws_priority_queue_node_init(node::Ptr{aws_priority_queue_node})::Cvoid
+end
+
+"""
+    aws_priority_queue_node_is_in_queue(node)
+
+Checks if a priority queue node is currently in a priority queue.
+
+### Parameters
+* `node`: priority queue node to check usage for
+### Returns
+true if the node is in a queue, false otherwise
+### Prototype
+```c
+bool aws_priority_queue_node_is_in_queue(const struct aws_priority_queue_node *node);
+```
+"""
+function aws_priority_queue_node_is_in_queue(node)
+    @ccall libaws_c_common.aws_priority_queue_node_is_in_queue(node::Ptr{aws_priority_queue_node})::Bool
 end
 
 struct aws_run_command_result
@@ -7897,7 +8030,7 @@ int aws_get_pid(void);
 ```
 """
 function aws_get_pid()
-    ccall((:aws_get_pid, libaws_c_common), Cint, ())
+    @ccall libaws_c_common.aws_get_pid()::Cint
 end
 
 """
@@ -7911,7 +8044,7 @@ size_t aws_get_soft_limit_io_handles(void);
 ```
 """
 function aws_get_soft_limit_io_handles()
-    ccall((:aws_get_soft_limit_io_handles, libaws_c_common), Csize_t, ())
+    @ccall libaws_c_common.aws_get_soft_limit_io_handles()::Csize_t
 end
 
 """
@@ -7925,7 +8058,7 @@ size_t aws_get_hard_limit_io_handles(void);
 ```
 """
 function aws_get_hard_limit_io_handles()
-    ccall((:aws_get_hard_limit_io_handles, libaws_c_common), Csize_t, ())
+    @ccall libaws_c_common.aws_get_hard_limit_io_handles()::Csize_t
 end
 
 """
@@ -7941,7 +8074,7 @@ int aws_set_soft_limit_io_handles(size_t max_handles);
 ```
 """
 function aws_set_soft_limit_io_handles(max_handles)
-    ccall((:aws_set_soft_limit_io_handles, libaws_c_common), Cint, (Csize_t,), max_handles)
+    @ccall libaws_c_common.aws_set_soft_limit_io_handles(max_handles::Csize_t)::Cint
 end
 
 """
@@ -7953,7 +8086,7 @@ int aws_run_command_result_init(struct aws_allocator *allocator, struct aws_run_
 ```
 """
 function aws_run_command_result_init(allocator, result)
-    ccall((:aws_run_command_result_init, libaws_c_common), Cint, (Ptr{aws_allocator}, Ptr{aws_run_command_result}), allocator, result)
+    @ccall libaws_c_common.aws_run_command_result_init(allocator::Ptr{aws_allocator}, result::Ptr{aws_run_command_result})::Cint
 end
 
 """
@@ -7965,7 +8098,7 @@ void aws_run_command_result_cleanup(struct aws_run_command_result *result);
 ```
 """
 function aws_run_command_result_cleanup(result)
-    ccall((:aws_run_command_result_cleanup, libaws_c_common), Cvoid, (Ptr{aws_run_command_result},), result)
+    @ccall libaws_c_common.aws_run_command_result_cleanup(result::Ptr{aws_run_command_result})::Cvoid
 end
 
 """
@@ -7979,7 +8112,7 @@ int aws_run_command( struct aws_allocator *allocator, struct aws_run_command_opt
 ```
 """
 function aws_run_command(allocator, options, result)
-    ccall((:aws_run_command, libaws_c_common), Cint, (Ptr{aws_allocator}, Ptr{aws_run_command_options}, Ptr{aws_run_command_result}), allocator, options, result)
+    @ccall libaws_c_common.aws_run_command(allocator::Ptr{aws_allocator}, options::Ptr{aws_run_command_options}, result::Ptr{aws_run_command_result})::Cint
 end
 
 mutable struct aws_promise end
@@ -7993,7 +8126,7 @@ struct aws_promise *aws_promise_new(struct aws_allocator *allocator);
 ```
 """
 function aws_promise_new(allocator)
-    ccall((:aws_promise_new, libaws_c_common), Ptr{aws_promise}, (Ptr{aws_allocator},), allocator)
+    @ccall libaws_c_common.aws_promise_new(allocator::Ptr{aws_allocator})::Ptr{aws_promise}
 end
 
 """
@@ -8005,7 +8138,7 @@ struct aws_promise *aws_promise_acquire(struct aws_promise *promise);
 ```
 """
 function aws_promise_acquire(promise)
-    ccall((:aws_promise_acquire, libaws_c_common), Ptr{aws_promise}, (Ptr{aws_promise},), promise)
+    @ccall libaws_c_common.aws_promise_acquire(promise::Ptr{aws_promise})::Ptr{aws_promise}
 end
 
 """
@@ -8017,7 +8150,7 @@ void aws_promise_release(struct aws_promise *promise);
 ```
 """
 function aws_promise_release(promise)
-    ccall((:aws_promise_release, libaws_c_common), Cvoid, (Ptr{aws_promise},), promise)
+    @ccall libaws_c_common.aws_promise_release(promise::Ptr{aws_promise})::Cvoid
 end
 
 """
@@ -8029,7 +8162,7 @@ void aws_promise_wait(struct aws_promise *promise);
 ```
 """
 function aws_promise_wait(promise)
-    ccall((:aws_promise_wait, libaws_c_common), Cvoid, (Ptr{aws_promise},), promise)
+    @ccall libaws_c_common.aws_promise_wait(promise::Ptr{aws_promise})::Cvoid
 end
 
 """
@@ -8041,7 +8174,7 @@ bool aws_promise_wait_for(struct aws_promise *promise, size_t nanoseconds);
 ```
 """
 function aws_promise_wait_for(promise, nanoseconds)
-    ccall((:aws_promise_wait_for, libaws_c_common), Bool, (Ptr{aws_promise}, Csize_t), promise, nanoseconds)
+    @ccall libaws_c_common.aws_promise_wait_for(promise::Ptr{aws_promise}, nanoseconds::Csize_t)::Bool
 end
 
 """
@@ -8053,7 +8186,7 @@ void aws_promise_complete(struct aws_promise *promise, void *value, void (*dtor)
 ```
 """
 function aws_promise_complete(promise, value, dtor)
-    ccall((:aws_promise_complete, libaws_c_common), Cvoid, (Ptr{aws_promise}, Ptr{Cvoid}, Ptr{Cvoid}), promise, value, dtor)
+    @ccall libaws_c_common.aws_promise_complete(promise::Ptr{aws_promise}, value::Ptr{Cvoid}, dtor::Ptr{Cvoid})::Cvoid
 end
 
 """
@@ -8065,7 +8198,7 @@ void aws_promise_fail(struct aws_promise *promise, int error_code);
 ```
 """
 function aws_promise_fail(promise, error_code)
-    ccall((:aws_promise_fail, libaws_c_common), Cvoid, (Ptr{aws_promise}, Cint), promise, error_code)
+    @ccall libaws_c_common.aws_promise_fail(promise::Ptr{aws_promise}, error_code::Cint)::Cvoid
 end
 
 """
@@ -8077,7 +8210,7 @@ bool aws_promise_is_complete(struct aws_promise *promise);
 ```
 """
 function aws_promise_is_complete(promise)
-    ccall((:aws_promise_is_complete, libaws_c_common), Bool, (Ptr{aws_promise},), promise)
+    @ccall libaws_c_common.aws_promise_is_complete(promise::Ptr{aws_promise})::Bool
 end
 
 """
@@ -8089,7 +8222,7 @@ int aws_promise_error_code(struct aws_promise *promise);
 ```
 """
 function aws_promise_error_code(promise)
-    ccall((:aws_promise_error_code, libaws_c_common), Cint, (Ptr{aws_promise},), promise)
+    @ccall libaws_c_common.aws_promise_error_code(promise::Ptr{aws_promise})::Cint
 end
 
 """
@@ -8101,7 +8234,7 @@ void *aws_promise_value(struct aws_promise *promise);
 ```
 """
 function aws_promise_value(promise)
-    ccall((:aws_promise_value, libaws_c_common), Ptr{Cvoid}, (Ptr{aws_promise},), promise)
+    @ccall libaws_c_common.aws_promise_value(promise::Ptr{aws_promise})::Ptr{Cvoid}
 end
 
 """
@@ -8113,7 +8246,7 @@ void *aws_promise_take_value(struct aws_promise *promise);
 ```
 """
 function aws_promise_take_value(promise)
-    ccall((:aws_promise_take_value, libaws_c_common), Ptr{Cvoid}, (Ptr{aws_promise},), promise)
+    @ccall libaws_c_common.aws_promise_take_value(promise::Ptr{aws_promise})::Ptr{Cvoid}
 end
 
 # typedef void ( aws_simple_completion_callback ) ( void * )
@@ -8145,7 +8278,7 @@ void aws_ref_count_init( struct aws_ref_count *ref_count, void *object, aws_simp
 ```
 """
 function aws_ref_count_init(ref_count, object, on_zero_fn)
-    ccall((:aws_ref_count_init, libaws_c_common), Cvoid, (Ptr{aws_ref_count}, Ptr{Cvoid}, Ptr{aws_simple_completion_callback}), ref_count, object, on_zero_fn)
+    @ccall libaws_c_common.aws_ref_count_init(ref_count::Ptr{aws_ref_count}, object::Ptr{Cvoid}, on_zero_fn::Ptr{aws_simple_completion_callback})::Cvoid
 end
 
 """
@@ -8163,7 +8296,7 @@ void *aws_ref_count_acquire(struct aws_ref_count *ref_count);
 ```
 """
 function aws_ref_count_acquire(ref_count)
-    ccall((:aws_ref_count_acquire, libaws_c_common), Ptr{Cvoid}, (Ptr{aws_ref_count},), ref_count)
+    @ccall libaws_c_common.aws_ref_count_acquire(ref_count::Ptr{aws_ref_count})::Ptr{Cvoid}
 end
 
 """
@@ -8181,7 +8314,7 @@ size_t aws_ref_count_release(struct aws_ref_count *ref_count);
 ```
 """
 function aws_ref_count_release(ref_count)
-    ccall((:aws_ref_count_release, libaws_c_common), Csize_t, (Ptr{aws_ref_count},), ref_count)
+    @ccall libaws_c_common.aws_ref_count_release(ref_count::Ptr{aws_ref_count})::Csize_t
 end
 
 """
@@ -8210,7 +8343,7 @@ int aws_ring_buffer_init(struct aws_ring_buffer *ring_buf, struct aws_allocator 
 ```
 """
 function aws_ring_buffer_init(ring_buf, allocator, size)
-    ccall((:aws_ring_buffer_init, libaws_c_common), Cint, (Ptr{aws_ring_buffer}, Ptr{aws_allocator}, Csize_t), ring_buf, allocator, size)
+    @ccall libaws_c_common.aws_ring_buffer_init(ring_buf::Ptr{aws_ring_buffer}, allocator::Ptr{aws_allocator}, size::Csize_t)::Cint
 end
 
 """
@@ -8222,7 +8355,7 @@ AWS_STATIC_IMPL bool aws_ring_buffer_check_atomic_ptr( const struct aws_ring_buf
 ```
 """
 function aws_ring_buffer_check_atomic_ptr(ring_buf, atomic_ptr)
-    ccall((:aws_ring_buffer_check_atomic_ptr, libaws_c_common), Bool, (Ptr{aws_ring_buffer}, Ptr{UInt8}), ring_buf, atomic_ptr)
+    @ccall libaws_c_common.aws_ring_buffer_check_atomic_ptr(ring_buf::Ptr{aws_ring_buffer}, atomic_ptr::Ptr{UInt8})::Bool
 end
 
 """
@@ -8236,7 +8369,7 @@ AWS_STATIC_IMPL bool aws_ring_buffer_is_empty(const struct aws_ring_buffer *ring
 ```
 """
 function aws_ring_buffer_is_empty(ring_buf)
-    ccall((:aws_ring_buffer_is_empty, libaws_c_common), Bool, (Ptr{aws_ring_buffer},), ring_buf)
+    @ccall libaws_c_common.aws_ring_buffer_is_empty(ring_buf::Ptr{aws_ring_buffer})::Bool
 end
 
 """
@@ -8250,7 +8383,7 @@ AWS_STATIC_IMPL bool aws_ring_buffer_is_valid(const struct aws_ring_buffer *ring
 ```
 """
 function aws_ring_buffer_is_valid(ring_buf)
-    ccall((:aws_ring_buffer_is_valid, libaws_c_common), Bool, (Ptr{aws_ring_buffer},), ring_buf)
+    @ccall libaws_c_common.aws_ring_buffer_is_valid(ring_buf::Ptr{aws_ring_buffer})::Bool
 end
 
 """
@@ -8264,7 +8397,7 @@ void aws_ring_buffer_clean_up(struct aws_ring_buffer *ring_buf);
 ```
 """
 function aws_ring_buffer_clean_up(ring_buf)
-    ccall((:aws_ring_buffer_clean_up, libaws_c_common), Cvoid, (Ptr{aws_ring_buffer},), ring_buf)
+    @ccall libaws_c_common.aws_ring_buffer_clean_up(ring_buf::Ptr{aws_ring_buffer})::Cvoid
 end
 
 """
@@ -8278,7 +8411,7 @@ int aws_ring_buffer_acquire( struct aws_ring_buffer *ring_buf, size_t requested_
 ```
 """
 function aws_ring_buffer_acquire(ring_buf, requested_size, dest)
-    ccall((:aws_ring_buffer_acquire, libaws_c_common), Cint, (Ptr{aws_ring_buffer}, Csize_t, Ptr{aws_byte_buf}), ring_buf, requested_size, dest)
+    @ccall libaws_c_common.aws_ring_buffer_acquire(ring_buf::Ptr{aws_ring_buffer}, requested_size::Csize_t, dest::Ptr{aws_byte_buf})::Cint
 end
 
 """
@@ -8292,7 +8425,7 @@ int aws_ring_buffer_acquire_up_to( struct aws_ring_buffer *ring_buf, size_t mini
 ```
 """
 function aws_ring_buffer_acquire_up_to(ring_buf, minimum_size, requested_size, dest)
-    ccall((:aws_ring_buffer_acquire_up_to, libaws_c_common), Cint, (Ptr{aws_ring_buffer}, Csize_t, Csize_t, Ptr{aws_byte_buf}), ring_buf, minimum_size, requested_size, dest)
+    @ccall libaws_c_common.aws_ring_buffer_acquire_up_to(ring_buf::Ptr{aws_ring_buffer}, minimum_size::Csize_t, requested_size::Csize_t, dest::Ptr{aws_byte_buf})::Cint
 end
 
 """
@@ -8306,7 +8439,7 @@ void aws_ring_buffer_release(struct aws_ring_buffer *ring_buffer, struct aws_byt
 ```
 """
 function aws_ring_buffer_release(ring_buffer, buf)
-    ccall((:aws_ring_buffer_release, libaws_c_common), Cvoid, (Ptr{aws_ring_buffer}, Ptr{aws_byte_buf}), ring_buffer, buf)
+    @ccall libaws_c_common.aws_ring_buffer_release(ring_buffer::Ptr{aws_ring_buffer}, buf::Ptr{aws_byte_buf})::Cvoid
 end
 
 """
@@ -8320,7 +8453,7 @@ bool aws_ring_buffer_buf_belongs_to_pool( const struct aws_ring_buffer *ring_buf
 ```
 """
 function aws_ring_buffer_buf_belongs_to_pool(ring_buffer, buf)
-    ccall((:aws_ring_buffer_buf_belongs_to_pool, libaws_c_common), Bool, (Ptr{aws_ring_buffer}, Ptr{aws_byte_buf}), ring_buffer, buf)
+    @ccall libaws_c_common.aws_ring_buffer_buf_belongs_to_pool(ring_buffer::Ptr{aws_ring_buffer}, buf::Ptr{aws_byte_buf})::Bool
 end
 
 struct aws_rw_lock
@@ -8338,7 +8471,7 @@ int aws_rw_lock_init(struct aws_rw_lock *lock);
 ```
 """
 function aws_rw_lock_init(lock)
-    ccall((:aws_rw_lock_init, libaws_c_common), Cint, (Ptr{aws_rw_lock},), lock)
+    @ccall libaws_c_common.aws_rw_lock_init(lock::Ptr{aws_rw_lock})::Cint
 end
 
 """
@@ -8352,7 +8485,7 @@ void aws_rw_lock_clean_up(struct aws_rw_lock *lock);
 ```
 """
 function aws_rw_lock_clean_up(lock)
-    ccall((:aws_rw_lock_clean_up, libaws_c_common), Cvoid, (Ptr{aws_rw_lock},), lock)
+    @ccall libaws_c_common.aws_rw_lock_clean_up(lock::Ptr{aws_rw_lock})::Cvoid
 end
 
 """
@@ -8366,7 +8499,7 @@ int aws_rw_lock_rlock(struct aws_rw_lock *lock);
 ```
 """
 function aws_rw_lock_rlock(lock)
-    ccall((:aws_rw_lock_rlock, libaws_c_common), Cint, (Ptr{aws_rw_lock},), lock)
+    @ccall libaws_c_common.aws_rw_lock_rlock(lock::Ptr{aws_rw_lock})::Cint
 end
 
 """
@@ -8378,7 +8511,7 @@ int aws_rw_lock_wlock(struct aws_rw_lock *lock);
 ```
 """
 function aws_rw_lock_wlock(lock)
-    ccall((:aws_rw_lock_wlock, libaws_c_common), Cint, (Ptr{aws_rw_lock},), lock)
+    @ccall libaws_c_common.aws_rw_lock_wlock(lock::Ptr{aws_rw_lock})::Cint
 end
 
 """
@@ -8392,7 +8525,7 @@ int aws_rw_lock_try_rlock(struct aws_rw_lock *lock);
 ```
 """
 function aws_rw_lock_try_rlock(lock)
-    ccall((:aws_rw_lock_try_rlock, libaws_c_common), Cint, (Ptr{aws_rw_lock},), lock)
+    @ccall libaws_c_common.aws_rw_lock_try_rlock(lock::Ptr{aws_rw_lock})::Cint
 end
 
 """
@@ -8404,7 +8537,7 @@ int aws_rw_lock_try_wlock(struct aws_rw_lock *lock);
 ```
 """
 function aws_rw_lock_try_wlock(lock)
-    ccall((:aws_rw_lock_try_wlock, libaws_c_common), Cint, (Ptr{aws_rw_lock},), lock)
+    @ccall libaws_c_common.aws_rw_lock_try_wlock(lock::Ptr{aws_rw_lock})::Cint
 end
 
 """
@@ -8418,7 +8551,7 @@ int aws_rw_lock_runlock(struct aws_rw_lock *lock);
 ```
 """
 function aws_rw_lock_runlock(lock)
-    ccall((:aws_rw_lock_runlock, libaws_c_common), Cint, (Ptr{aws_rw_lock},), lock)
+    @ccall libaws_c_common.aws_rw_lock_runlock(lock::Ptr{aws_rw_lock})::Cint
 end
 
 """
@@ -8430,12 +8563,12 @@ int aws_rw_lock_wunlock(struct aws_rw_lock *lock);
 ```
 """
 function aws_rw_lock_wunlock(lock)
-    ccall((:aws_rw_lock_wunlock, libaws_c_common), Cint, (Ptr{aws_rw_lock},), lock)
+    @ccall libaws_c_common.aws_rw_lock_wunlock(lock::Ptr{aws_rw_lock})::Cint
 end
 
 const aws_crt_statistics_category_t = UInt32
 
-@cenum __JL_Ctag_859::UInt32 begin
+@cenum __JL_Ctag_260::UInt32 begin
     AWS_CRT_STATISTICS_CATEGORY_STRIDE_BITS = 8
 end
 
@@ -8519,7 +8652,7 @@ void aws_crt_statistics_handler_process_statistics( struct aws_crt_statistics_ha
 ```
 """
 function aws_crt_statistics_handler_process_statistics(handler, interval, stats, context)
-    ccall((:aws_crt_statistics_handler_process_statistics, libaws_c_common), Cvoid, (Ptr{aws_crt_statistics_handler}, Ptr{aws_crt_statistics_sample_interval}, Ptr{aws_array_list}, Ptr{Cvoid}), handler, interval, stats, context)
+    @ccall libaws_c_common.aws_crt_statistics_handler_process_statistics(handler::Ptr{aws_crt_statistics_handler}, interval::Ptr{aws_crt_statistics_sample_interval}, stats::Ptr{aws_array_list}, context::Ptr{Cvoid})::Cvoid
 end
 
 """
@@ -8533,7 +8666,7 @@ uint64_t aws_crt_statistics_handler_get_report_interval_ms(struct aws_crt_statis
 ```
 """
 function aws_crt_statistics_handler_get_report_interval_ms(handler)
-    ccall((:aws_crt_statistics_handler_get_report_interval_ms, libaws_c_common), UInt64, (Ptr{aws_crt_statistics_handler},), handler)
+    @ccall libaws_c_common.aws_crt_statistics_handler_get_report_interval_ms(handler::Ptr{aws_crt_statistics_handler})::UInt64
 end
 
 """
@@ -8547,7 +8680,7 @@ void aws_crt_statistics_handler_destroy(struct aws_crt_statistics_handler *handl
 ```
 """
 function aws_crt_statistics_handler_destroy(handler)
-    ccall((:aws_crt_statistics_handler_destroy, libaws_c_common), Cvoid, (Ptr{aws_crt_statistics_handler},), handler)
+    @ccall libaws_c_common.aws_crt_statistics_handler_destroy(handler::Ptr{aws_crt_statistics_handler})::Cvoid
 end
 
 """
@@ -8566,7 +8699,7 @@ bool aws_string_eq(const struct aws_string *a, const struct aws_string *b);
 ```
 """
 function aws_string_eq(a, b)
-    ccall((:aws_string_eq, libaws_c_common), Bool, (Ptr{aws_string}, Ptr{aws_string}), a, b)
+    @ccall libaws_c_common.aws_string_eq(a::Ptr{aws_string}, b::Ptr{aws_string})::Bool
 end
 
 """
@@ -8580,7 +8713,7 @@ bool aws_string_eq_ignore_case(const struct aws_string *a, const struct aws_stri
 ```
 """
 function aws_string_eq_ignore_case(a, b)
-    ccall((:aws_string_eq_ignore_case, libaws_c_common), Bool, (Ptr{aws_string}, Ptr{aws_string}), a, b)
+    @ccall libaws_c_common.aws_string_eq_ignore_case(a::Ptr{aws_string}, b::Ptr{aws_string})::Bool
 end
 
 """
@@ -8594,7 +8727,7 @@ bool aws_string_eq_byte_cursor(const struct aws_string *str, const struct aws_by
 ```
 """
 function aws_string_eq_byte_cursor(str, cur)
-    ccall((:aws_string_eq_byte_cursor, libaws_c_common), Bool, (Ptr{aws_string}, Ptr{aws_byte_cursor}), str, cur)
+    @ccall libaws_c_common.aws_string_eq_byte_cursor(str::Ptr{aws_string}, cur::Ptr{aws_byte_cursor})::Bool
 end
 
 """
@@ -8608,7 +8741,7 @@ bool aws_string_eq_byte_cursor_ignore_case(const struct aws_string *str, const s
 ```
 """
 function aws_string_eq_byte_cursor_ignore_case(str, cur)
-    ccall((:aws_string_eq_byte_cursor_ignore_case, libaws_c_common), Bool, (Ptr{aws_string}, Ptr{aws_byte_cursor}), str, cur)
+    @ccall libaws_c_common.aws_string_eq_byte_cursor_ignore_case(str::Ptr{aws_string}, cur::Ptr{aws_byte_cursor})::Bool
 end
 
 """
@@ -8622,7 +8755,7 @@ bool aws_string_eq_byte_buf(const struct aws_string *str, const struct aws_byte_
 ```
 """
 function aws_string_eq_byte_buf(str, buf)
-    ccall((:aws_string_eq_byte_buf, libaws_c_common), Bool, (Ptr{aws_string}, Ptr{aws_byte_buf}), str, buf)
+    @ccall libaws_c_common.aws_string_eq_byte_buf(str::Ptr{aws_string}, buf::Ptr{aws_byte_buf})::Bool
 end
 
 """
@@ -8636,7 +8769,7 @@ bool aws_string_eq_byte_buf_ignore_case(const struct aws_string *str, const stru
 ```
 """
 function aws_string_eq_byte_buf_ignore_case(str, buf)
-    ccall((:aws_string_eq_byte_buf_ignore_case, libaws_c_common), Bool, (Ptr{aws_string}, Ptr{aws_byte_buf}), str, buf)
+    @ccall libaws_c_common.aws_string_eq_byte_buf_ignore_case(str::Ptr{aws_string}, buf::Ptr{aws_byte_buf})::Bool
 end
 
 """
@@ -8648,7 +8781,7 @@ bool aws_string_eq_c_str(const struct aws_string *str, const char *c_str);
 ```
 """
 function aws_string_eq_c_str(str, c_str)
-    ccall((:aws_string_eq_c_str, libaws_c_common), Bool, (Ptr{aws_string}, Ptr{Cchar}), str, c_str)
+    @ccall libaws_c_common.aws_string_eq_c_str(str::Ptr{aws_string}, c_str::Ptr{Cchar})::Bool
 end
 
 """
@@ -8662,7 +8795,7 @@ bool aws_string_eq_c_str_ignore_case(const struct aws_string *str, const char *c
 ```
 """
 function aws_string_eq_c_str_ignore_case(str, c_str)
-    ccall((:aws_string_eq_c_str_ignore_case, libaws_c_common), Bool, (Ptr{aws_string}, Ptr{Cchar}), str, c_str)
+    @ccall libaws_c_common.aws_string_eq_c_str_ignore_case(str::Ptr{aws_string}, c_str::Ptr{Cchar})::Bool
 end
 
 """
@@ -8676,7 +8809,7 @@ struct aws_string *aws_string_new_from_c_str(struct aws_allocator *allocator, co
 ```
 """
 function aws_string_new_from_c_str(allocator, c_str)
-    ccall((:aws_string_new_from_c_str, libaws_c_common), Ptr{aws_string}, (Ptr{aws_allocator}, Ptr{Cchar}), allocator, c_str)
+    @ccall libaws_c_common.aws_string_new_from_c_str(allocator::Ptr{aws_allocator}, c_str::Ptr{Cchar})::Ptr{aws_string}
 end
 
 """
@@ -8690,7 +8823,7 @@ struct aws_string *aws_string_new_from_array(struct aws_allocator *allocator, co
 ```
 """
 function aws_string_new_from_array(allocator, bytes, len)
-    ccall((:aws_string_new_from_array, libaws_c_common), Ptr{aws_string}, (Ptr{aws_allocator}, Ptr{UInt8}, Csize_t), allocator, bytes, len)
+    @ccall libaws_c_common.aws_string_new_from_array(allocator::Ptr{aws_allocator}, bytes::Ptr{UInt8}, len::Csize_t)::Ptr{aws_string}
 end
 
 """
@@ -8704,7 +8837,7 @@ struct aws_string *aws_string_new_from_string(struct aws_allocator *allocator, c
 ```
 """
 function aws_string_new_from_string(allocator, str)
-    ccall((:aws_string_new_from_string, libaws_c_common), Ptr{aws_string}, (Ptr{aws_allocator}, Ptr{aws_string}), allocator, str)
+    @ccall libaws_c_common.aws_string_new_from_string(allocator::Ptr{aws_allocator}, str::Ptr{aws_string})::Ptr{aws_string}
 end
 
 """
@@ -8718,7 +8851,7 @@ struct aws_string *aws_string_new_from_cursor(struct aws_allocator *allocator, c
 ```
 """
 function aws_string_new_from_cursor(allocator, cursor)
-    ccall((:aws_string_new_from_cursor, libaws_c_common), Ptr{aws_string}, (Ptr{aws_allocator}, Ptr{aws_byte_cursor}), allocator, cursor)
+    @ccall libaws_c_common.aws_string_new_from_cursor(allocator::Ptr{aws_allocator}, cursor::Ptr{aws_byte_cursor})::Ptr{aws_string}
 end
 
 """
@@ -8732,7 +8865,7 @@ struct aws_string *aws_string_new_from_buf(struct aws_allocator *allocator, cons
 ```
 """
 function aws_string_new_from_buf(allocator, buf)
-    ccall((:aws_string_new_from_buf, libaws_c_common), Ptr{aws_string}, (Ptr{aws_allocator}, Ptr{aws_byte_buf}), allocator, buf)
+    @ccall libaws_c_common.aws_string_new_from_buf(allocator::Ptr{aws_allocator}, buf::Ptr{aws_byte_buf})::Ptr{aws_string}
 end
 
 """
@@ -8746,7 +8879,7 @@ void aws_string_destroy(struct aws_string *str);
 ```
 """
 function aws_string_destroy(str)
-    ccall((:aws_string_destroy, libaws_c_common), Cvoid, (Ptr{aws_string},), str)
+    @ccall libaws_c_common.aws_string_destroy(str::Ptr{aws_string})::Cvoid
 end
 
 """
@@ -8760,7 +8893,7 @@ void aws_string_destroy_secure(struct aws_string *str);
 ```
 """
 function aws_string_destroy_secure(str)
-    ccall((:aws_string_destroy_secure, libaws_c_common), Cvoid, (Ptr{aws_string},), str)
+    @ccall libaws_c_common.aws_string_destroy_secure(str::Ptr{aws_string})::Cvoid
 end
 
 """
@@ -8776,7 +8909,7 @@ int aws_string_compare(const struct aws_string *a, const struct aws_string *b);
 ```
 """
 function aws_string_compare(a, b)
-    ccall((:aws_string_compare, libaws_c_common), Cint, (Ptr{aws_string}, Ptr{aws_string}), a, b)
+    @ccall libaws_c_common.aws_string_compare(a::Ptr{aws_string}, b::Ptr{aws_string})::Cint
 end
 
 """
@@ -8790,7 +8923,7 @@ int aws_array_list_comparator_string(const void *a, const void *b);
 ```
 """
 function aws_array_list_comparator_string(a, b)
-    ccall((:aws_array_list_comparator_string, libaws_c_common), Cint, (Ptr{Cvoid}, Ptr{Cvoid}), a, b)
+    @ccall libaws_c_common.aws_array_list_comparator_string(a::Ptr{Cvoid}, b::Ptr{Cvoid})::Cint
 end
 
 """
@@ -8806,7 +8939,7 @@ bool aws_byte_buf_write_from_whole_string( struct aws_byte_buf *AWS_RESTRICT buf
 ```
 """
 function aws_byte_buf_write_from_whole_string(buf, src)
-    ccall((:aws_byte_buf_write_from_whole_string, libaws_c_common), Bool, (Ptr{aws_byte_buf}, Ptr{aws_string}), buf, src)
+    @ccall libaws_c_common.aws_byte_buf_write_from_whole_string(buf::Ptr{aws_byte_buf}, src::Ptr{aws_string})::Bool
 end
 
 """
@@ -8820,7 +8953,7 @@ struct aws_byte_cursor aws_byte_cursor_from_string(const struct aws_string *src)
 ```
 """
 function aws_byte_cursor_from_string(src)
-    ccall((:aws_byte_cursor_from_string, libaws_c_common), aws_byte_cursor, (Ptr{aws_string},), src)
+    @ccall libaws_c_common.aws_byte_cursor_from_string(src::Ptr{aws_string})::aws_byte_cursor
 end
 
 """
@@ -8834,7 +8967,7 @@ struct aws_string *aws_string_clone_or_reuse(struct aws_allocator *allocator, co
 ```
 """
 function aws_string_clone_or_reuse(allocator, str)
-    ccall((:aws_string_clone_or_reuse, libaws_c_common), Ptr{aws_string}, (Ptr{aws_allocator}, Ptr{aws_string}), allocator, str)
+    @ccall libaws_c_common.aws_string_clone_or_reuse(allocator::Ptr{aws_allocator}, str::Ptr{aws_string})::Ptr{aws_string}
 end
 
 """
@@ -8848,7 +8981,7 @@ int aws_secure_strlen(const char *str, size_t max_read_len, size_t *str_len);
 ```
 """
 function aws_secure_strlen(str, max_read_len, str_len)
-    ccall((:aws_secure_strlen, libaws_c_common), Cint, (Ptr{Cchar}, Csize_t, Ptr{Csize_t}), str, max_read_len, str_len)
+    @ccall libaws_c_common.aws_secure_strlen(str::Ptr{Cchar}, max_read_len::Csize_t, str_len::Ptr{Csize_t})::Cint
 end
 
 @cenum aws_platform_os::UInt32 begin
@@ -8862,6 +8995,108 @@ struct aws_cpu_info
     suspected_hyper_thread::Bool
 end
 
+mutable struct aws_system_environment end
+
+"""
+    aws_system_environment_load(allocator)
+
+Allocates and initializes information about the system the current process is executing on. If successful returns an instance of [`aws_system_environment`](@ref). If it fails, it will return NULL.
+
+Note: This api is used internally and is still early in its evolution. It may change in incompatible ways in the future.
+
+### Prototype
+```c
+struct aws_system_environment *aws_system_environment_load(struct aws_allocator *allocator);
+```
+"""
+function aws_system_environment_load(allocator)
+    @ccall libaws_c_common.aws_system_environment_load(allocator::Ptr{aws_allocator})::Ptr{aws_system_environment}
+end
+
+"""
+    aws_system_environment_acquire(env)
+
+### Prototype
+```c
+struct aws_system_environment *aws_system_environment_acquire(struct aws_system_environment *env);
+```
+"""
+function aws_system_environment_acquire(env)
+    @ccall libaws_c_common.aws_system_environment_acquire(env::Ptr{aws_system_environment})::Ptr{aws_system_environment}
+end
+
+"""
+    aws_system_environment_release(env)
+
+### Prototype
+```c
+void aws_system_environment_release(struct aws_system_environment *env);
+```
+"""
+function aws_system_environment_release(env)
+    @ccall libaws_c_common.aws_system_environment_release(env::Ptr{aws_system_environment})::Cvoid
+end
+
+"""
+    aws_system_environment_get_virtualization_vendor(env)
+
+Returns the virtualization vendor for the specified compute environment, e.g. "Xen, Amazon EC2, etc..."
+
+The return value may be empty and in that case no vendor was detected.
+
+### Prototype
+```c
+struct aws_byte_cursor aws_system_environment_get_virtualization_vendor(const struct aws_system_environment *env);
+```
+"""
+function aws_system_environment_get_virtualization_vendor(env)
+    @ccall libaws_c_common.aws_system_environment_get_virtualization_vendor(env::Ptr{aws_system_environment})::aws_byte_cursor
+end
+
+"""
+    aws_system_environment_get_virtualization_product_name(env)
+
+Returns the product name for the specified compute environment. For example, the Amazon EC2 Instance type.
+
+The return value may be empty and in that case no vendor was detected.
+
+### Prototype
+```c
+struct aws_byte_cursor aws_system_environment_get_virtualization_product_name(const struct aws_system_environment *env);
+```
+"""
+function aws_system_environment_get_virtualization_product_name(env)
+    @ccall libaws_c_common.aws_system_environment_get_virtualization_product_name(env::Ptr{aws_system_environment})::aws_byte_cursor
+end
+
+"""
+    aws_system_environment_get_processor_count(env)
+
+Returns the number of processors for the specified compute environment.
+
+### Prototype
+```c
+size_t aws_system_environment_get_processor_count(struct aws_system_environment *env);
+```
+"""
+function aws_system_environment_get_processor_count(env)
+    @ccall libaws_c_common.aws_system_environment_get_processor_count(env::Ptr{aws_system_environment})::Csize_t
+end
+
+"""
+    aws_system_environment_get_cpu_group_count(env)
+
+Returns the number of separate cpu groupings (multi-socket configurations or NUMA).
+
+### Prototype
+```c
+size_t aws_system_environment_get_cpu_group_count(const struct aws_system_environment *env);
+```
+"""
+function aws_system_environment_get_cpu_group_count(env)
+    @ccall libaws_c_common.aws_system_environment_get_cpu_group_count(env::Ptr{aws_system_environment})::Csize_t
+end
+
 """
     aws_get_platform_build_os()
 
@@ -8871,7 +9106,7 @@ enum aws_platform_os aws_get_platform_build_os(void);
 ```
 """
 function aws_get_platform_build_os()
-    ccall((:aws_get_platform_build_os, libaws_c_common), aws_platform_os, ())
+    @ccall libaws_c_common.aws_get_platform_build_os()::aws_platform_os
 end
 
 """
@@ -8883,7 +9118,7 @@ size_t aws_system_info_processor_count(void);
 ```
 """
 function aws_system_info_processor_count()
-    ccall((:aws_system_info_processor_count, libaws_c_common), Csize_t, ())
+    @ccall libaws_c_common.aws_system_info_processor_count()::Csize_t
 end
 
 """
@@ -8897,7 +9132,7 @@ uint16_t aws_get_cpu_group_count(void);
 ```
 """
 function aws_get_cpu_group_count()
-    ccall((:aws_get_cpu_group_count, libaws_c_common), UInt16, ())
+    @ccall libaws_c_common.aws_get_cpu_group_count()::UInt16
 end
 
 """
@@ -8911,7 +9146,7 @@ size_t aws_get_cpu_count_for_group(uint16_t group_idx);
 ```
 """
 function aws_get_cpu_count_for_group(group_idx)
-    ccall((:aws_get_cpu_count_for_group, libaws_c_common), Csize_t, (UInt16,), group_idx)
+    @ccall libaws_c_common.aws_get_cpu_count_for_group(group_idx::UInt16)::Csize_t
 end
 
 """
@@ -8925,7 +9160,7 @@ void aws_get_cpu_ids_for_group(uint16_t group_idx, struct aws_cpu_info *cpu_ids_
 ```
 """
 function aws_get_cpu_ids_for_group(group_idx, cpu_ids_array, cpu_ids_array_length)
-    ccall((:aws_get_cpu_ids_for_group, libaws_c_common), Cvoid, (UInt16, Ptr{aws_cpu_info}, Csize_t), group_idx, cpu_ids_array, cpu_ids_array_length)
+    @ccall libaws_c_common.aws_get_cpu_ids_for_group(group_idx::UInt16, cpu_ids_array::Ptr{aws_cpu_info}, cpu_ids_array_length::Csize_t)::Cvoid
 end
 
 """
@@ -8937,7 +9172,7 @@ bool aws_is_debugger_present(void);
 ```
 """
 function aws_is_debugger_present()
-    ccall((:aws_is_debugger_present, libaws_c_common), Bool, ())
+    @ccall libaws_c_common.aws_is_debugger_present()::Bool
 end
 
 """
@@ -8949,7 +9184,7 @@ void aws_debug_break(void);
 ```
 """
 function aws_debug_break()
-    ccall((:aws_debug_break, libaws_c_common), Cvoid, ())
+    @ccall libaws_c_common.aws_debug_break()::Cvoid
 end
 
 """
@@ -8961,7 +9196,7 @@ size_t aws_backtrace(void **stack_frames, size_t num_frames);
 ```
 """
 function aws_backtrace(stack_frames, num_frames)
-    ccall((:aws_backtrace, libaws_c_common), Csize_t, (Ptr{Ptr{Cvoid}}, Csize_t), stack_frames, num_frames)
+    @ccall libaws_c_common.aws_backtrace(stack_frames::Ptr{Ptr{Cvoid}}, num_frames::Csize_t)::Csize_t
 end
 
 """
@@ -8973,7 +9208,7 @@ char **aws_backtrace_symbols(void *const *stack_frames, size_t stack_depth);
 ```
 """
 function aws_backtrace_symbols(stack_frames, stack_depth)
-    ccall((:aws_backtrace_symbols, libaws_c_common), Ptr{Ptr{Cchar}}, (Ptr{Ptr{Cvoid}}, Csize_t), stack_frames, stack_depth)
+    @ccall libaws_c_common.aws_backtrace_symbols(stack_frames::Ptr{Ptr{Cvoid}}, stack_depth::Csize_t)::Ptr{Ptr{Cchar}}
 end
 
 """
@@ -8985,7 +9220,7 @@ char **aws_backtrace_addr2line(void *const *stack_frames, size_t stack_depth);
 ```
 """
 function aws_backtrace_addr2line(stack_frames, stack_depth)
-    ccall((:aws_backtrace_addr2line, libaws_c_common), Ptr{Ptr{Cchar}}, (Ptr{Ptr{Cvoid}}, Csize_t), stack_frames, stack_depth)
+    @ccall libaws_c_common.aws_backtrace_addr2line(stack_frames::Ptr{Ptr{Cvoid}}, stack_depth::Csize_t)::Ptr{Ptr{Cchar}}
 end
 
 """
@@ -8999,7 +9234,7 @@ void aws_backtrace_print(FILE *fp, void *call_site_data);
 ```
 """
 function aws_backtrace_print(fp, call_site_data)
-    ccall((:aws_backtrace_print, libaws_c_common), Cvoid, (Ptr{Libc.FILE}, Ptr{Cvoid}), fp, call_site_data)
+    @ccall libaws_c_common.aws_backtrace_print(fp::Ptr{Libc.FILE}, call_site_data::Ptr{Cvoid})::Cvoid
 end
 
 """
@@ -9011,7 +9246,25 @@ void aws_backtrace_log(int log_level);
 ```
 """
 function aws_backtrace_log(log_level)
-    ccall((:aws_backtrace_log, libaws_c_common), Cvoid, (Cint,), log_level)
+    @ccall libaws_c_common.aws_backtrace_log(log_level::Cint)::Cvoid
+end
+
+struct aws_memory_usage_stats
+    maxrss::Csize_t
+    page_faults::Csize_t
+    _reserved::NTuple{8, Csize_t}
+end
+
+"""
+    aws_init_memory_usage_for_current_process(memory_usage)
+
+### Prototype
+```c
+int aws_init_memory_usage_for_current_process(struct aws_memory_usage_stats *memory_usage);
+```
+"""
+function aws_init_memory_usage_for_current_process(memory_usage)
+    @ccall libaws_c_common.aws_init_memory_usage_for_current_process(memory_usage::Ptr{aws_memory_usage_stats})::Cint
 end
 
 @cenum aws_task_status::UInt32 begin
@@ -9025,24 +9278,24 @@ A scheduled function.
 """
 const aws_task_fn = Cvoid
 
-struct __JL_Ctag_1150
+struct __JL_Ctag_345
     data::NTuple{8, UInt8}
 end
 
-function Base.getproperty(x::Ptr{__JL_Ctag_1150}, f::Symbol)
+function Base.getproperty(x::Ptr{__JL_Ctag_345}, f::Symbol)
     f === :scheduled && return Ptr{Bool}(x + 0)
     f === :reserved && return Ptr{Csize_t}(x + 0)
     return getfield(x, f)
 end
 
-function Base.getproperty(x::__JL_Ctag_1150, f::Symbol)
-    r = Ref{__JL_Ctag_1150}(x)
-    ptr = Base.unsafe_convert(Ptr{__JL_Ctag_1150}, r)
+function Base.getproperty(x::__JL_Ctag_345, f::Symbol)
+    r = Ref{__JL_Ctag_345}(x)
+    ptr = Base.unsafe_convert(Ptr{__JL_Ctag_345}, r)
     fptr = getproperty(ptr, f)
     GC.@preserve r unsafe_load(fptr)
 end
 
-function Base.setproperty!(x::Ptr{__JL_Ctag_1150}, f::Symbol, v)
+function Base.setproperty!(x::Ptr{__JL_Ctag_345}, f::Symbol, v)
     unsafe_store!(getproperty(x, f), v)
 end
 
@@ -9057,7 +9310,7 @@ function Base.getproperty(x::Ptr{aws_task}, f::Symbol)
     f === :node && return Ptr{aws_linked_list_node}(x + 24)
     f === :priority_queue_node && return Ptr{aws_priority_queue_node}(x + 40)
     f === :type_tag && return Ptr{Ptr{Cchar}}(x + 48)
-    f === :abi_extension && return Ptr{__JL_Ctag_1150}(x + 56)
+    f === :abi_extension && return Ptr{__JL_Ctag_345}(x + 56)
     return getfield(x, f)
 end
 
@@ -9090,7 +9343,7 @@ void aws_task_init(struct aws_task *task, aws_task_fn *fn, void *arg, const char
 ```
 """
 function aws_task_init(task, fn, arg, type_tag)
-    ccall((:aws_task_init, libaws_c_common), Cvoid, (Ptr{aws_task}, Ptr{aws_task_fn}, Ptr{Cvoid}, Ptr{Cchar}), task, fn, arg, type_tag)
+    @ccall libaws_c_common.aws_task_init(task::Ptr{aws_task}, fn::Ptr{aws_task_fn}, arg::Ptr{Cvoid}, type_tag::Ptr{Cchar})::Cvoid
 end
 
 """
@@ -9102,7 +9355,7 @@ void aws_task_run(struct aws_task *task, enum aws_task_status status);
 ```
 """
 function aws_task_run(task, status)
-    ccall((:aws_task_run, libaws_c_common), Cvoid, (Ptr{aws_task}, aws_task_status), task, status)
+    @ccall libaws_c_common.aws_task_run(task::Ptr{aws_task}, status::aws_task_status)::Cvoid
 end
 
 """
@@ -9116,7 +9369,7 @@ int aws_task_scheduler_init(struct aws_task_scheduler *scheduler, struct aws_all
 ```
 """
 function aws_task_scheduler_init(scheduler, alloc)
-    ccall((:aws_task_scheduler_init, libaws_c_common), Cint, (Ptr{aws_task_scheduler}, Ptr{aws_allocator}), scheduler, alloc)
+    @ccall libaws_c_common.aws_task_scheduler_init(scheduler::Ptr{aws_task_scheduler}, alloc::Ptr{aws_allocator})::Cint
 end
 
 """
@@ -9130,7 +9383,7 @@ void aws_task_scheduler_clean_up(struct aws_task_scheduler *scheduler);
 ```
 """
 function aws_task_scheduler_clean_up(scheduler)
-    ccall((:aws_task_scheduler_clean_up, libaws_c_common), Cvoid, (Ptr{aws_task_scheduler},), scheduler)
+    @ccall libaws_c_common.aws_task_scheduler_clean_up(scheduler::Ptr{aws_task_scheduler})::Cvoid
 end
 
 """
@@ -9142,7 +9395,7 @@ bool aws_task_scheduler_is_valid(const struct aws_task_scheduler *scheduler);
 ```
 """
 function aws_task_scheduler_is_valid(scheduler)
-    ccall((:aws_task_scheduler_is_valid, libaws_c_common), Bool, (Ptr{aws_task_scheduler},), scheduler)
+    @ccall libaws_c_common.aws_task_scheduler_is_valid(scheduler::Ptr{aws_task_scheduler})::Bool
 end
 
 """
@@ -9156,7 +9409,7 @@ bool aws_task_scheduler_has_tasks(const struct aws_task_scheduler *scheduler, ui
 ```
 """
 function aws_task_scheduler_has_tasks(scheduler, next_task_time)
-    ccall((:aws_task_scheduler_has_tasks, libaws_c_common), Bool, (Ptr{aws_task_scheduler}, Ptr{UInt64}), scheduler, next_task_time)
+    @ccall libaws_c_common.aws_task_scheduler_has_tasks(scheduler::Ptr{aws_task_scheduler}, next_task_time::Ptr{UInt64})::Bool
 end
 
 """
@@ -9170,7 +9423,7 @@ void aws_task_scheduler_schedule_now(struct aws_task_scheduler *scheduler, struc
 ```
 """
 function aws_task_scheduler_schedule_now(scheduler, task)
-    ccall((:aws_task_scheduler_schedule_now, libaws_c_common), Cvoid, (Ptr{aws_task_scheduler}, Ptr{aws_task}), scheduler, task)
+    @ccall libaws_c_common.aws_task_scheduler_schedule_now(scheduler::Ptr{aws_task_scheduler}, task::Ptr{aws_task})::Cvoid
 end
 
 """
@@ -9184,7 +9437,7 @@ void aws_task_scheduler_schedule_future( struct aws_task_scheduler *scheduler, s
 ```
 """
 function aws_task_scheduler_schedule_future(scheduler, task, time_to_run)
-    ccall((:aws_task_scheduler_schedule_future, libaws_c_common), Cvoid, (Ptr{aws_task_scheduler}, Ptr{aws_task}, UInt64), scheduler, task, time_to_run)
+    @ccall libaws_c_common.aws_task_scheduler_schedule_future(scheduler::Ptr{aws_task_scheduler}, task::Ptr{aws_task}, time_to_run::UInt64)::Cvoid
 end
 
 """
@@ -9198,7 +9451,7 @@ void aws_task_scheduler_cancel_task(struct aws_task_scheduler *scheduler, struct
 ```
 """
 function aws_task_scheduler_cancel_task(scheduler, task)
-    ccall((:aws_task_scheduler_cancel_task, libaws_c_common), Cvoid, (Ptr{aws_task_scheduler}, Ptr{aws_task}), scheduler, task)
+    @ccall libaws_c_common.aws_task_scheduler_cancel_task(scheduler::Ptr{aws_task_scheduler}, task::Ptr{aws_task})::Cvoid
 end
 
 """
@@ -9214,7 +9467,7 @@ void aws_task_scheduler_run_all(struct aws_task_scheduler *scheduler, uint64_t c
 ```
 """
 function aws_task_scheduler_run_all(scheduler, current_time)
-    ccall((:aws_task_scheduler_run_all, libaws_c_common), Cvoid, (Ptr{aws_task_scheduler}, UInt64), scheduler, current_time)
+    @ccall libaws_c_common.aws_task_scheduler_run_all(scheduler::Ptr{aws_task_scheduler}, current_time::UInt64)::Cvoid
 end
 
 """
@@ -9228,7 +9481,7 @@ const char *aws_task_status_to_c_str(enum aws_task_status status);
 ```
 """
 function aws_task_status_to_c_str(status)
-    ccall((:aws_task_status_to_c_str, libaws_c_common), Ptr{Cchar}, (aws_task_status,), status)
+    @ccall libaws_c_common.aws_task_status_to_c_str(status::aws_task_status)::Ptr{Cchar}
 end
 
 @cenum aws_thread_detach_state::UInt32 begin
@@ -9284,7 +9537,7 @@ const struct aws_thread_options *aws_default_thread_options(void);
 ```
 """
 function aws_default_thread_options()
-    ccall((:aws_default_thread_options, libaws_c_common), Ptr{aws_thread_options}, ())
+    @ccall libaws_c_common.aws_default_thread_options()::Ptr{aws_thread_options}
 end
 
 """
@@ -9296,7 +9549,7 @@ void aws_thread_call_once(aws_thread_once *flag, void (*call_once)(void *), void
 ```
 """
 function aws_thread_call_once(flag, call_once, user_data)
-    ccall((:aws_thread_call_once, libaws_c_common), Cvoid, (Ptr{aws_thread_once}, Ptr{Cvoid}, Ptr{Cvoid}), flag, call_once, user_data)
+    @ccall libaws_c_common.aws_thread_call_once(flag::Ptr{aws_thread_once}, call_once::Ptr{Cvoid}, user_data::Ptr{Cvoid})::Cvoid
 end
 
 """
@@ -9310,7 +9563,7 @@ int aws_thread_init(struct aws_thread *thread, struct aws_allocator *allocator);
 ```
 """
 function aws_thread_init(thread, allocator)
-    ccall((:aws_thread_init, libaws_c_common), Cint, (Ptr{aws_thread}, Ptr{aws_allocator}), thread, allocator)
+    @ccall libaws_c_common.aws_thread_init(thread::Ptr{aws_thread}, allocator::Ptr{aws_allocator})::Cint
 end
 
 """
@@ -9328,7 +9581,7 @@ int aws_thread_launch( struct aws_thread *thread, void (*func)(void *arg), void 
 ```
 """
 function aws_thread_launch(thread, func, arg, options)
-    ccall((:aws_thread_launch, libaws_c_common), Cint, (Ptr{aws_thread}, Ptr{Cvoid}, Ptr{Cvoid}, Ptr{aws_thread_options}), thread, func, arg, options)
+    @ccall libaws_c_common.aws_thread_launch(thread::Ptr{aws_thread}, func::Ptr{Cvoid}, arg::Ptr{Cvoid}, options::Ptr{aws_thread_options})::Cint
 end
 
 """
@@ -9342,7 +9595,7 @@ aws_thread_id_t aws_thread_get_id(struct aws_thread *thread);
 ```
 """
 function aws_thread_get_id(thread)
-    ccall((:aws_thread_get_id, libaws_c_common), aws_thread_id_t, (Ptr{aws_thread},), thread)
+    @ccall libaws_c_common.aws_thread_get_id(thread::Ptr{aws_thread})::aws_thread_id_t
 end
 
 """
@@ -9356,7 +9609,7 @@ enum aws_thread_detach_state aws_thread_get_detach_state(struct aws_thread *thre
 ```
 """
 function aws_thread_get_detach_state(thread)
-    ccall((:aws_thread_get_detach_state, libaws_c_common), aws_thread_detach_state, (Ptr{aws_thread},), thread)
+    @ccall libaws_c_common.aws_thread_get_detach_state(thread::Ptr{aws_thread})::aws_thread_detach_state
 end
 
 """
@@ -9370,7 +9623,7 @@ int aws_thread_join(struct aws_thread *thread);
 ```
 """
 function aws_thread_join(thread)
-    ccall((:aws_thread_join, libaws_c_common), Cint, (Ptr{aws_thread},), thread)
+    @ccall libaws_c_common.aws_thread_join(thread::Ptr{aws_thread})::Cint
 end
 
 """
@@ -9388,7 +9641,7 @@ int aws_thread_join_all_managed(void);
 ```
 """
 function aws_thread_join_all_managed()
-    ccall((:aws_thread_join_all_managed, libaws_c_common), Cint, ())
+    @ccall libaws_c_common.aws_thread_join_all_managed()::Cint
 end
 
 """
@@ -9402,7 +9655,7 @@ void aws_thread_set_managed_join_timeout_ns(uint64_t timeout_in_ns);
 ```
 """
 function aws_thread_set_managed_join_timeout_ns(timeout_in_ns)
-    ccall((:aws_thread_set_managed_join_timeout_ns, libaws_c_common), Cvoid, (UInt64,), timeout_in_ns)
+    @ccall libaws_c_common.aws_thread_set_managed_join_timeout_ns(timeout_in_ns::UInt64)::Cvoid
 end
 
 """
@@ -9416,7 +9669,7 @@ void aws_thread_clean_up(struct aws_thread *thread);
 ```
 """
 function aws_thread_clean_up(thread)
-    ccall((:aws_thread_clean_up, libaws_c_common), Cvoid, (Ptr{aws_thread},), thread)
+    @ccall libaws_c_common.aws_thread_clean_up(thread::Ptr{aws_thread})::Cvoid
 end
 
 """
@@ -9430,7 +9683,7 @@ aws_thread_id_t aws_thread_current_thread_id(void);
 ```
 """
 function aws_thread_current_thread_id()
-    ccall((:aws_thread_current_thread_id, libaws_c_common), aws_thread_id_t, ())
+    @ccall libaws_c_common.aws_thread_current_thread_id()::aws_thread_id_t
 end
 
 """
@@ -9444,7 +9697,7 @@ bool aws_thread_thread_id_equal(aws_thread_id_t t1, aws_thread_id_t t2);
 ```
 """
 function aws_thread_thread_id_equal(t1, t2)
-    ccall((:aws_thread_thread_id_equal, libaws_c_common), Bool, (aws_thread_id_t, aws_thread_id_t), t1, t2)
+    @ccall libaws_c_common.aws_thread_thread_id_equal(t1::aws_thread_id_t, t2::aws_thread_id_t)::Bool
 end
 
 """
@@ -9458,7 +9711,7 @@ void aws_thread_current_sleep(uint64_t nanos);
 ```
 """
 function aws_thread_current_sleep(nanos)
-    ccall((:aws_thread_current_sleep, libaws_c_common), Cvoid, (UInt64,), nanos)
+    @ccall libaws_c_common.aws_thread_current_sleep(nanos::UInt64)::Cvoid
 end
 
 # typedef void ( aws_thread_atexit_fn ) ( void * user_data )
@@ -9475,7 +9728,7 @@ int aws_thread_current_at_exit(aws_thread_atexit_fn *callback, void *user_data);
 ```
 """
 function aws_thread_current_at_exit(callback, user_data)
-    ccall((:aws_thread_current_at_exit, libaws_c_common), Cint, (Ptr{aws_thread_atexit_fn}, Ptr{Cvoid}), callback, user_data)
+    @ccall libaws_c_common.aws_thread_current_at_exit(callback::Ptr{aws_thread_atexit_fn}, user_data::Ptr{Cvoid})::Cint
 end
 
 """
@@ -9491,7 +9744,7 @@ void aws_thread_increment_unjoined_count(void);
 ```
 """
 function aws_thread_increment_unjoined_count()
-    ccall((:aws_thread_increment_unjoined_count, libaws_c_common), Cvoid, ())
+    @ccall libaws_c_common.aws_thread_increment_unjoined_count()::Cvoid
 end
 
 """
@@ -9507,7 +9760,7 @@ void aws_thread_decrement_unjoined_count(void);
 ```
 """
 function aws_thread_decrement_unjoined_count()
-    ccall((:aws_thread_decrement_unjoined_count, libaws_c_common), Cvoid, ())
+    @ccall libaws_c_common.aws_thread_decrement_unjoined_count()::Cvoid
 end
 
 """
@@ -9521,7 +9774,7 @@ int aws_thread_current_name(struct aws_allocator *allocator, struct aws_string *
 ```
 """
 function aws_thread_current_name(allocator, out_name)
-    ccall((:aws_thread_current_name, libaws_c_common), Cint, (Ptr{aws_allocator}, Ptr{Ptr{aws_string}}), allocator, out_name)
+    @ccall libaws_c_common.aws_thread_current_name(allocator::Ptr{aws_allocator}, out_name::Ptr{Ptr{aws_string}})::Cint
 end
 
 """
@@ -9535,7 +9788,7 @@ int aws_thread_name( struct aws_allocator *allocator, aws_thread_id_t thread_id,
 ```
 """
 function aws_thread_name(allocator, thread_id, out_name)
-    ccall((:aws_thread_name, libaws_c_common), Cint, (Ptr{aws_allocator}, aws_thread_id_t, Ptr{Ptr{aws_string}}), allocator, thread_id, out_name)
+    @ccall libaws_c_common.aws_thread_name(allocator::Ptr{aws_allocator}, thread_id::aws_thread_id_t, out_name::Ptr{Ptr{aws_string}})::Cint
 end
 
 mutable struct aws_thread_scheduler end
@@ -9555,7 +9808,7 @@ struct aws_thread_scheduler *aws_thread_scheduler_new( struct aws_allocator *all
 ```
 """
 function aws_thread_scheduler_new(allocator, thread_options)
-    ccall((:aws_thread_scheduler_new, libaws_c_common), Ptr{aws_thread_scheduler}, (Ptr{aws_allocator}, Ptr{aws_thread_options}), allocator, thread_options)
+    @ccall libaws_c_common.aws_thread_scheduler_new(allocator::Ptr{aws_allocator}, thread_options::Ptr{aws_thread_options})::Ptr{aws_thread_scheduler}
 end
 
 """
@@ -9569,7 +9822,7 @@ void aws_thread_scheduler_acquire(struct aws_thread_scheduler *scheduler);
 ```
 """
 function aws_thread_scheduler_acquire(scheduler)
-    ccall((:aws_thread_scheduler_acquire, libaws_c_common), Cvoid, (Ptr{aws_thread_scheduler},), scheduler)
+    @ccall libaws_c_common.aws_thread_scheduler_acquire(scheduler::Ptr{aws_thread_scheduler})::Cvoid
 end
 
 """
@@ -9583,7 +9836,7 @@ void aws_thread_scheduler_release(const struct aws_thread_scheduler *scheduler);
 ```
 """
 function aws_thread_scheduler_release(scheduler)
-    ccall((:aws_thread_scheduler_release, libaws_c_common), Cvoid, (Ptr{aws_thread_scheduler},), scheduler)
+    @ccall libaws_c_common.aws_thread_scheduler_release(scheduler::Ptr{aws_thread_scheduler})::Cvoid
 end
 
 """
@@ -9597,7 +9850,7 @@ void aws_thread_scheduler_schedule_future( struct aws_thread_scheduler *schedule
 ```
 """
 function aws_thread_scheduler_schedule_future(scheduler, task, time_to_run)
-    ccall((:aws_thread_scheduler_schedule_future, libaws_c_common), Cvoid, (Ptr{aws_thread_scheduler}, Ptr{aws_task}, UInt64), scheduler, task, time_to_run)
+    @ccall libaws_c_common.aws_thread_scheduler_schedule_future(scheduler::Ptr{aws_thread_scheduler}, task::Ptr{aws_task}, time_to_run::UInt64)::Cvoid
 end
 
 """
@@ -9611,7 +9864,7 @@ void aws_thread_scheduler_schedule_now(struct aws_thread_scheduler *scheduler, s
 ```
 """
 function aws_thread_scheduler_schedule_now(scheduler, task)
-    ccall((:aws_thread_scheduler_schedule_now, libaws_c_common), Cvoid, (Ptr{aws_thread_scheduler}, Ptr{aws_task}), scheduler, task)
+    @ccall libaws_c_common.aws_thread_scheduler_schedule_now(scheduler::Ptr{aws_thread_scheduler}, task::Ptr{aws_task})::Cvoid
 end
 
 """
@@ -9625,7 +9878,7 @@ void aws_thread_scheduler_cancel_task(struct aws_thread_scheduler *scheduler, st
 ```
 """
 function aws_thread_scheduler_cancel_task(scheduler, task)
-    ccall((:aws_thread_scheduler_cancel_task, libaws_c_common), Cvoid, (Ptr{aws_thread_scheduler}, Ptr{aws_task}), scheduler, task)
+    @ccall libaws_c_common.aws_thread_scheduler_cancel_task(scheduler::Ptr{aws_thread_scheduler}, task::Ptr{aws_task})::Cvoid
 end
 
 """
@@ -9639,7 +9892,7 @@ time_t aws_timegm(struct tm *const t);
 ```
 """
 function aws_timegm(t)
-    ccall((:aws_timegm, libaws_c_common), time_t, (Ptr{tm},), t)
+    @ccall libaws_c_common.aws_timegm(t::Ptr{tm})::time_t
 end
 
 """
@@ -9653,7 +9906,7 @@ void aws_localtime(time_t time, struct tm *t);
 ```
 """
 function aws_localtime(time, t)
-    ccall((:aws_localtime, libaws_c_common), Cvoid, (time_t, Ptr{tm}), time, t)
+    @ccall libaws_c_common.aws_localtime(time::time_t, t::Ptr{tm})::Cvoid
 end
 
 """
@@ -9667,7 +9920,7 @@ void aws_gmtime(time_t time, struct tm *t);
 ```
 """
 function aws_gmtime(time, t)
-    ccall((:aws_gmtime, libaws_c_common), Cvoid, (time_t, Ptr{tm}), time, t)
+    @ccall libaws_c_common.aws_gmtime(time::time_t, t::Ptr{tm})::Cvoid
 end
 
 """
@@ -9685,7 +9938,7 @@ struct aws_uri
     user::aws_byte_cursor
     password::aws_byte_cursor
     host_name::aws_byte_cursor
-    port::UInt16
+    port::UInt32
     path::aws_byte_cursor
     query_string::aws_byte_cursor
     path_and_query::aws_byte_cursor
@@ -9712,7 +9965,7 @@ struct aws_uri_builder_options
     scheme::aws_byte_cursor
     path::aws_byte_cursor
     host_name::aws_byte_cursor
-    port::UInt16
+    port::UInt32
     query_params::Ptr{aws_array_list}
     query_string::aws_byte_cursor
 end
@@ -9728,7 +9981,7 @@ int aws_uri_init_parse( struct aws_uri *uri, struct aws_allocator *allocator, co
 ```
 """
 function aws_uri_init_parse(uri, allocator, uri_str)
-    ccall((:aws_uri_init_parse, libaws_c_common), Cint, (Ptr{aws_uri}, Ptr{aws_allocator}, Ptr{aws_byte_cursor}), uri, allocator, uri_str)
+    @ccall libaws_c_common.aws_uri_init_parse(uri::Ptr{aws_uri}, allocator::Ptr{aws_allocator}, uri_str::Ptr{aws_byte_cursor})::Cint
 end
 
 """
@@ -9742,7 +9995,7 @@ int aws_uri_init_from_builder_options( struct aws_uri *uri, struct aws_allocator
 ```
 """
 function aws_uri_init_from_builder_options(uri, allocator, options)
-    ccall((:aws_uri_init_from_builder_options, libaws_c_common), Cint, (Ptr{aws_uri}, Ptr{aws_allocator}, Ptr{aws_uri_builder_options}), uri, allocator, options)
+    @ccall libaws_c_common.aws_uri_init_from_builder_options(uri::Ptr{aws_uri}, allocator::Ptr{aws_allocator}, options::Ptr{aws_uri_builder_options})::Cint
 end
 
 """
@@ -9754,7 +10007,7 @@ void aws_uri_clean_up(struct aws_uri *uri);
 ```
 """
 function aws_uri_clean_up(uri)
-    ccall((:aws_uri_clean_up, libaws_c_common), Cvoid, (Ptr{aws_uri},), uri)
+    @ccall libaws_c_common.aws_uri_clean_up(uri::Ptr{aws_uri})::Cvoid
 end
 
 """
@@ -9768,7 +10021,7 @@ const struct aws_byte_cursor *aws_uri_scheme(const struct aws_uri *uri);
 ```
 """
 function aws_uri_scheme(uri)
-    ccall((:aws_uri_scheme, libaws_c_common), Ptr{aws_byte_cursor}, (Ptr{aws_uri},), uri)
+    @ccall libaws_c_common.aws_uri_scheme(uri::Ptr{aws_uri})::Ptr{aws_byte_cursor}
 end
 
 """
@@ -9782,7 +10035,7 @@ const struct aws_byte_cursor *aws_uri_authority(const struct aws_uri *uri);
 ```
 """
 function aws_uri_authority(uri)
-    ccall((:aws_uri_authority, libaws_c_common), Ptr{aws_byte_cursor}, (Ptr{aws_uri},), uri)
+    @ccall libaws_c_common.aws_uri_authority(uri::Ptr{aws_uri})::Ptr{aws_byte_cursor}
 end
 
 """
@@ -9796,7 +10049,7 @@ const struct aws_byte_cursor *aws_uri_path(const struct aws_uri *uri);
 ```
 """
 function aws_uri_path(uri)
-    ccall((:aws_uri_path, libaws_c_common), Ptr{aws_byte_cursor}, (Ptr{aws_uri},), uri)
+    @ccall libaws_c_common.aws_uri_path(uri::Ptr{aws_uri})::Ptr{aws_byte_cursor}
 end
 
 """
@@ -9810,7 +10063,7 @@ const struct aws_byte_cursor *aws_uri_query_string(const struct aws_uri *uri);
 ```
 """
 function aws_uri_query_string(uri)
-    ccall((:aws_uri_query_string, libaws_c_common), Ptr{aws_byte_cursor}, (Ptr{aws_uri},), uri)
+    @ccall libaws_c_common.aws_uri_query_string(uri::Ptr{aws_uri})::Ptr{aws_byte_cursor}
 end
 
 """
@@ -9824,7 +10077,7 @@ const struct aws_byte_cursor *aws_uri_host_name(const struct aws_uri *uri);
 ```
 """
 function aws_uri_host_name(uri)
-    ccall((:aws_uri_host_name, libaws_c_common), Ptr{aws_byte_cursor}, (Ptr{aws_uri},), uri)
+    @ccall libaws_c_common.aws_uri_host_name(uri::Ptr{aws_uri})::Ptr{aws_byte_cursor}
 end
 
 """
@@ -9834,11 +10087,11 @@ Returns the port portion of the authority if it was present, otherwise, returns 
 
 ### Prototype
 ```c
-uint16_t aws_uri_port(const struct aws_uri *uri);
+uint32_t aws_uri_port(const struct aws_uri *uri);
 ```
 """
 function aws_uri_port(uri)
-    ccall((:aws_uri_port, libaws_c_common), UInt16, (Ptr{aws_uri},), uri)
+    @ccall libaws_c_common.aws_uri_port(uri::Ptr{aws_uri})::UInt32
 end
 
 """
@@ -9852,7 +10105,39 @@ const struct aws_byte_cursor *aws_uri_path_and_query(const struct aws_uri *uri);
 ```
 """
 function aws_uri_path_and_query(uri)
-    ccall((:aws_uri_path_and_query, libaws_c_common), Ptr{aws_byte_cursor}, (Ptr{aws_uri},), uri)
+    @ccall libaws_c_common.aws_uri_path_and_query(uri::Ptr{aws_uri})::Ptr{aws_byte_cursor}
+end
+
+"""
+    aws_query_string_next_param(query_string, param)
+
+For iterating over the params in the query string. `param` is an in/out argument used to track progress, it MUST be zeroed out to start. If true is returned, `param` contains the value of the next param. If false is returned, there are no further params.
+
+Edge cases: 1) Entries without '=' sign are treated as having a key and no value. Example: First param in query string "a&b=c" has key="a" value=""
+
+2) Blank entries are skipped. Example: The only param in query string "&&a=b" is key="a" value="b"
+
+### Prototype
+```c
+bool aws_query_string_next_param(struct aws_byte_cursor query_string, struct aws_uri_param *param);
+```
+"""
+function aws_query_string_next_param(query_string, param)
+    @ccall libaws_c_common.aws_query_string_next_param(query_string::aws_byte_cursor, param::Ptr{aws_uri_param})::Bool
+end
+
+"""
+    aws_query_string_params(query_string, out_params)
+
+Parses query string and stores the parameters in 'out\\_params'. Returns [`AWS_OP_SUCCESS`](@ref) on success and [`AWS_OP_ERR`](@ref) on failure. The user is responsible for initializing out\\_params with item size of struct aws\\_query\\_param. The user is also responsible for cleaning up out\\_params when finished.
+
+### Prototype
+```c
+int aws_query_string_params(struct aws_byte_cursor query_string, struct aws_array_list *out_params);
+```
+"""
+function aws_query_string_params(query_string, out_params)
+    @ccall libaws_c_common.aws_query_string_params(query_string::aws_byte_cursor, out_params::Ptr{aws_array_list})::Cint
 end
 
 """
@@ -9870,7 +10155,7 @@ bool aws_uri_query_string_next_param(const struct aws_uri *uri, struct aws_uri_p
 ```
 """
 function aws_uri_query_string_next_param(uri, param)
-    ccall((:aws_uri_query_string_next_param, libaws_c_common), Bool, (Ptr{aws_uri}, Ptr{aws_uri_param}), uri, param)
+    @ccall libaws_c_common.aws_uri_query_string_next_param(uri::Ptr{aws_uri}, param::Ptr{aws_uri_param})::Bool
 end
 
 """
@@ -9884,7 +10169,7 @@ int aws_uri_query_string_params(const struct aws_uri *uri, struct aws_array_list
 ```
 """
 function aws_uri_query_string_params(uri, out_params)
-    ccall((:aws_uri_query_string_params, libaws_c_common), Cint, (Ptr{aws_uri}, Ptr{aws_array_list}), uri, out_params)
+    @ccall libaws_c_common.aws_uri_query_string_params(uri::Ptr{aws_uri}, out_params::Ptr{aws_array_list})::Cint
 end
 
 """
@@ -9898,7 +10183,7 @@ int aws_byte_buf_append_encoding_uri_path( struct aws_byte_buf *buffer, const st
 ```
 """
 function aws_byte_buf_append_encoding_uri_path(buffer, cursor)
-    ccall((:aws_byte_buf_append_encoding_uri_path, libaws_c_common), Cint, (Ptr{aws_byte_buf}, Ptr{aws_byte_cursor}), buffer, cursor)
+    @ccall libaws_c_common.aws_byte_buf_append_encoding_uri_path(buffer::Ptr{aws_byte_buf}, cursor::Ptr{aws_byte_cursor})::Cint
 end
 
 """
@@ -9912,7 +10197,7 @@ int aws_byte_buf_append_encoding_uri_param( struct aws_byte_buf *buffer, const s
 ```
 """
 function aws_byte_buf_append_encoding_uri_param(buffer, cursor)
-    ccall((:aws_byte_buf_append_encoding_uri_param, libaws_c_common), Cint, (Ptr{aws_byte_buf}, Ptr{aws_byte_cursor}), buffer, cursor)
+    @ccall libaws_c_common.aws_byte_buf_append_encoding_uri_param(buffer::Ptr{aws_byte_buf}, cursor::Ptr{aws_byte_cursor})::Cint
 end
 
 """
@@ -9926,14 +10211,14 @@ int aws_byte_buf_append_decoding_uri(struct aws_byte_buf *buffer, const struct a
 ```
 """
 function aws_byte_buf_append_decoding_uri(buffer, cursor)
-    ccall((:aws_byte_buf_append_decoding_uri, libaws_c_common), Cint, (Ptr{aws_byte_buf}, Ptr{aws_byte_cursor}), buffer, cursor)
+    @ccall libaws_c_common.aws_byte_buf_append_decoding_uri(buffer::Ptr{aws_byte_buf}, cursor::Ptr{aws_byte_cursor})::Cint
 end
 
 struct aws_uuid
     uuid_data::NTuple{16, UInt8}
 end
 
-@cenum __JL_Ctag_1068::UInt32 begin
+@cenum __JL_Ctag_332::UInt32 begin
     AWS_UUID_STR_LEN = 37
 end
 
@@ -9946,7 +10231,7 @@ int aws_uuid_init(struct aws_uuid *uuid);
 ```
 """
 function aws_uuid_init(uuid)
-    ccall((:aws_uuid_init, libaws_c_common), Cint, (Ptr{aws_uuid},), uuid)
+    @ccall libaws_c_common.aws_uuid_init(uuid::Ptr{aws_uuid})::Cint
 end
 
 """
@@ -9958,7 +10243,7 @@ int aws_uuid_init_from_str(struct aws_uuid *uuid, const struct aws_byte_cursor *
 ```
 """
 function aws_uuid_init_from_str(uuid, uuid_str)
-    ccall((:aws_uuid_init_from_str, libaws_c_common), Cint, (Ptr{aws_uuid}, Ptr{aws_byte_cursor}), uuid, uuid_str)
+    @ccall libaws_c_common.aws_uuid_init_from_str(uuid::Ptr{aws_uuid}, uuid_str::Ptr{aws_byte_cursor})::Cint
 end
 
 """
@@ -9970,7 +10255,7 @@ int aws_uuid_to_str(const struct aws_uuid *uuid, struct aws_byte_buf *output);
 ```
 """
 function aws_uuid_to_str(uuid, output)
-    ccall((:aws_uuid_to_str, libaws_c_common), Cint, (Ptr{aws_uuid}, Ptr{aws_byte_buf}), uuid, output)
+    @ccall libaws_c_common.aws_uuid_to_str(uuid::Ptr{aws_uuid}, output::Ptr{aws_byte_buf})::Cint
 end
 
 """
@@ -9982,7 +10267,7 @@ bool aws_uuid_equals(const struct aws_uuid *a, const struct aws_uuid *b);
 ```
 """
 function aws_uuid_equals(a, b)
-    ccall((:aws_uuid_equals, libaws_c_common), Bool, (Ptr{aws_uuid}, Ptr{aws_uuid}), a, b)
+    @ccall libaws_c_common.aws_uuid_equals(a::Ptr{aws_uuid}, b::Ptr{aws_uuid})::Bool
 end
 
 mutable struct aws_xml_node end
@@ -10022,7 +10307,7 @@ int aws_xml_parse(struct aws_allocator *allocator, const struct aws_xml_parser_o
 ```
 """
 function aws_xml_parse(allocator, options)
-    ccall((:aws_xml_parse, libaws_c_common), Cint, (Ptr{aws_allocator}, Ptr{aws_xml_parser_options}), allocator, options)
+    @ccall libaws_c_common.aws_xml_parse(allocator::Ptr{aws_allocator}, options::Ptr{aws_xml_parser_options})::Cint
 end
 
 """
@@ -10036,7 +10321,7 @@ int aws_xml_node_as_body(struct aws_xml_node *node, struct aws_byte_cursor *out_
 ```
 """
 function aws_xml_node_as_body(node, out_body)
-    ccall((:aws_xml_node_as_body, libaws_c_common), Cint, (Ptr{aws_xml_node}, Ptr{aws_byte_cursor}), node, out_body)
+    @ccall libaws_c_common.aws_xml_node_as_body(node::Ptr{aws_xml_node}, out_body::Ptr{aws_byte_cursor})::Cint
 end
 
 """
@@ -10050,7 +10335,7 @@ int aws_xml_node_traverse( struct aws_xml_node *node, aws_xml_parser_on_node_enc
 ```
 """
 function aws_xml_node_traverse(node, on_node_encountered, user_data)
-    ccall((:aws_xml_node_traverse, libaws_c_common), Cint, (Ptr{aws_xml_node}, Ptr{aws_xml_parser_on_node_encountered_fn}, Ptr{Cvoid}), node, on_node_encountered, user_data)
+    @ccall libaws_c_common.aws_xml_node_traverse(node::Ptr{aws_xml_node}, on_node_encountered::Ptr{aws_xml_parser_on_node_encountered_fn}, user_data::Ptr{Cvoid})::Cint
 end
 
 """
@@ -10062,7 +10347,7 @@ struct aws_byte_cursor aws_xml_node_get_name(const struct aws_xml_node *node);
 ```
 """
 function aws_xml_node_get_name(node)
-    ccall((:aws_xml_node_get_name, libaws_c_common), aws_byte_cursor, (Ptr{aws_xml_node},), node)
+    @ccall libaws_c_common.aws_xml_node_get_name(node::Ptr{aws_xml_node})::aws_byte_cursor
 end
 
 """
@@ -10074,7 +10359,7 @@ size_t aws_xml_node_get_num_attributes(const struct aws_xml_node *node);
 ```
 """
 function aws_xml_node_get_num_attributes(node)
-    ccall((:aws_xml_node_get_num_attributes, libaws_c_common), Csize_t, (Ptr{aws_xml_node},), node)
+    @ccall libaws_c_common.aws_xml_node_get_num_attributes(node::Ptr{aws_xml_node})::Csize_t
 end
 
 """
@@ -10086,7 +10371,7 @@ struct aws_xml_attribute aws_xml_node_get_attribute(const struct aws_xml_node *n
 ```
 """
 function aws_xml_node_get_attribute(node, attribute_index)
-    ccall((:aws_xml_node_get_attribute, libaws_c_common), aws_xml_attribute, (Ptr{aws_xml_node}, Csize_t), node, attribute_index)
+    @ccall libaws_c_common.aws_xml_node_get_attribute(node::Ptr{aws_xml_node}, attribute_index::Csize_t)::aws_xml_attribute
 end
 
 """
@@ -10100,91 +10385,7 @@ void aws_secure_zero(void *pBuf, size_t bufsize);
 ```
 """
 function aws_secure_zero(pBuf, bufsize)
-    ccall((:aws_secure_zero, libaws_c_common), Cvoid, (Ptr{Cvoid}, Csize_t), pBuf, bufsize)
-end
-
-struct __JL_Ctag_1114
-    __lock::Cint
-    __nr_readers::Cuint
-    __readers_wakeup::Cuint
-    __writer_wakeup::Cuint
-    __nr_readers_queued::Cuint
-    __nr_writers_queued::Cuint
-    __writer::Cint
-    __shared::Cint
-    __pad1::Culong
-    __pad2::Culong
-    __flags::Cuint
-end
-function Base.getproperty(x::Ptr{__JL_Ctag_1114}, f::Symbol)
-    f === :__lock && return Ptr{Cint}(x + 0)
-    f === :__nr_readers && return Ptr{Cuint}(x + 4)
-    f === :__readers_wakeup && return Ptr{Cuint}(x + 8)
-    f === :__writer_wakeup && return Ptr{Cuint}(x + 12)
-    f === :__nr_readers_queued && return Ptr{Cuint}(x + 16)
-    f === :__nr_writers_queued && return Ptr{Cuint}(x + 20)
-    f === :__writer && return Ptr{Cint}(x + 24)
-    f === :__shared && return Ptr{Cint}(x + 28)
-    f === :__pad1 && return Ptr{Culong}(x + 32)
-    f === :__pad2 && return Ptr{Culong}(x + 40)
-    f === :__flags && return Ptr{Cuint}(x + 48)
-    return getfield(x, f)
-end
-
-function Base.getproperty(x::__JL_Ctag_1114, f::Symbol)
-    r = Ref{__JL_Ctag_1114}(x)
-    ptr = Base.unsafe_convert(Ptr{__JL_Ctag_1114}, r)
-    fptr = getproperty(ptr, f)
-    GC.@preserve r unsafe_load(fptr)
-end
-
-function Base.setproperty!(x::Ptr{__JL_Ctag_1114}, f::Symbol, v)
-    unsafe_store!(getproperty(x, f), v)
-end
-
-
-struct __JL_Ctag_1115
-    __lock::Cint
-    __futex::Cuint
-    __total_seq::Culonglong
-    __wakeup_seq::Culonglong
-    __woken_seq::Culonglong
-    __mutex::Ptr{Cvoid}
-    __nwaiters::Cuint
-    __broadcast_seq::Cuint
-end
-function Base.getproperty(x::Ptr{__JL_Ctag_1115}, f::Symbol)
-    f === :__lock && return Ptr{Cint}(x + 0)
-    f === :__futex && return Ptr{Cuint}(x + 4)
-    f === :__total_seq && return Ptr{Culonglong}(x + 8)
-    f === :__wakeup_seq && return Ptr{Culonglong}(x + 16)
-    f === :__woken_seq && return Ptr{Culonglong}(x + 24)
-    f === :__mutex && return Ptr{Ptr{Cvoid}}(x + 32)
-    f === :__nwaiters && return Ptr{Cuint}(x + 40)
-    f === :__broadcast_seq && return Ptr{Cuint}(x + 44)
-    return getfield(x, f)
-end
-
-function Base.getproperty(x::__JL_Ctag_1115, f::Symbol)
-    r = Ref{__JL_Ctag_1115}(x)
-    ptr = Base.unsafe_convert(Ptr{__JL_Ctag_1115}, r)
-    fptr = getproperty(ptr, f)
-    GC.@preserve r unsafe_load(fptr)
-end
-
-function Base.setproperty!(x::Ptr{__JL_Ctag_1115}, f::Symbol, v)
-    unsafe_store!(getproperty(x, f), v)
-end
-
-
-struct __pthread_mutex_s
-    __lock::Cint
-    __count::Cuint
-    __owner::Cint
-    __nusers::Cuint
-    __kind::Cint
-    __spins::Cint
-    __list::__pthread_list_t
+    @ccall libaws_c_common.aws_secure_zero(pBuf::Ptr{Cvoid}, bufsize::Csize_t)::Cvoid
 end
 
 const AWS_OP_SUCCESS = 0
