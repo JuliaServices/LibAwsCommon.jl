@@ -16,7 +16,7 @@ jobs:
       fail-fast: false
       matrix:
         version:
-          - "1.6"
+          - "1.9"
           - "1" # automatically expands to the latest stable 1.x release of Julia
           - nightly
         os:
@@ -52,13 +52,3 @@ jobs:
       - uses: codecov/codecov-action@v1
         with:
           file: lcov.info
-  docs:
-    name: Documentation
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: julia-actions/julia-buildpkg@latest
-      - uses: julia-actions/julia-docdeploy@latest
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          DOCUMENTER_KEY: ${{ secrets.DOCUMENTER_KEY }}
