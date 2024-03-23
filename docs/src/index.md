@@ -1,7 +1,7 @@
-# Example
+# LibAwsCommon
 
-Example Julia package repo.
+LibAwsCommon Julia package repo.
 
 ```@autodocs
-Modules = [Example]
+Modules = [LibAwsCommon]
 ```

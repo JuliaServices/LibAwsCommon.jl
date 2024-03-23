@@ -1,5 +1,5 @@
-using Documenter, Example
+using Documenter, LibAwsCommon
 
-makedocs(modules = [Example], sitename = "Example.jl")
+makedocs(modules=[LibAwsCommon], sitename="LibAwsCommon.jl")
 
-deploydocs(repo = "github.com/quinnj/Example.jl.git", push_preview = true)
+deploydocs(repo="github.com/quinnj/LibAwsCommon.jl.git", push_preview=true)
