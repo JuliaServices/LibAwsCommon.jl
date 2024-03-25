@@ -1,44 +1,36 @@
 using Clang.Generators
+using Clang.JLLEnvs
 using JLLPrefixes
+import aws_c_common_jll
 
 cd(@__DIR__)
 
-options = load_options(joinpath(@__DIR__, "generator.toml"))
-options["general"]["output_file_path"] = joinpath(@__DIR__, "..", "src", "lib.jl")
-
-metas = collect_artifact_metas(["aws_c_common_jll"])
-metas_keys = collect(keys(metas))
-
-jll_include_dirs = Dict(
-    "aws_c_common_jll" => ["aws/common"],
-)
-
-# add compiler flags, e.g. "-DXXXXXXXXX"
-args = get_default_args()  # Note you must call this function firstly and then append your own flags
-header_dirs = String[]
-
-for (jll_name, include_dirs) in collect(jll_include_dirs)
-    meta_key = metas_keys[findfirst(it -> it.name == jll_name, metas_keys)]
-    meta = metas[meta_key]
-    if length(meta["paths"]) != 1
-        error("not sure what to do with these paths", meta)
+for target in JLLEnvs.JLL_ENV_TRIPLES
+    if target == "i686-w64-mingw32"
+        # aws_c_common_jll does not support i686 windows https://github.com/JuliaPackaging/Yggdrasil/blob/bbab3a916ae5543902b025a4a873cf9ee4a7de68/A/aws_c_common/build_tarballs.jl#L48-L49
+        continue
     end
-    path = meta["paths"][1]
-    push!(args, "-I$(joinpath(path, "include"))")
-    for dir in include_dirs
-        push!(header_dirs, joinpath(path, "include", dir))
+    options = load_options(joinpath(@__DIR__, "generator.toml"))
+    options["general"]["output_file_path"] = joinpath(@__DIR__, "..", "lib", "$target.jl")
+
+    header_dirs = []
+    args = get_default_args(target)
+    inc = JLLEnvs.get_pkg_include_dir(aws_c_common_jll, target)
+    push!(args, "-I$inc")
+    push!(header_dirs, inc)
+
+    headers = String[]
+    for header_dir in header_dirs
+        for (root, dirs, files) in walkdir(header_dir)
+            for file in files
+                if endswith(file, ".h")
+                    push!(headers, joinpath(root, file))
+                end
+            end
+        end
     end
+    unique!(headers)
+
+    ctx = create_context(headers, args, options)
+    build!(ctx)
 end
-
-headers = String[]
-for header_dir in header_dirs, file in readdir(header_dir, join=true)
-    if endswith(file, ".h")
-        push!(headers, file)
-    end
-end
-
-# create context
-ctx = create_context(headers, args, options)
-
-# run generator
-build!(ctx)

@@ -1,85 +1,31 @@
 using CEnum
 
-const __time_t = Clong
+const __time_t = Int64
+
+mutable struct pthread end
+
+mutable struct pthread_cond end
+
+mutable struct pthread_mutex end
+
+mutable struct pthread_rwlock end
+
+const pthread_t = Ptr{pthread}
+
+const pthread_mutex_t = Ptr{pthread_mutex}
+
+const pthread_cond_t = Ptr{pthread_cond}
+
+struct pthread_once
+    state::Cint
+    mutex::pthread_mutex_t
+end
+
+const pthread_once_t = pthread_once
+
+const pthread_rwlock_t = Ptr{pthread_rwlock}
 
 const time_t = __time_t
-
-const pthread_t = Culong
-
-struct __pthread_internal_list
-    __prev::Ptr{__pthread_internal_list}
-    __next::Ptr{__pthread_internal_list}
-end
-
-const __pthread_list_t = __pthread_internal_list
-
-struct pthread_mutex_t
-    data::NTuple{40, UInt8}
-end
-
-function Base.getproperty(x::Ptr{pthread_mutex_t}, f::Symbol)
-    f === :__data && return Ptr{__pthread_mutex_s}(x + 0)
-    f === :__size && return Ptr{NTuple{40, Cchar}}(x + 0)
-    f === :__align && return Ptr{Clong}(x + 0)
-    return getfield(x, f)
-end
-
-function Base.getproperty(x::pthread_mutex_t, f::Symbol)
-    r = Ref{pthread_mutex_t}(x)
-    ptr = Base.unsafe_convert(Ptr{pthread_mutex_t}, r)
-    fptr = getproperty(ptr, f)
-    GC.@preserve r unsafe_load(fptr)
-end
-
-function Base.setproperty!(x::Ptr{pthread_mutex_t}, f::Symbol, v)
-    unsafe_store!(getproperty(x, f), v)
-end
-
-struct pthread_cond_t
-    data::NTuple{48, UInt8}
-end
-
-function Base.getproperty(x::Ptr{pthread_cond_t}, f::Symbol)
-    f === :__data && return Ptr{__JL_Ctag_1115}(x + 0)
-    f === :__size && return Ptr{NTuple{48, Cchar}}(x + 0)
-    f === :__align && return Ptr{Clonglong}(x + 0)
-    return getfield(x, f)
-end
-
-function Base.getproperty(x::pthread_cond_t, f::Symbol)
-    r = Ref{pthread_cond_t}(x)
-    ptr = Base.unsafe_convert(Ptr{pthread_cond_t}, r)
-    fptr = getproperty(ptr, f)
-    GC.@preserve r unsafe_load(fptr)
-end
-
-function Base.setproperty!(x::Ptr{pthread_cond_t}, f::Symbol, v)
-    unsafe_store!(getproperty(x, f), v)
-end
-
-const pthread_once_t = Cint
-
-struct pthread_rwlock_t
-    data::NTuple{56, UInt8}
-end
-
-function Base.getproperty(x::Ptr{pthread_rwlock_t}, f::Symbol)
-    f === :__data && return Ptr{__JL_Ctag_1114}(x + 0)
-    f === :__size && return Ptr{NTuple{56, Cchar}}(x + 0)
-    f === :__align && return Ptr{Clong}(x + 0)
-    return getfield(x, f)
-end
-
-function Base.getproperty(x::pthread_rwlock_t, f::Symbol)
-    r = Ref{pthread_rwlock_t}(x)
-    ptr = Base.unsafe_convert(Ptr{pthread_rwlock_t}, r)
-    fptr = getproperty(ptr, f)
-    GC.@preserve r unsafe_load(fptr)
-end
-
-function Base.setproperty!(x::Ptr{pthread_rwlock_t}, f::Symbol, v)
-    unsafe_store!(getproperty(x, f), v)
-end
 
 struct tm
     tm_sec::Cint
@@ -93,6 +39,18 @@ struct tm
     tm_isdst::Cint
     tm_gmtoff::Clong
     tm_zone::Ptr{Cchar}
+end
+
+"""
+    pthread_once(arg1, arg2)
+
+### Prototype
+```c
+int pthread_once(pthread_once_t *, void (*) (void));
+```
+"""
+function pthread_once(arg1, arg2)
+    ccall((:pthread_once, libaws_c_common), Cint, (Ptr{pthread_once_t}, Ptr{Cvoid}), arg1, arg2)
 end
 
 struct aws_allocator
@@ -1043,7 +1001,7 @@ function aws_max_double(a, b)
     ccall((:aws_max_double, libaws_c_common), Cdouble, (Cdouble, Cdouble), a, b)
 end
 
-@cenum __JL_Ctag_41::UInt32 begin
+@cenum __JL_Ctag_15::UInt32 begin
     AWS_ARRAY_LIST_DEBUG_FILL = 221
 end
 
@@ -4344,7 +4302,7 @@ function aws_cpu_has_feature(feature_name)
     ccall((:aws_cpu_has_feature, libaws_c_common), Bool, (aws_cpu_feature_name,), feature_name)
 end
 
-@cenum __JL_Ctag_267::UInt32 begin
+@cenum __JL_Ctag_89::UInt32 begin
     AWS_DATE_TIME_STR_MAX_LEN = 100
     AWS_DATE_TIME_STR_MAX_BASIC_LEN = 20
 end
@@ -5705,7 +5663,7 @@ function aws_file_get_length(file, length)
     ccall((:aws_file_get_length, libaws_c_common), Cint, (Ptr{Libc.FILE}, Ptr{Int64}), file, length)
 end
 
-@cenum __JL_Ctag_418::UInt32 begin
+@cenum __JL_Ctag_139::UInt32 begin
     AWS_COMMON_HASH_TABLE_ITER_CONTINUE = 1
     AWS_COMMON_HASH_TABLE_ITER_DELETE = 2
     AWS_COMMON_HASH_TABLE_ITER_ERROR = 4
@@ -7298,7 +7256,7 @@ Log subject is an enum similar to aws error: each library has its own value-spac
 """
 const aws_log_subject_t = UInt32
 
-@cenum __JL_Ctag_635::UInt32 begin
+@cenum __JL_Ctag_205::UInt32 begin
     AWS_LOG_SUBJECT_STRIDE_BITS = 10
 end
 
@@ -7583,7 +7541,7 @@ const static_assertion_at_line_61 = NTuple{1, Cchar}
 
 const static_assertion_at_line_62 = NTuple{1, Cchar}
 
-@cenum __JL_Ctag_656::UInt32 begin
+@cenum __JL_Ctag_213::UInt32 begin
     AWS_CACHE_LINE = 64
 end
 
@@ -8435,7 +8393,7 @@ end
 
 const aws_crt_statistics_category_t = UInt32
 
-@cenum __JL_Ctag_859::UInt32 begin
+@cenum __JL_Ctag_277::UInt32 begin
     AWS_CRT_STATISTICS_CATEGORY_STRIDE_BITS = 8
 end
 
@@ -9025,24 +8983,24 @@ A scheduled function.
 """
 const aws_task_fn = Cvoid
 
-struct __JL_Ctag_1150
+struct __JL_Ctag_385
     data::NTuple{8, UInt8}
 end
 
-function Base.getproperty(x::Ptr{__JL_Ctag_1150}, f::Symbol)
+function Base.getproperty(x::Ptr{__JL_Ctag_385}, f::Symbol)
     f === :scheduled && return Ptr{Bool}(x + 0)
     f === :reserved && return Ptr{Csize_t}(x + 0)
     return getfield(x, f)
 end
 
-function Base.getproperty(x::__JL_Ctag_1150, f::Symbol)
-    r = Ref{__JL_Ctag_1150}(x)
-    ptr = Base.unsafe_convert(Ptr{__JL_Ctag_1150}, r)
+function Base.getproperty(x::__JL_Ctag_385, f::Symbol)
+    r = Ref{__JL_Ctag_385}(x)
+    ptr = Base.unsafe_convert(Ptr{__JL_Ctag_385}, r)
     fptr = getproperty(ptr, f)
     GC.@preserve r unsafe_load(fptr)
 end
 
-function Base.setproperty!(x::Ptr{__JL_Ctag_1150}, f::Symbol, v)
+function Base.setproperty!(x::Ptr{__JL_Ctag_385}, f::Symbol, v)
     unsafe_store!(getproperty(x, f), v)
 end
 
@@ -9057,7 +9015,7 @@ function Base.getproperty(x::Ptr{aws_task}, f::Symbol)
     f === :node && return Ptr{aws_linked_list_node}(x + 24)
     f === :priority_queue_node && return Ptr{aws_priority_queue_node}(x + 40)
     f === :type_tag && return Ptr{Ptr{Cchar}}(x + 48)
-    f === :abi_extension && return Ptr{__JL_Ctag_1150}(x + 56)
+    f === :abi_extension && return Ptr{__JL_Ctag_385}(x + 56)
     return getfield(x, f)
 end
 
@@ -9933,7 +9891,7 @@ struct aws_uuid
     uuid_data::NTuple{16, UInt8}
 end
 
-@cenum __JL_Ctag_1068::UInt32 begin
+@cenum __JL_Ctag_347::UInt32 begin
     AWS_UUID_STR_LEN = 37
 end
 
@@ -10103,88 +10061,1087 @@ function aws_secure_zero(pBuf, bufsize)
     ccall((:aws_secure_zero, libaws_c_common), Cvoid, (Ptr{Cvoid}, Csize_t), pBuf, bufsize)
 end
 
-struct __JL_Ctag_1114
-    __lock::Cint
-    __nr_readers::Cuint
-    __readers_wakeup::Cuint
-    __writer_wakeup::Cuint
-    __nr_readers_queued::Cuint
-    __nr_writers_queued::Cuint
-    __writer::Cint
-    __shared::Cint
-    __pad1::Culong
-    __pad2::Culong
-    __flags::Cuint
+"""
+` exclude_from_documentation `
+"""
+const __itt_timestamp = Culonglong
+
+"""
+    __itt_collection_scope
+
+` __itt_collection_scope`
+
+Enumerator for collection scopes
+"""
+@cenum __itt_collection_scope::UInt32 begin
+    __itt_collection_scope_host = 1
+    __itt_collection_scope_offload = 2
+    __itt_collection_scope_all = 2147483647
 end
-function Base.getproperty(x::Ptr{__JL_Ctag_1114}, f::Symbol)
-    f === :__lock && return Ptr{Cint}(x + 0)
-    f === :__nr_readers && return Ptr{Cuint}(x + 4)
-    f === :__readers_wakeup && return Ptr{Cuint}(x + 8)
-    f === :__writer_wakeup && return Ptr{Cuint}(x + 12)
-    f === :__nr_readers_queued && return Ptr{Cuint}(x + 16)
-    f === :__nr_writers_queued && return Ptr{Cuint}(x + 20)
-    f === :__writer && return Ptr{Cint}(x + 24)
-    f === :__shared && return Ptr{Cint}(x + 28)
-    f === :__pad1 && return Ptr{Culong}(x + 32)
-    f === :__pad2 && return Ptr{Culong}(x + 40)
-    f === :__flags && return Ptr{Cuint}(x + 48)
+
+# ITT_STUBV
+const __itt_pause_ptr__3_0_t = Ptr{Cvoid}
+
+# ITT_STUBV
+const __itt_pause_scoped_ptr__3_0_t = Ptr{Cvoid}
+
+# ITT_STUBV
+const __itt_resume_ptr__3_0_t = Ptr{Cvoid}
+
+# ITT_STUBV
+const __itt_resume_scoped_ptr__3_0_t = Ptr{Cvoid}
+
+# ITT_STUBV
+const __itt_detach_ptr__3_0_t = Ptr{Cvoid}
+
+"""
+` Intel Processor Trace control`
+
+API from this group provides control over collection and analysis of Intel Processor Trace (Intel PT) data Information about Intel Processor Trace technology can be found here (Volume 3 chapter 35): https://software.intel.com/sites/default/files/managed/39/c5/325462-sdm-vol-1-2abcd-3abcd.pdf Use this API to mark particular code regions for loading detailed performance statistics. This mode makes your analysis faster and more accurate. @{
+"""
+const __itt_pt_region = Cuchar
+
+# ITT_STUB
+const __itt_pt_region_create_ptr__3_0_t = Ptr{Cvoid}
+
+"""
+    __itt_mark_pt_region_begin(region)
+
+function contains a special code pattern identified on the post-processing stage and marks the beginning of a code region targeted for Intel PT analysis
+
+### Parameters
+* `region`:\\[in\\] - region id, 0 <= region < 8
+### Prototype
+```c
+void __itt_mark_pt_region_begin(__itt_pt_region region);
+```
+"""
+function __itt_mark_pt_region_begin(region)
+    ccall((:__itt_mark_pt_region_begin, libaws_c_common), Cvoid, (__itt_pt_region,), region)
+end
+
+"""
+    __itt_mark_pt_region_end(region)
+
+function contains a special code pattern identified on the post-processing stage and marks the end of a code region targeted for Intel PT analysis
+
+### Parameters
+* `region`:\\[in\\] - region id, 0 <= region < 8
+### Prototype
+```c
+void __itt_mark_pt_region_end(__itt_pt_region region);
+```
+"""
+function __itt_mark_pt_region_end(region)
+    ccall((:__itt_mark_pt_region_end, libaws_c_common), Cvoid, (__itt_pt_region,), region)
+end
+
+# ITT_STUBV
+const __itt_thread_set_name_ptr__3_0_t = Ptr{Cvoid}
+
+# ITT_STUBV
+const __itt_thread_ignore_ptr__3_0_t = Ptr{Cvoid}
+
+# ITT_STUBV
+const __itt_suppress_push_ptr__3_0_t = Ptr{Cvoid}
+
+# ITT_STUBV
+const __itt_suppress_pop_ptr__3_0_t = Ptr{Cvoid}
+
+"""
+    __itt_suppress_mode
+
+` __itt_suppress_mode`
+
+Enumerator for the suppressing modes
+"""
+@cenum __itt_suppress_mode::UInt32 begin
+    __itt_unsuppress_range = 0
+    __itt_suppress_range = 1
+end
+
+"""
+` __itt_suppress_mode`
+
+Enumerator for the suppressing modes
+"""
+const __itt_suppress_mode_t = __itt_suppress_mode
+
+"""
+    __itt_collection_state
+
+` __itt_collection_state`
+
+Enumerator for collection state.
+"""
+@cenum __itt_collection_state::UInt32 begin
+    __itt_collection_uninitialized = 0
+    __itt_collection_init_fail = 1
+    __itt_collection_collector_absent = 2
+    __itt_collection_collector_exists = 3
+    __itt_collection_init_successful = 4
+end
+
+# ITT_STUBV
+const __itt_suppress_mark_range_ptr__3_0_t = Ptr{Cvoid}
+
+# ITT_STUBV
+const __itt_suppress_clear_range_ptr__3_0_t = Ptr{Cvoid}
+
+# ITT_STUBV
+const __itt_sync_create_ptr__3_0_t = Ptr{Cvoid}
+
+# ITT_STUBV
+const __itt_sync_rename_ptr__3_0_t = Ptr{Cvoid}
+
+# ITT_STUBV
+const __itt_sync_destroy_ptr__3_0_t = Ptr{Cvoid}
+
+# ITT_STUBV
+const __itt_sync_prepare_ptr__3_0_t = Ptr{Cvoid}
+
+# ITT_STUBV
+const __itt_sync_cancel_ptr__3_0_t = Ptr{Cvoid}
+
+# ITT_STUBV
+const __itt_sync_acquired_ptr__3_0_t = Ptr{Cvoid}
+
+# ITT_STUBV
+const __itt_sync_releasing_ptr__3_0_t = Ptr{Cvoid}
+
+# ITT_STUBV
+const __itt_fsync_prepare_ptr__3_0_t = Ptr{Cvoid}
+
+# ITT_STUBV
+const __itt_fsync_cancel_ptr__3_0_t = Ptr{Cvoid}
+
+# ITT_STUBV
+const __itt_fsync_acquired_ptr__3_0_t = Ptr{Cvoid}
+
+# ITT_STUBV
+const __itt_fsync_releasing_ptr__3_0_t = Ptr{Cvoid}
+
+const __itt_model_site = Ptr{Cvoid}
+
+const __itt_model_site_instance = Ptr{Cvoid}
+
+const __itt_model_task = Ptr{Cvoid}
+
+const __itt_model_task_instance = Ptr{Cvoid}
+
+"""
+    __itt_model_disable
+
+` __itt_model_disable`
+
+Enumerator for the disable methods
+"""
+@cenum __itt_model_disable::UInt32 begin
+    __itt_model_disable_observation = 0
+    __itt_model_disable_collection = 1
+end
+
+# ITT_STUBV
+const __itt_model_site_begin_ptr__3_0_t = Ptr{Cvoid}
+
+# ITT_STUBV
+const __itt_model_site_beginA_ptr__3_0_t = Ptr{Cvoid}
+
+# ITT_STUBV
+const __itt_model_site_beginAL_ptr__3_0_t = Ptr{Cvoid}
+
+# ITT_STUBV
+const __itt_model_site_end_ptr__3_0_t = Ptr{Cvoid}
+
+# ITT_STUBV
+const __itt_model_site_end_2_ptr__3_0_t = Ptr{Cvoid}
+
+# ITT_STUBV
+const __itt_model_task_begin_ptr__3_0_t = Ptr{Cvoid}
+
+# ITT_STUBV
+const __itt_model_task_beginA_ptr__3_0_t = Ptr{Cvoid}
+
+# ITT_STUBV
+const __itt_model_task_beginAL_ptr__3_0_t = Ptr{Cvoid}
+
+# ITT_STUBV
+const __itt_model_iteration_taskA_ptr__3_0_t = Ptr{Cvoid}
+
+# ITT_STUBV
+const __itt_model_iteration_taskAL_ptr__3_0_t = Ptr{Cvoid}
+
+# ITT_STUBV
+const __itt_model_task_end_ptr__3_0_t = Ptr{Cvoid}
+
+# ITT_STUBV
+const __itt_model_task_end_2_ptr__3_0_t = Ptr{Cvoid}
+
+# ITT_STUBV
+const __itt_model_lock_acquire_ptr__3_0_t = Ptr{Cvoid}
+
+# ITT_STUBV
+const __itt_model_lock_acquire_2_ptr__3_0_t = Ptr{Cvoid}
+
+# ITT_STUBV
+const __itt_model_lock_release_ptr__3_0_t = Ptr{Cvoid}
+
+# ITT_STUBV
+const __itt_model_lock_release_2_ptr__3_0_t = Ptr{Cvoid}
+
+# ITT_STUBV
+const __itt_model_record_allocation_ptr__3_0_t = Ptr{Cvoid}
+
+# ITT_STUBV
+const __itt_model_record_deallocation_ptr__3_0_t = Ptr{Cvoid}
+
+# ITT_STUBV
+const __itt_model_induction_uses_ptr__3_0_t = Ptr{Cvoid}
+
+# ITT_STUBV
+const __itt_model_reduction_uses_ptr__3_0_t = Ptr{Cvoid}
+
+# ITT_STUBV
+const __itt_model_observe_uses_ptr__3_0_t = Ptr{Cvoid}
+
+# ITT_STUBV
+const __itt_model_clear_uses_ptr__3_0_t = Ptr{Cvoid}
+
+# ITT_STUBV
+const __itt_model_disable_push_ptr__3_0_t = Ptr{Cvoid}
+
+# ITT_STUBV
+const __itt_model_disable_pop_ptr__3_0_t = Ptr{Cvoid}
+
+# ITT_STUBV
+const __itt_model_aggregate_task_ptr__3_0_t = Ptr{Cvoid}
+
+"""
+` heap Heap`
+
+` public`
+
+Heap group @{
+"""
+const __itt_heap_function = Ptr{Cvoid}
+
+# ITT_STUB
+const __itt_heap_function_create_ptr__3_0_t = Ptr{Cvoid}
+
+# ITT_STUBV
+const __itt_heap_allocate_begin_ptr__3_0_t = Ptr{Cvoid}
+
+# ITT_STUBV
+const __itt_heap_allocate_end_ptr__3_0_t = Ptr{Cvoid}
+
+# ITT_STUBV
+const __itt_heap_free_begin_ptr__3_0_t = Ptr{Cvoid}
+
+# ITT_STUBV
+const __itt_heap_free_end_ptr__3_0_t = Ptr{Cvoid}
+
+# ITT_STUBV
+const __itt_heap_reallocate_begin_ptr__3_0_t = Ptr{Cvoid}
+
+# ITT_STUBV
+const __itt_heap_reallocate_end_ptr__3_0_t = Ptr{Cvoid}
+
+# ITT_STUBV
+const __itt_heap_internal_access_begin_ptr__3_0_t = Ptr{Cvoid}
+
+# ITT_STUBV
+const __itt_heap_internal_access_end_ptr__3_0_t = Ptr{Cvoid}
+
+# ITT_STUBV
+const __itt_heap_record_memory_growth_begin_ptr__3_0_t = Ptr{Cvoid}
+
+# ITT_STUBV
+const __itt_heap_record_memory_growth_end_ptr__3_0_t = Ptr{Cvoid}
+
+# ITT_STUBV
+const __itt_heap_reset_detection_ptr__3_0_t = Ptr{Cvoid}
+
+# ITT_STUBV
+const __itt_heap_record_ptr__3_0_t = Ptr{Cvoid}
+
+struct ___itt_domain
+    data::NTuple{48, UInt8}
+end
+
+function Base.getproperty(x::Ptr{___itt_domain}, f::Symbol)
+    f === :flags && return Ptr{Cint}(x + 0)
+    f === :nameA && return Ptr{Ptr{Cchar}}(x + 8)
+    f === :nameW && return Ptr{Ptr{Cvoid}}(x + 16)
+    f === :extra1 && return Ptr{Cint}(x + 24)
+    f === :extra2 && return Ptr{Ptr{Cvoid}}(x + 32)
+    f === :next && return Ptr{Ptr{___itt_domain}}(x + 40)
     return getfield(x, f)
 end
 
-function Base.getproperty(x::__JL_Ctag_1114, f::Symbol)
-    r = Ref{__JL_Ctag_1114}(x)
-    ptr = Base.unsafe_convert(Ptr{__JL_Ctag_1114}, r)
+function Base.getproperty(x::___itt_domain, f::Symbol)
+    r = Ref{___itt_domain}(x)
+    ptr = Base.unsafe_convert(Ptr{___itt_domain}, r)
     fptr = getproperty(ptr, f)
     GC.@preserve r unsafe_load(fptr)
 end
 
-function Base.setproperty!(x::Ptr{__JL_Ctag_1114}, f::Symbol, v)
+function Base.setproperty!(x::Ptr{___itt_domain}, f::Symbol, v)
     unsafe_store!(getproperty(x, f), v)
 end
 
+const __itt_domain = ___itt_domain
 
-struct __JL_Ctag_1115
-    __lock::Cint
-    __futex::Cuint
-    __total_seq::Culonglong
-    __wakeup_seq::Culonglong
-    __woken_seq::Culonglong
-    __mutex::Ptr{Cvoid}
-    __nwaiters::Cuint
-    __broadcast_seq::Cuint
+# ITT_STUB
+const __itt_domain_create_ptr__3_0_t = Ptr{Cvoid}
+
+struct ___itt_id
+    data::NTuple{24, UInt8}
 end
-function Base.getproperty(x::Ptr{__JL_Ctag_1115}, f::Symbol)
-    f === :__lock && return Ptr{Cint}(x + 0)
-    f === :__futex && return Ptr{Cuint}(x + 4)
-    f === :__total_seq && return Ptr{Culonglong}(x + 8)
-    f === :__wakeup_seq && return Ptr{Culonglong}(x + 16)
-    f === :__woken_seq && return Ptr{Culonglong}(x + 24)
-    f === :__mutex && return Ptr{Ptr{Cvoid}}(x + 32)
-    f === :__nwaiters && return Ptr{Cuint}(x + 40)
-    f === :__broadcast_seq && return Ptr{Cuint}(x + 44)
+
+function Base.getproperty(x::Ptr{___itt_id}, f::Symbol)
+    f === :d1 && return Ptr{Culonglong}(x + 0)
+    f === :d2 && return Ptr{Culonglong}(x + 8)
+    f === :d3 && return Ptr{Culonglong}(x + 16)
     return getfield(x, f)
 end
 
-function Base.getproperty(x::__JL_Ctag_1115, f::Symbol)
-    r = Ref{__JL_Ctag_1115}(x)
-    ptr = Base.unsafe_convert(Ptr{__JL_Ctag_1115}, r)
+function Base.getproperty(x::___itt_id, f::Symbol)
+    r = Ref{___itt_id}(x)
+    ptr = Base.unsafe_convert(Ptr{___itt_id}, r)
     fptr = getproperty(ptr, f)
     GC.@preserve r unsafe_load(fptr)
 end
 
-function Base.setproperty!(x::Ptr{__JL_Ctag_1115}, f::Symbol, v)
+function Base.setproperty!(x::Ptr{___itt_id}, f::Symbol, v)
     unsafe_store!(getproperty(x, f), v)
 end
 
+const __itt_id = ___itt_id
 
-struct __pthread_mutex_s
-    __lock::Cint
-    __count::Cuint
-    __owner::Cint
-    __nusers::Cuint
-    __kind::Cint
-    __spins::Cint
-    __list::__pthread_list_t
+"""
+    __itt_id_make(addr, extra)
+
+` ids`
+
+A convenience function is provided to create an ID without domain control.
+
+This is a convenience function to initialize an [`__itt_id`](@ref) structure. This function does not affect the collector runtime in any way. After you make the ID with this function, you still must create it with the [`__itt_id_create`](@ref) function before using the ID to identify a named entity.
+
+### Parameters
+* `addr`:\\[in\\] The address of object; high QWORD of the ID value.
+* `extra`:\\[in\\] The extra data to unique identify object; low QWORD of the ID value.
+### Prototype
+```c
+ITT_INLINE __itt_id ITTAPI __itt_id_make(void* addr, unsigned long long extra) ITT_INLINE_ATTRIBUTE;
+```
+"""
+function __itt_id_make(addr, extra)
+    ccall((:__itt_id_make, libaws_c_common), __itt_id, (Ptr{Cvoid}, Culonglong), addr, extra)
+end
+
+# ITT_STUBV
+const __itt_id_create_ptr__3_0_t = Ptr{Cvoid}
+
+# ITT_STUBV
+const __itt_id_destroy_ptr__3_0_t = Ptr{Cvoid}
+
+struct ___itt_string_handle
+    data::NTuple{40, UInt8}
+end
+
+function Base.getproperty(x::Ptr{___itt_string_handle}, f::Symbol)
+    f === :strA && return Ptr{Ptr{Cchar}}(x + 0)
+    f === :strW && return Ptr{Ptr{Cvoid}}(x + 8)
+    f === :extra1 && return Ptr{Cint}(x + 16)
+    f === :extra2 && return Ptr{Ptr{Cvoid}}(x + 24)
+    f === :next && return Ptr{Ptr{___itt_string_handle}}(x + 32)
+    return getfield(x, f)
+end
+
+function Base.getproperty(x::___itt_string_handle, f::Symbol)
+    r = Ref{___itt_string_handle}(x)
+    ptr = Base.unsafe_convert(Ptr{___itt_string_handle}, r)
+    fptr = getproperty(ptr, f)
+    GC.@preserve r unsafe_load(fptr)
+end
+
+function Base.setproperty!(x::Ptr{___itt_string_handle}, f::Symbol, v)
+    unsafe_store!(getproperty(x, f), v)
+end
+
+const __itt_string_handle = ___itt_string_handle
+
+# ITT_STUB
+const __itt_string_handle_create_ptr__3_0_t = Ptr{Cvoid}
+
+# ITT_STUB
+const __itt_get_timestamp_ptr__3_0_t = Ptr{Cvoid}
+
+# ITT_STUBV
+const __itt_region_begin_ptr__3_0_t = Ptr{Cvoid}
+
+# ITT_STUBV
+const __itt_region_end_ptr__3_0_t = Ptr{Cvoid}
+
+# ITT_STUBV
+const __itt_frame_begin_v3_ptr__3_0_t = Ptr{Cvoid}
+
+# ITT_STUBV
+const __itt_frame_end_v3_ptr__3_0_t = Ptr{Cvoid}
+
+# ITT_STUBV
+const __itt_frame_submit_v3_ptr__3_0_t = Ptr{Cvoid}
+
+# ITT_STUBV
+const __itt_task_group_ptr__3_0_t = Ptr{Cvoid}
+
+# ITT_STUBV
+const __itt_task_begin_ptr__3_0_t = Ptr{Cvoid}
+
+# ITT_STUBV
+const __itt_task_begin_fn_ptr__3_0_t = Ptr{Cvoid}
+
+# ITT_STUBV
+const __itt_task_end_ptr__3_0_t = Ptr{Cvoid}
+
+# ITT_STUBV
+const __itt_task_begin_overlapped_ptr__3_0_t = Ptr{Cvoid}
+
+# ITT_STUBV
+const __itt_task_end_overlapped_ptr__3_0_t = Ptr{Cvoid}
+
+"""
+    __itt_scope
+
+Describes the scope of an event object in the trace.
+"""
+@cenum __itt_scope::UInt32 begin
+    __itt_scope_unknown = 0
+    __itt_scope_global = 1
+    __itt_scope_track_group = 2
+    __itt_scope_track = 3
+    __itt_scope_task = 4
+    __itt_scope_marker = 5
+end
+
+# ITT_STUBV
+const __itt_marker_ptr__3_0_t = Ptr{Cvoid}
+
+"""
+    __itt_metadata_type
+
+` parameters`
+
+describes the type of metadata
+"""
+@cenum __itt_metadata_type::UInt32 begin
+    __itt_metadata_unknown = 0
+    __itt_metadata_u64 = 1
+    __itt_metadata_s64 = 2
+    __itt_metadata_u32 = 3
+    __itt_metadata_s32 = 4
+    __itt_metadata_u16 = 5
+    __itt_metadata_s16 = 6
+    __itt_metadata_float = 7
+    __itt_metadata_double = 8
+end
+
+# ITT_STUBV
+const __itt_metadata_add_ptr__3_0_t = Ptr{Cvoid}
+
+# ITT_STUBV
+const __itt_metadata_str_add_ptr__3_0_t = Ptr{Cvoid}
+
+# ITT_STUBV
+const __itt_metadata_add_with_scope_ptr__3_0_t = Ptr{Cvoid}
+
+# ITT_STUBV
+const __itt_metadata_str_add_with_scope_ptr__3_0_t = Ptr{Cvoid}
+
+"""
+    __itt_relation
+
+` relations`
+
+The kind of relation between two instances is specified by the enumerated type [`__itt_relation`](@ref). Relations between instances can be added with an API call. The relation API uses instance IDs. Relations can be added before or after the actual instances are created and persist independently of the instances. This is the motivation for having different lifetimes for instance IDs and the actual instances.
+"""
+@cenum __itt_relation::UInt32 begin
+    __itt_relation_is_unknown = 0
+    __itt_relation_is_dependent_on = 1
+    __itt_relation_is_sibling_of = 2
+    __itt_relation_is_parent_of = 3
+    __itt_relation_is_continuation_of = 4
+    __itt_relation_is_child_of = 5
+    __itt_relation_is_continued_by = 6
+    __itt_relation_is_predecessor_to = 7
+end
+
+# ITT_STUBV
+const __itt_relation_add_to_current_ptr__3_0_t = Ptr{Cvoid}
+
+# ITT_STUBV
+const __itt_relation_add_ptr__3_0_t = Ptr{Cvoid}
+
+struct ___itt_clock_info
+    data::NTuple{16, UInt8}
+end
+
+function Base.getproperty(x::Ptr{___itt_clock_info}, f::Symbol)
+    f === :clock_freq && return Ptr{Culonglong}(x + 0)
+    f === :clock_base && return Ptr{Culonglong}(x + 8)
+    return getfield(x, f)
+end
+
+function Base.getproperty(x::___itt_clock_info, f::Symbol)
+    r = Ref{___itt_clock_info}(x)
+    ptr = Base.unsafe_convert(Ptr{___itt_clock_info}, r)
+    fptr = getproperty(ptr, f)
+    GC.@preserve r unsafe_load(fptr)
+end
+
+function Base.setproperty!(x::Ptr{___itt_clock_info}, f::Symbol, v)
+    unsafe_store!(getproperty(x, f), v)
+end
+
+const __itt_clock_info = ___itt_clock_info
+
+# typedef void ( ITTAPI * __itt_get_clock_info_fn ) ( __itt_clock_info * clock_info , void * data )
+"""
+` exclude_from_documentation `
+"""
+const __itt_get_clock_info_fn = Ptr{Cvoid}
+
+struct ___itt_clock_domain
+    data::NTuple{56, UInt8}
+end
+
+function Base.getproperty(x::Ptr{___itt_clock_domain}, f::Symbol)
+    f === :info && return Ptr{__itt_clock_info}(x + 0)
+    f === :fn && return Ptr{__itt_get_clock_info_fn}(x + 16)
+    f === :fn_data && return Ptr{Ptr{Cvoid}}(x + 24)
+    f === :extra1 && return Ptr{Cint}(x + 32)
+    f === :extra2 && return Ptr{Ptr{Cvoid}}(x + 40)
+    f === :next && return Ptr{Ptr{___itt_clock_domain}}(x + 48)
+    return getfield(x, f)
+end
+
+function Base.getproperty(x::___itt_clock_domain, f::Symbol)
+    r = Ref{___itt_clock_domain}(x)
+    ptr = Base.unsafe_convert(Ptr{___itt_clock_domain}, r)
+    fptr = getproperty(ptr, f)
+    GC.@preserve r unsafe_load(fptr)
+end
+
+function Base.setproperty!(x::Ptr{___itt_clock_domain}, f::Symbol, v)
+    unsafe_store!(getproperty(x, f), v)
+end
+
+const __itt_clock_domain = ___itt_clock_domain
+
+# ITT_STUB
+const __itt_clock_domain_create_ptr__3_0_t = Ptr{Cvoid}
+
+# ITT_STUBV
+const __itt_clock_domain_reset_ptr__3_0_t = Ptr{Cvoid}
+
+# ITT_STUBV
+const __itt_id_create_ex_ptr__3_0_t = Ptr{Cvoid}
+
+# ITT_STUBV
+const __itt_id_destroy_ex_ptr__3_0_t = Ptr{Cvoid}
+
+# ITT_STUBV
+const __itt_task_begin_ex_ptr__3_0_t = Ptr{Cvoid}
+
+# ITT_STUBV
+const __itt_task_begin_fn_ex_ptr__3_0_t = Ptr{Cvoid}
+
+# ITT_STUBV
+const __itt_task_end_ex_ptr__3_0_t = Ptr{Cvoid}
+
+mutable struct ___itt_counter end
+
+"""
+opaque structure for counter identification
+
+` exclude_from_documentation `
+"""
+const __itt_counter = Ptr{___itt_counter}
+
+# ITT_STUB
+const __itt_counter_create_ptr__3_0_t = Ptr{Cvoid}
+
+# ITT_STUBV
+const __itt_counter_inc_ptr__3_0_t = Ptr{Cvoid}
+
+# ITT_STUBV
+const __itt_counter_inc_delta_ptr__3_0_t = Ptr{Cvoid}
+
+# ITT_STUBV
+const __itt_counter_dec_ptr__3_0_t = Ptr{Cvoid}
+
+# ITT_STUBV
+const __itt_counter_dec_delta_ptr__3_0_t = Ptr{Cvoid}
+
+# ITT_STUBV
+const __itt_counter_inc_v3_ptr__3_0_t = Ptr{Cvoid}
+
+# ITT_STUBV
+const __itt_counter_inc_delta_v3_ptr__3_0_t = Ptr{Cvoid}
+
+# ITT_STUBV
+const __itt_counter_dec_v3_ptr__3_0_t = Ptr{Cvoid}
+
+# ITT_STUBV
+const __itt_counter_dec_delta_v3_ptr__3_0_t = Ptr{Cvoid}
+
+# ITT_STUBV
+const __itt_counter_set_value_ptr__3_0_t = Ptr{Cvoid}
+
+# ITT_STUBV
+const __itt_counter_set_value_ex_ptr__3_0_t = Ptr{Cvoid}
+
+# ITT_STUB
+const __itt_counter_create_typed_ptr__3_0_t = Ptr{Cvoid}
+
+# ITT_STUBV
+const __itt_counter_destroy_ptr__3_0_t = Ptr{Cvoid}
+
+# ITT_STUBV
+const __itt_marker_ex_ptr__3_0_t = Ptr{Cvoid}
+
+# ITT_STUBV
+const __itt_relation_add_to_current_ex_ptr__3_0_t = Ptr{Cvoid}
+
+# ITT_STUBV
+const __itt_relation_add_ex_ptr__3_0_t = Ptr{Cvoid}
+
+"""
+    ___itt_track_group_type
+
+` exclude_from_documentation `
+"""
+@cenum ___itt_track_group_type::UInt32 begin
+    __itt_track_group_type_normal = 0
+end
+
+"""
+` exclude_from_documentation `
+"""
+const __itt_track_group_type = ___itt_track_group_type
+
+"""
+    ___itt_track_type
+
+Placeholder for custom track types. Currently, "normal" custom track is the only available track type.
+"""
+@cenum ___itt_track_type::UInt32 begin
+    __itt_track_type_normal = 0
+end
+
+"""
+Placeholder for custom track types. Currently, "normal" custom track is the only available track type.
+"""
+const __itt_track_type = ___itt_track_type
+
+struct ___itt_track
+    data::NTuple{40, UInt8}
+end
+
+function Base.getproperty(x::Ptr{___itt_track}, f::Symbol)
+    f === :name && return Ptr{Ptr{__itt_string_handle}}(x + 0)
+    f === :group && return Ptr{Ptr{__itt_track_group}}(x + 8)
+    f === :ttype && return Ptr{__itt_track_type}(x + 16)
+    f === :extra1 && return Ptr{Cint}(x + 20)
+    f === :extra2 && return Ptr{Ptr{Cvoid}}(x + 24)
+    f === :next && return Ptr{Ptr{___itt_track}}(x + 32)
+    return getfield(x, f)
+end
+
+function Base.getproperty(x::___itt_track, f::Symbol)
+    r = Ref{___itt_track}(x)
+    ptr = Base.unsafe_convert(Ptr{___itt_track}, r)
+    fptr = getproperty(ptr, f)
+    GC.@preserve r unsafe_load(fptr)
+end
+
+function Base.setproperty!(x::Ptr{___itt_track}, f::Symbol, v)
+    unsafe_store!(getproperty(x, f), v)
+end
+
+struct ___itt_track_group
+    data::NTuple{40, UInt8}
+end
+
+function Base.getproperty(x::Ptr{___itt_track_group}, f::Symbol)
+    f === :name && return Ptr{Ptr{__itt_string_handle}}(x + 0)
+    f === :track && return Ptr{Ptr{___itt_track}}(x + 8)
+    f === :tgtype && return Ptr{__itt_track_group_type}(x + 16)
+    f === :extra1 && return Ptr{Cint}(x + 20)
+    f === :extra2 && return Ptr{Ptr{Cvoid}}(x + 24)
+    f === :next && return Ptr{Ptr{___itt_track_group}}(x + 32)
+    return getfield(x, f)
+end
+
+function Base.getproperty(x::___itt_track_group, f::Symbol)
+    r = Ref{___itt_track_group}(x)
+    ptr = Base.unsafe_convert(Ptr{___itt_track_group}, r)
+    fptr = getproperty(ptr, f)
+    GC.@preserve r unsafe_load(fptr)
+end
+
+function Base.setproperty!(x::Ptr{___itt_track_group}, f::Symbol, v)
+    unsafe_store!(getproperty(x, f), v)
+end
+
+const __itt_track_group = ___itt_track_group
+
+const __itt_track = ___itt_track
+
+# ITT_STUB
+const __itt_track_group_create_ptr__3_0_t = Ptr{Cvoid}
+
+# ITT_STUB
+const __itt_track_create_ptr__3_0_t = Ptr{Cvoid}
+
+# ITT_STUBV
+const __itt_set_track_ptr__3_0_t = Ptr{Cvoid}
+
+"""
+` exclude_from_gpa_documentation `
+
+` events Events`
+
+` public`
+
+Events group @{
+
+user event type
+"""
+const __itt_event = Cint
+
+# ITT_STUB
+const __itt_event_create_ptr__3_0_t = Ptr{Cvoid}
+
+# ITT_STUB
+const __itt_event_start_ptr__3_0_t = Ptr{Cvoid}
+
+# ITT_STUB
+const __itt_event_end_ptr__3_0_t = Ptr{Cvoid}
+
+"""
+    __itt_av_data_type
+
+` __itt_av_data_type`
+
+Defines types of arrays data (for C/C++ intrinsic types)
+"""
+@cenum __itt_av_data_type::UInt32 begin
+    __itt_e_first = 0
+    __itt_e_char = 0
+    __itt_e_uchar = 1
+    __itt_e_int16 = 2
+    __itt_e_uint16 = 3
+    __itt_e_int32 = 4
+    __itt_e_uint32 = 5
+    __itt_e_int64 = 6
+    __itt_e_uint64 = 7
+    __itt_e_float = 8
+    __itt_e_double = 9
+    __itt_e_last = 9
+end
+
+# ITT_STUB
+const __itt_av_save_ptr__3_0_t = Ptr{Cvoid}
+
+# ITT_STUBV
+const __itt_enable_attach_ptr__3_0_t = Ptr{Cvoid}
+
+# ITT_STUB
+const __itt_module_load_ptr__3_0_t = Ptr{Cvoid}
+
+# ITT_STUBV
+const __itt_module_unload_ptr__3_0_t = Ptr{Cvoid}
+
+"""
+    __itt_module_type
+
+` exclude_from_documentation `
+"""
+@cenum __itt_module_type::UInt32 begin
+    __itt_module_type_unknown = 0
+    __itt_module_type_elf = 1
+    __itt_module_type_coff = 2
+end
+
+"""
+    __itt_section_type
+
+` exclude_from_documentation `
+"""
+@cenum __itt_section_type::UInt32 begin
+    itt_section_type_unknown = 0
+    itt_section_type_bss = 1
+    itt_section_type_data = 2
+    itt_section_type_text = 3
+end
+
+struct ___itt_section_info
+    data::NTuple{48, UInt8}
+end
+
+function Base.getproperty(x::Ptr{___itt_section_info}, f::Symbol)
+    f === :name && return Ptr{Ptr{Cchar}}(x + 0)
+    f === :type && return Ptr{__itt_section_type}(x + 8)
+    f === :flags && return Ptr{Csize_t}(x + 16)
+    f === :start_addr && return Ptr{Ptr{Cvoid}}(x + 24)
+    f === :size && return Ptr{Csize_t}(x + 32)
+    f === :file_offset && return Ptr{Csize_t}(x + 40)
+    return getfield(x, f)
+end
+
+function Base.getproperty(x::___itt_section_info, f::Symbol)
+    r = Ref{___itt_section_info}(x)
+    ptr = Base.unsafe_convert(Ptr{___itt_section_info}, r)
+    fptr = getproperty(ptr, f)
+    GC.@preserve r unsafe_load(fptr)
+end
+
+function Base.setproperty!(x::Ptr{___itt_section_info}, f::Symbol, v)
+    unsafe_store!(getproperty(x, f), v)
+end
+
+const __itt_section_info = ___itt_section_info
+
+struct ___itt_module_object
+    data::NTuple{80, UInt8}
+end
+
+function Base.getproperty(x::Ptr{___itt_module_object}, f::Symbol)
+    f === :version && return Ptr{Cuint}(x + 0)
+    f === :module_id && return Ptr{__itt_id}(x + 8)
+    f === :module_type && return Ptr{__itt_module_type}(x + 32)
+    f === :module_name && return Ptr{Ptr{Cchar}}(x + 40)
+    f === :module_buffer && return Ptr{Ptr{Cvoid}}(x + 48)
+    f === :module_size && return Ptr{Csize_t}(x + 56)
+    f === :section_array && return Ptr{Ptr{__itt_section_info}}(x + 64)
+    f === :section_number && return Ptr{Csize_t}(x + 72)
+    return getfield(x, f)
+end
+
+function Base.getproperty(x::___itt_module_object, f::Symbol)
+    r = Ref{___itt_module_object}(x)
+    ptr = Base.unsafe_convert(Ptr{___itt_module_object}, r)
+    fptr = getproperty(ptr, f)
+    GC.@preserve r unsafe_load(fptr)
+end
+
+function Base.setproperty!(x::Ptr{___itt_module_object}, f::Symbol, v)
+    unsafe_store!(getproperty(x, f), v)
+end
+
+const __itt_module_object = ___itt_module_object
+
+# ITT_STUBV
+const __itt_module_load_with_sections_ptr__3_0_t = Ptr{Cvoid}
+
+# ITT_STUBV
+const __itt_module_unload_with_sections_ptr__3_0_t = Ptr{Cvoid}
+
+struct ___itt_histogram
+    data::NTuple{56, UInt8}
+end
+
+function Base.getproperty(x::Ptr{___itt_histogram}, f::Symbol)
+    f === :domain && return Ptr{Ptr{__itt_domain}}(x + 0)
+    f === :nameA && return Ptr{Ptr{Cchar}}(x + 8)
+    f === :nameW && return Ptr{Ptr{Cvoid}}(x + 16)
+    f === :x_type && return Ptr{__itt_metadata_type}(x + 24)
+    f === :y_type && return Ptr{__itt_metadata_type}(x + 28)
+    f === :extra1 && return Ptr{Cint}(x + 32)
+    f === :extra2 && return Ptr{Ptr{Cvoid}}(x + 40)
+    f === :next && return Ptr{Ptr{___itt_histogram}}(x + 48)
+    return getfield(x, f)
+end
+
+function Base.getproperty(x::___itt_histogram, f::Symbol)
+    r = Ref{___itt_histogram}(x)
+    ptr = Base.unsafe_convert(Ptr{___itt_histogram}, r)
+    fptr = getproperty(ptr, f)
+    GC.@preserve r unsafe_load(fptr)
+end
+
+function Base.setproperty!(x::Ptr{___itt_histogram}, f::Symbol, v)
+    unsafe_store!(getproperty(x, f), v)
+end
+
+const __itt_histogram = ___itt_histogram
+
+# ITT_STUB
+const __itt_histogram_create_ptr__3_0_t = Ptr{Cvoid}
+
+# ITT_STUBV
+const __itt_histogram_submit_ptr__3_0_t = Ptr{Cvoid}
+
+"""
+    __itt_get_collection_state()
+
+function allows to obtain the current collection state at the moment
+
+### Returns
+collection state as a enum [`__itt_collection_state`](@ref)
+### Prototype
+```c
+__itt_collection_state __itt_get_collection_state(void);
+```
+"""
+function __itt_get_collection_state()
+    ccall((:__itt_get_collection_state, libaws_c_common), __itt_collection_state, ())
+end
+
+"""
+    __itt_release_resources()
+
+function releases resources allocated by ITT API static part this API should be called from the library destructor
+
+### Returns
+void
+### Prototype
+```c
+void __itt_release_resources(void);
+```
+"""
+function __itt_release_resources()
+    ccall((:__itt_release_resources, libaws_c_common), Cvoid, ())
+end
+
+# ITT_STUB
+const __itt_counter_create_v3_ptr__3_0_t = Ptr{Cvoid}
+
+# ITT_STUBV
+const __itt_counter_set_value_v3_ptr__3_0_t = Ptr{Cvoid}
+
+"""
+    __itt_context_type
+
+describes the type of context metadata
+"""
+@cenum __itt_context_type::UInt32 begin
+    __itt_context_unknown = 0
+    __itt_context_nameA = 1
+    __itt_context_nameW = 2
+    __itt_context_deviceA = 3
+    __itt_context_deviceW = 4
+    __itt_context_unitsA = 5
+    __itt_context_unitsW = 6
+    __itt_context_pci_addrA = 7
+    __itt_context_pci_addrW = 8
+    __itt_context_tid = 9
+    __itt_context_max_val = 10
+    __itt_context_bandwidth_flag = 11
+    __itt_context_latency_flag = 12
+    __itt_context_occupancy_flag = 13
+    __itt_context_on_thread_flag = 14
+    __itt_context_is_abs_val_flag = 15
+    __itt_context_cpu_instructions_flag = 16
+    __itt_context_cpu_cycles_flag = 17
+end
+
+struct ___itt_context_metadata
+    data::NTuple{16, UInt8}
+end
+
+function Base.getproperty(x::Ptr{___itt_context_metadata}, f::Symbol)
+    f === :type && return Ptr{__itt_context_type}(x + 0)
+    f === :value && return Ptr{Ptr{Cvoid}}(x + 8)
+    return getfield(x, f)
+end
+
+function Base.getproperty(x::___itt_context_metadata, f::Symbol)
+    r = Ref{___itt_context_metadata}(x)
+    ptr = Base.unsafe_convert(Ptr{___itt_context_metadata}, r)
+    fptr = getproperty(ptr, f)
+    GC.@preserve r unsafe_load(fptr)
+end
+
+function Base.setproperty!(x::Ptr{___itt_context_metadata}, f::Symbol, v)
+    unsafe_store!(getproperty(x, f), v)
+end
+
+const __itt_context_metadata = ___itt_context_metadata
+
+struct ___itt_counter_metadata
+    data::NTuple{64, UInt8}
+end
+
+function Base.getproperty(x::Ptr{___itt_counter_metadata}, f::Symbol)
+    f === :counter && return Ptr{__itt_counter}(x + 0)
+    f === :type && return Ptr{__itt_context_type}(x + 8)
+    f === :str_valueA && return Ptr{Ptr{Cchar}}(x + 16)
+    f === :str_valueW && return Ptr{Ptr{Cvoid}}(x + 24)
+    f === :value && return Ptr{Culonglong}(x + 32)
+    f === :extra1 && return Ptr{Cint}(x + 40)
+    f === :extra2 && return Ptr{Ptr{Cvoid}}(x + 48)
+    f === :next && return Ptr{Ptr{___itt_counter_metadata}}(x + 56)
+    return getfield(x, f)
+end
+
+function Base.getproperty(x::___itt_counter_metadata, f::Symbol)
+    r = Ref{___itt_counter_metadata}(x)
+    ptr = Base.unsafe_convert(Ptr{___itt_counter_metadata}, r)
+    fptr = getproperty(ptr, f)
+    GC.@preserve r unsafe_load(fptr)
+end
+
+function Base.setproperty!(x::Ptr{___itt_counter_metadata}, f::Symbol, v)
+    unsafe_store!(getproperty(x, f), v)
+end
+
+const __itt_counter_metadata = ___itt_counter_metadata
+
+# ITT_STUBV
+const __itt_bind_context_metadata_to_counter_ptr__3_0_t = Ptr{Cvoid}
+
+# typedef int ( aws_test_before_fn ) ( struct aws_allocator * allocator , void * ctx )
+const aws_test_before_fn = Cvoid
+
+# typedef int ( aws_test_run_fn ) ( struct aws_allocator * allocator , void * ctx )
+const aws_test_run_fn = Cvoid
+
+# typedef int ( aws_test_after_fn ) ( struct aws_allocator * allocator , int setup_result , void * ctx )
+const aws_test_after_fn = Cvoid
+
+struct aws_test_harness
+    on_before::Ptr{aws_test_before_fn}
+    run::Ptr{aws_test_run_fn}
+    on_after::Ptr{aws_test_after_fn}
+    ctx::Ptr{Cvoid}
+    test_name::Ptr{Cchar}
+    suppress_memcheck::Cint
+end
+
+"""
+    s_aws_run_test_case(harness)
+
+### Prototype
+```c
+static inline int s_aws_run_test_case(struct aws_test_harness *harness);
+```
+"""
+function s_aws_run_test_case(harness)
+    ccall((:s_aws_run_test_case, libaws_c_common), Cint, (Ptr{aws_test_harness},), harness)
+end
+
+"""
+    enable_vt_mode()
+
+### Prototype
+```c
+static inline int enable_vt_mode(void);
+```
+"""
+function enable_vt_mode()
+    ccall((:enable_vt_mode, libaws_c_common), Cint, ())
 end
 
 const AWS_OP_SUCCESS = 0
@@ -10242,4 +11199,534 @@ const AWS_CRT_STATISTICS_CATEGORY_STRIDE = Cuint(1) << AWS_CRT_STATISTICS_CATEGO
 const AWS_THREAD_NAME_RECOMMENDED_STRLEN = 15
 
 # Skipping MacroDefinition: AWS_THREAD_ID_T_REPR_BUFSZ ( sizeof ( aws_thread_id_t ) * 2 + 1 )
+
+const ITT_OS_WIN = 1
+
+const ITT_OS_LINUX = 2
+
+const ITT_OS_MAC = 3
+
+const ITT_OS_FREEBSD = 4
+
+const ITT_OS_OPENBSD = 5
+
+const ITT_OS = ITT_OS_FREEBSD
+
+const ITT_PLATFORM_WIN = 1
+
+const ITT_PLATFORM_POSIX = 2
+
+const ITT_PLATFORM_MAC = 3
+
+const ITT_PLATFORM_FREEBSD = 4
+
+const ITT_PLATFORM_OPENBSD = 5
+
+const ITT_PLATFORM = ITT_PLATFORM_FREEBSD
+
+const ITTAPI = ITTAPI_CDECL
+
+const LIBITTAPI = ITTAPI_CDECL
+
+const ITTAPI_CALL = ITTAPI_CDECL
+
+const LIBITTAPI_CALL = ITTAPI_CDECL
+
+# Skipping MacroDefinition: ITT_INLINE static inline
+
+# Skipping MacroDefinition: ITT_INLINE_ATTRIBUTE __attribute__ ( ( always_inline , unused ) )
+
+const ITT_MAJOR = 3
+
+const ITT_MINOR = 0
+
+const INTEL_ITTNOTIFY_PREFIX = __itt_
+
+const INTEL_ITTNOTIFY_POSTFIX = _ptr_
+
+const ITT_STUB = ITT_STUBV
+
+const __itt_pause = ITTNOTIFY_VOID(pause)
+
+const __itt_pause_ptr = ITTNOTIFY_NAME(pause)
+
+const __itt_pause_scoped = ITTNOTIFY_VOID(pause_scoped)
+
+const __itt_pause_scoped_ptr = ITTNOTIFY_NAME(pause_scoped)
+
+const __itt_resume = ITTNOTIFY_VOID(resume)
+
+const __itt_resume_ptr = ITTNOTIFY_NAME(resume)
+
+const __itt_resume_scoped = ITTNOTIFY_VOID(resume_scoped)
+
+const __itt_resume_scoped_ptr = ITTNOTIFY_NAME(resume_scoped)
+
+const __itt_detach = ITTNOTIFY_VOID(detach)
+
+const __itt_detach_ptr = ITTNOTIFY_NAME(detach)
+
+const __itt_pt_region_create = ITTNOTIFY_DATA(pt_region_create)
+
+const __itt_pt_region_create_ptr = ITTNOTIFY_NAME(pt_region_create)
+
+const __itt_thread_set_name = ITTNOTIFY_VOID(thread_set_name)
+
+const __itt_thread_set_name_ptr = ITTNOTIFY_NAME(thread_set_name)
+
+const __itt_thread_ignore = ITTNOTIFY_VOID(thread_ignore)
+
+const __itt_thread_ignore_ptr = ITTNOTIFY_NAME(thread_ignore)
+
+const __itt_suppress_all_errors = 0x7fffffff
+
+const __itt_suppress_threading_errors = 0x000000ff
+
+const __itt_suppress_memory_errors = 0x0000ff00
+
+const __itt_suppress_push = ITTNOTIFY_VOID(suppress_push)
+
+const __itt_suppress_push_ptr = ITTNOTIFY_NAME(suppress_push)
+
+const __itt_suppress_pop = ITTNOTIFY_VOID(suppress_pop)
+
+const __itt_suppress_pop_ptr = ITTNOTIFY_NAME(suppress_pop)
+
+const __itt_suppress_mark_range = ITTNOTIFY_VOID(suppress_mark_range)
+
+const __itt_suppress_mark_range_ptr = ITTNOTIFY_NAME(suppress_mark_range)
+
+const __itt_suppress_clear_range = ITTNOTIFY_VOID(suppress_clear_range)
+
+const __itt_suppress_clear_range_ptr = ITTNOTIFY_NAME(suppress_clear_range)
+
+const __itt_attr_barrier = 1
+
+const __itt_attr_mutex = 2
+
+const __itt_sync_create = ITTNOTIFY_VOID(sync_create)
+
+const __itt_sync_create_ptr = ITTNOTIFY_NAME(sync_create)
+
+const __itt_sync_rename = ITTNOTIFY_VOID(sync_rename)
+
+const __itt_sync_rename_ptr = ITTNOTIFY_NAME(sync_rename)
+
+const __itt_sync_destroy = ITTNOTIFY_VOID(sync_destroy)
+
+const __itt_sync_destroy_ptr = ITTNOTIFY_NAME(sync_destroy)
+
+const __itt_sync_prepare = ITTNOTIFY_VOID(sync_prepare)
+
+const __itt_sync_prepare_ptr = ITTNOTIFY_NAME(sync_prepare)
+
+const __itt_sync_cancel = ITTNOTIFY_VOID(sync_cancel)
+
+const __itt_sync_cancel_ptr = ITTNOTIFY_NAME(sync_cancel)
+
+const __itt_sync_acquired = ITTNOTIFY_VOID(sync_acquired)
+
+const __itt_sync_acquired_ptr = ITTNOTIFY_NAME(sync_acquired)
+
+const __itt_sync_releasing = ITTNOTIFY_VOID(sync_releasing)
+
+const __itt_sync_releasing_ptr = ITTNOTIFY_NAME(sync_releasing)
+
+const __itt_fsync_prepare = ITTNOTIFY_VOID(fsync_prepare)
+
+const __itt_fsync_prepare_ptr = ITTNOTIFY_NAME(fsync_prepare)
+
+const __itt_fsync_cancel = ITTNOTIFY_VOID(fsync_cancel)
+
+const __itt_fsync_cancel_ptr = ITTNOTIFY_NAME(fsync_cancel)
+
+const __itt_fsync_acquired = ITTNOTIFY_VOID(fsync_acquired)
+
+const __itt_fsync_acquired_ptr = ITTNOTIFY_NAME(fsync_acquired)
+
+const __itt_fsync_releasing = ITTNOTIFY_VOID(fsync_releasing)
+
+const __itt_fsync_releasing_ptr = ITTNOTIFY_NAME(fsync_releasing)
+
+const __itt_model_site_begin = ITTNOTIFY_VOID(model_site_begin)
+
+const __itt_model_site_begin_ptr = ITTNOTIFY_NAME(model_site_begin)
+
+const __itt_model_site_beginA = ITTNOTIFY_VOID(model_site_beginA)
+
+const __itt_model_site_beginA_ptr = ITTNOTIFY_NAME(model_site_beginA)
+
+const __itt_model_site_beginAL = ITTNOTIFY_VOID(model_site_beginAL)
+
+const __itt_model_site_beginAL_ptr = ITTNOTIFY_NAME(model_site_beginAL)
+
+const __itt_model_site_end = ITTNOTIFY_VOID(model_site_end)
+
+const __itt_model_site_end_ptr = ITTNOTIFY_NAME(model_site_end)
+
+const __itt_model_site_end_2 = ITTNOTIFY_VOID(model_site_end_2)
+
+const __itt_model_site_end_2_ptr = ITTNOTIFY_NAME(model_site_end_2)
+
+const __itt_model_task_begin = ITTNOTIFY_VOID(model_task_begin)
+
+const __itt_model_task_begin_ptr = ITTNOTIFY_NAME(model_task_begin)
+
+const __itt_model_task_beginA = ITTNOTIFY_VOID(model_task_beginA)
+
+const __itt_model_task_beginA_ptr = ITTNOTIFY_NAME(model_task_beginA)
+
+const __itt_model_task_beginAL = ITTNOTIFY_VOID(model_task_beginAL)
+
+const __itt_model_task_beginAL_ptr = ITTNOTIFY_NAME(model_task_beginAL)
+
+const __itt_model_iteration_taskA = ITTNOTIFY_VOID(model_iteration_taskA)
+
+const __itt_model_iteration_taskA_ptr = ITTNOTIFY_NAME(model_iteration_taskA)
+
+const __itt_model_iteration_taskAL = ITTNOTIFY_VOID(model_iteration_taskAL)
+
+const __itt_model_iteration_taskAL_ptr = ITTNOTIFY_NAME(model_iteration_taskAL)
+
+const __itt_model_task_end = ITTNOTIFY_VOID(model_task_end)
+
+const __itt_model_task_end_ptr = ITTNOTIFY_NAME(model_task_end)
+
+const __itt_model_task_end_2 = ITTNOTIFY_VOID(model_task_end_2)
+
+const __itt_model_task_end_2_ptr = ITTNOTIFY_NAME(model_task_end_2)
+
+const __itt_model_lock_acquire = ITTNOTIFY_VOID(model_lock_acquire)
+
+const __itt_model_lock_acquire_ptr = ITTNOTIFY_NAME(model_lock_acquire)
+
+const __itt_model_lock_acquire_2 = ITTNOTIFY_VOID(model_lock_acquire_2)
+
+const __itt_model_lock_acquire_2_ptr = ITTNOTIFY_NAME(model_lock_acquire_2)
+
+const __itt_model_lock_release = ITTNOTIFY_VOID(model_lock_release)
+
+const __itt_model_lock_release_ptr = ITTNOTIFY_NAME(model_lock_release)
+
+const __itt_model_lock_release_2 = ITTNOTIFY_VOID(model_lock_release_2)
+
+const __itt_model_lock_release_2_ptr = ITTNOTIFY_NAME(model_lock_release_2)
+
+const __itt_model_record_allocation = ITTNOTIFY_VOID(model_record_allocation)
+
+const __itt_model_record_allocation_ptr = ITTNOTIFY_NAME(model_record_allocation)
+
+const __itt_model_record_deallocation = ITTNOTIFY_VOID(model_record_deallocation)
+
+const __itt_model_record_deallocation_ptr = ITTNOTIFY_NAME(model_record_deallocation)
+
+const __itt_model_induction_uses = ITTNOTIFY_VOID(model_induction_uses)
+
+const __itt_model_induction_uses_ptr = ITTNOTIFY_NAME(model_induction_uses)
+
+const __itt_model_reduction_uses = ITTNOTIFY_VOID(model_reduction_uses)
+
+const __itt_model_reduction_uses_ptr = ITTNOTIFY_NAME(model_reduction_uses)
+
+const __itt_model_observe_uses = ITTNOTIFY_VOID(model_observe_uses)
+
+const __itt_model_observe_uses_ptr = ITTNOTIFY_NAME(model_observe_uses)
+
+const __itt_model_clear_uses = ITTNOTIFY_VOID(model_clear_uses)
+
+const __itt_model_clear_uses_ptr = ITTNOTIFY_NAME(model_clear_uses)
+
+const __itt_model_disable_push = ITTNOTIFY_VOID(model_disable_push)
+
+const __itt_model_disable_push_ptr = ITTNOTIFY_NAME(model_disable_push)
+
+const __itt_model_disable_pop = ITTNOTIFY_VOID(model_disable_pop)
+
+const __itt_model_disable_pop_ptr = ITTNOTIFY_NAME(model_disable_pop)
+
+const __itt_model_aggregate_task = ITTNOTIFY_VOID(model_aggregate_task)
+
+const __itt_model_aggregate_task_ptr = ITTNOTIFY_NAME(model_aggregate_task)
+
+const __itt_heap_function_create = ITTNOTIFY_DATA(heap_function_create)
+
+const __itt_heap_function_create_ptr = ITTNOTIFY_NAME(heap_function_create)
+
+const __itt_heap_allocate_begin = ITTNOTIFY_VOID(heap_allocate_begin)
+
+const __itt_heap_allocate_begin_ptr = ITTNOTIFY_NAME(heap_allocate_begin)
+
+const __itt_heap_allocate_end = ITTNOTIFY_VOID(heap_allocate_end)
+
+const __itt_heap_allocate_end_ptr = ITTNOTIFY_NAME(heap_allocate_end)
+
+const __itt_heap_free_begin = ITTNOTIFY_VOID(heap_free_begin)
+
+const __itt_heap_free_begin_ptr = ITTNOTIFY_NAME(heap_free_begin)
+
+const __itt_heap_free_end = ITTNOTIFY_VOID(heap_free_end)
+
+const __itt_heap_free_end_ptr = ITTNOTIFY_NAME(heap_free_end)
+
+const __itt_heap_reallocate_begin = ITTNOTIFY_VOID(heap_reallocate_begin)
+
+const __itt_heap_reallocate_begin_ptr = ITTNOTIFY_NAME(heap_reallocate_begin)
+
+const __itt_heap_reallocate_end = ITTNOTIFY_VOID(heap_reallocate_end)
+
+const __itt_heap_reallocate_end_ptr = ITTNOTIFY_NAME(heap_reallocate_end)
+
+const __itt_heap_internal_access_begin = ITTNOTIFY_VOID(heap_internal_access_begin)
+
+const __itt_heap_internal_access_begin_ptr = ITTNOTIFY_NAME(heap_internal_access_begin)
+
+const __itt_heap_internal_access_end = ITTNOTIFY_VOID(heap_internal_access_end)
+
+const __itt_heap_internal_access_end_ptr = ITTNOTIFY_NAME(heap_internal_access_end)
+
+const __itt_heap_record_memory_growth_begin = ITTNOTIFY_VOID(heap_record_memory_growth_begin)
+
+const __itt_heap_record_memory_growth_begin_ptr = ITTNOTIFY_NAME(heap_record_memory_growth_begin)
+
+const __itt_heap_record_memory_growth_end = ITTNOTIFY_VOID(heap_record_memory_growth_end)
+
+const __itt_heap_record_memory_growth_end_ptr = ITTNOTIFY_NAME(heap_record_memory_growth_end)
+
+const __itt_heap_leaks = 0x00000001
+
+const __itt_heap_growth = 0x00000002
+
+const __itt_heap_reset_detection = ITTNOTIFY_VOID(heap_reset_detection)
+
+const __itt_heap_reset_detection_ptr = ITTNOTIFY_NAME(heap_reset_detection)
+
+const __itt_heap_record = ITTNOTIFY_VOID(heap_record)
+
+const __itt_heap_record_ptr = ITTNOTIFY_NAME(heap_record)
+
+const __itt_domain_create = ITTNOTIFY_DATA(domain_create)
+
+const __itt_domain_create_ptr = ITTNOTIFY_NAME(domain_create)
+
+const __itt_id_create_ptr = ITTNOTIFY_NAME(id_create)
+
+const __itt_id_destroy_ptr = ITTNOTIFY_NAME(id_destroy)
+
+const __itt_string_handle_create = ITTNOTIFY_DATA(string_handle_create)
+
+const __itt_string_handle_create_ptr = ITTNOTIFY_NAME(string_handle_create)
+
+const __itt_timestamp_none = __itt_timestamp(Clonglong(-1))
+
+const __itt_get_timestamp = ITTNOTIFY_DATA(get_timestamp)
+
+const __itt_get_timestamp_ptr = ITTNOTIFY_NAME(get_timestamp)
+
+const __itt_region_begin_ptr = ITTNOTIFY_NAME(region_begin)
+
+const __itt_region_end_ptr = ITTNOTIFY_NAME(region_end)
+
+const __itt_frame_begin_v3_ptr = ITTNOTIFY_NAME(frame_begin_v3)
+
+const __itt_frame_end_v3_ptr = ITTNOTIFY_NAME(frame_end_v3)
+
+const __itt_frame_submit_v3_ptr = ITTNOTIFY_NAME(frame_submit_v3)
+
+const __itt_task_group_ptr = ITTNOTIFY_NAME(task_group)
+
+const __itt_task_begin_ptr = ITTNOTIFY_NAME(task_begin)
+
+const __itt_task_begin_fn_ptr = ITTNOTIFY_NAME(task_begin_fn)
+
+const __itt_task_end_ptr = ITTNOTIFY_NAME(task_end)
+
+const __itt_task_begin_overlapped_ptr = ITTNOTIFY_NAME(task_begin_overlapped)
+
+const __itt_task_end_overlapped_ptr = ITTNOTIFY_NAME(task_end_overlapped)
+
+const __itt_marker_scope_unknown = __itt_scope_unknown
+
+const __itt_marker_scope_global = __itt_scope_global
+
+const __itt_marker_scope_process = __itt_scope_track_group
+
+const __itt_marker_scope_thread = __itt_scope_track
+
+const __itt_marker_scope_task = __itt_scope_task
+
+const __itt_marker_ptr = ITTNOTIFY_NAME(marker)
+
+const __itt_metadata_add_ptr = ITTNOTIFY_NAME(metadata_add)
+
+const __itt_metadata_str_add_ptr = ITTNOTIFY_NAME(metadata_str_add)
+
+const __itt_metadata_add_with_scope_ptr = ITTNOTIFY_NAME(metadata_add_with_scope)
+
+const __itt_metadata_str_add_with_scope_ptr = ITTNOTIFY_NAME(metadata_str_add_with_scope)
+
+const __itt_relation_add_to_current_ptr = ITTNOTIFY_NAME(relation_add_to_current)
+
+const __itt_relation_add_ptr = ITTNOTIFY_NAME(relation_add)
+
+const __itt_clock_domain_create = ITTNOTIFY_DATA(clock_domain_create)
+
+const __itt_clock_domain_create_ptr = ITTNOTIFY_NAME(clock_domain_create)
+
+const __itt_clock_domain_reset = ITTNOTIFY_VOID(clock_domain_reset)
+
+const __itt_clock_domain_reset_ptr = ITTNOTIFY_NAME(clock_domain_reset)
+
+const __itt_id_create_ex_ptr = ITTNOTIFY_NAME(id_create_ex)
+
+const __itt_id_destroy_ex_ptr = ITTNOTIFY_NAME(id_destroy_ex)
+
+const __itt_task_begin_ex_ptr = ITTNOTIFY_NAME(task_begin_ex)
+
+const __itt_task_begin_fn_ex_ptr = ITTNOTIFY_NAME(task_begin_fn_ex)
+
+const __itt_task_end_ex_ptr = ITTNOTIFY_NAME(task_end_ex)
+
+const __itt_counter_create = ITTNOTIFY_DATA(counter_create)
+
+const __itt_counter_create_ptr = ITTNOTIFY_NAME(counter_create)
+
+const __itt_counter_inc = ITTNOTIFY_VOID(counter_inc)
+
+const __itt_counter_inc_ptr = ITTNOTIFY_NAME(counter_inc)
+
+const __itt_counter_inc_delta = ITTNOTIFY_VOID(counter_inc_delta)
+
+const __itt_counter_inc_delta_ptr = ITTNOTIFY_NAME(counter_inc_delta)
+
+const __itt_counter_dec = ITTNOTIFY_VOID(counter_dec)
+
+const __itt_counter_dec_ptr = ITTNOTIFY_NAME(counter_dec)
+
+const __itt_counter_dec_delta = ITTNOTIFY_VOID(counter_dec_delta)
+
+const __itt_counter_dec_delta_ptr = ITTNOTIFY_NAME(counter_dec_delta)
+
+const __itt_counter_inc_v3_ptr = ITTNOTIFY_NAME(counter_inc_v3)
+
+const __itt_counter_inc_delta_v3_ptr = ITTNOTIFY_NAME(counter_inc_delta_v3)
+
+const __itt_counter_dec_v3_ptr = ITTNOTIFY_NAME(counter_dec_v3)
+
+const __itt_counter_dec_delta_v3_ptr = ITTNOTIFY_NAME(counter_dec_delta_v3)
+
+const __itt_counter_set_value = ITTNOTIFY_VOID(counter_set_value)
+
+const __itt_counter_set_value_ptr = ITTNOTIFY_NAME(counter_set_value)
+
+const __itt_counter_set_value_ex = ITTNOTIFY_VOID(counter_set_value_ex)
+
+const __itt_counter_set_value_ex_ptr = ITTNOTIFY_NAME(counter_set_value_ex)
+
+const __itt_counter_create_typed = ITTNOTIFY_DATA(counter_create_typed)
+
+const __itt_counter_create_typed_ptr = ITTNOTIFY_NAME(counter_create_typed)
+
+const __itt_counter_destroy = ITTNOTIFY_VOID(counter_destroy)
+
+const __itt_counter_destroy_ptr = ITTNOTIFY_NAME(counter_destroy)
+
+const __itt_marker_ex_ptr = ITTNOTIFY_NAME(marker_ex)
+
+const __itt_relation_add_to_current_ex_ptr = ITTNOTIFY_NAME(relation_add_to_current_ex)
+
+const __itt_relation_add_ex_ptr = ITTNOTIFY_NAME(relation_add_ex)
+
+const __itt_track_group_create = ITTNOTIFY_DATA(track_group_create)
+
+const __itt_track_group_create_ptr = ITTNOTIFY_NAME(track_group_create)
+
+const __itt_track_create = ITTNOTIFY_DATA(track_create)
+
+const __itt_track_create_ptr = ITTNOTIFY_NAME(track_create)
+
+const __itt_set_track = ITTNOTIFY_VOID(set_track)
+
+const __itt_set_track_ptr = ITTNOTIFY_NAME(set_track)
+
+const __itt_event_create = ITTNOTIFY_DATA(event_create)
+
+const __itt_event_create_ptr = ITTNOTIFY_NAME(event_create)
+
+const __itt_event_start = ITTNOTIFY_DATA(event_start)
+
+const __itt_event_start_ptr = ITTNOTIFY_NAME(event_start)
+
+const __itt_event_end = ITTNOTIFY_DATA(event_end)
+
+const __itt_event_end_ptr = ITTNOTIFY_NAME(event_end)
+
+const __itt_av_save = ITTNOTIFY_DATA(av_save)
+
+const __itt_av_save_ptr = ITTNOTIFY_NAME(av_save)
+
+const __itt_enable_attach = ITTNOTIFY_VOID(enable_attach)
+
+const __itt_enable_attach_ptr = ITTNOTIFY_NAME(enable_attach)
+
+const __itt_module_load = ITTNOTIFY_VOID(module_load)
+
+const __itt_module_load_ptr = ITTNOTIFY_NAME(module_load)
+
+const __itt_module_unload = ITTNOTIFY_VOID(module_unload)
+
+const __itt_module_unload_ptr = ITTNOTIFY_NAME(module_unload)
+
+const __itt_section_exec = 0x20000000
+
+const __itt_section_read = 0x40000000
+
+const __itt_section_write = 0x80000000
+
+const __itt_module_load_with_sections = ITTNOTIFY_VOID(module_load_with_sections)
+
+const __itt_module_load_with_sections_ptr = ITTNOTIFY_NAME(module_load_with_sections)
+
+const __itt_module_unload_with_sections = ITTNOTIFY_VOID(module_unload_with_sections)
+
+const __itt_module_unload_with_sections_ptr = ITTNOTIFY_NAME(module_unload_with_sections)
+
+const __itt_histogram_create = ITTNOTIFY_DATA(histogram_create)
+
+const __itt_histogram_create_ptr = ITTNOTIFY_NAME(histogram_create)
+
+const __itt_histogram_submit = ITTNOTIFY_VOID(histogram_submit)
+
+const __itt_histogram_submit_ptr = ITTNOTIFY_NAME(histogram_submit)
+
+const __itt_counter_create_v3 = ITTNOTIFY_DATA(counter_create_v3)
+
+const __itt_counter_create_v3_ptr = ITTNOTIFY_NAME(counter_create_v3)
+
+const __itt_counter_set_value_v3 = ITTNOTIFY_VOID(counter_set_value_v3)
+
+const __itt_counter_set_value_v3_ptr = ITTNOTIFY_NAME(counter_set_value_v3)
+
+const __itt_context_name = __itt_context_nameA
+
+const __itt_context_device = __itt_context_deviceA
+
+const __itt_context_units = __itt_context_unitsA
+
+const __itt_context_pci_addr = __itt_context_pci_addrA
+
+const __itt_bind_context_metadata_to_counter = ITTNOTIFY_VOID(bind_context_metadata_to_counter)
+
+const __itt_bind_context_metadata_to_counter_ptr = ITTNOTIFY_NAME(bind_context_metadata_to_counter)
+
+const AWS_OP_SKIP = -2
+
+const AWS_TESTING_REPORT_FD = stderr
+
+const FAIL_PREFIX = "***FAILURE*** "
+
+const SUCCESS = 0
+
+const FAILURE = -1
+
+const SKIP = 103
 
