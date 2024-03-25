@@ -1,6 +1,11 @@
 name: Generate Bindings
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/generate_bindings.yml
+      - gen/**
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref || github.run_id }}
   cancel-in-progress: true

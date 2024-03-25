@@ -2,7 +2,7 @@
 
 julia_version = "1.10.2"
 manifest_format = "2.0"
-project_hash = "2fe88c2d4906b932c5d15da7632d9ce4ec911637"
+project_hash = "17529965341e648e57dcbc863dd11933859fd679"
 
 [[deps.ArgTools]]
 uuid = "0dad84c5-d112-42e6-8d28-ef12dabb789f"
@@ -206,6 +206,12 @@ uuid = "4ec0a83e-493e-50e2-b9ac-8f72acf5a8f5"
 deps = ["Libdl"]
 uuid = "83775a58-1f1d-513f-b197-d71354ab007a"
 version = "1.2.13+1"
+
+[[deps.aws_c_common_jll]]
+deps = ["Artifacts", "JLLWrappers", "Libdl"]
+git-tree-sha1 = "586a1aa2fdda172c45587b52f5329fedde14f44c"
+uuid = "73048d1d-b8c4-5092-a58d-866c5e8d1e50"
+version = "0.9.14+0"
 
 [[deps.libLLVM_jll]]
 deps = ["Artifacts", "Libdl"]
