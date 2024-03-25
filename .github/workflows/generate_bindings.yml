@@ -14,7 +14,7 @@ jobs:
 
       - uses: julia-actions/setup-julia@v1
         with:
-          version: "1.9"
+          version: "1.10.2"
 
       - name: Run the generator
         run: ./gen/generate.sh
