@@ -10,6 +10,7 @@ output_ignorelist = [
     "AWS_COMMON_MATH_API",
     "AWS_THREAD_ONCE_STATIC_INIT",
     "AWS_BUS_ADDRESS_ALL",
+    "IGNORED",
 ]
 
 auto_mutability = false
