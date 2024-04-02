@@ -10579,8 +10579,6 @@ const AWS_THREAD_NAME_RECOMMENDED_STRLEN = 15
 
 # Skipping MacroDefinition: ITTAPI_CDECL __cdecl
 
-const STDCALL = __stdcall
-
 # Skipping MacroDefinition: ITT_INLINE static __inline__ __attribute__ ( ( __always_inline__ , __gnu_inline__ ) )
 
 const AWS_OP_SKIP = -2
