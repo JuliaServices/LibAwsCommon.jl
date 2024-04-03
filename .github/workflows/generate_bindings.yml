@@ -13,7 +13,7 @@ jobs:
   generate-bindings:
     name: Generate bindings
     runs-on: ubuntu-22.04
-    timeout-minutes: 10
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
 
