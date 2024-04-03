@@ -8,5 +8,3 @@ For documentation, please refer to the [lib.jl](https://github.com/JuliaServices
 [![](https://img.shields.io/badge/docs-dev-blue.svg)](https://JuliaServices.github.io/LibAwsCommon.jl/dev)
 
 GitHub Actions : [![Build Status](https://github.com/JuliaServices/LibAwsCommon.jl/workflows/CI/badge.svg)](https://github.com/JuliaServices/LibAwsCommon.jl/actions?query=workflow%3ACI+branch%3Amaster)
-
-[![codecov.io](http://codecov.io/github/JuliaServices/LibAwsCommon.jl/coverage.svg?branch=master)](http://codecov.io/github/JuliaServices/LibAwsCommon.jl?branch=master)
