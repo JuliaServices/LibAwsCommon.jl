@@ -45,7 +45,7 @@ struct pthread_cond_t
 end
 
 function Base.getproperty(x::Ptr{pthread_cond_t}, f::Symbol)
-    f === :__data && return Ptr{__JL_Ctag_1176}(x + 0)
+    f === :__data && return Ptr{__JL_Ctag_1226}(x + 0)
     f === :__size && return Ptr{NTuple{48, Cchar}}(x + 0)
     f === :__align && return Ptr{Clonglong}(x + 0)
     return getfield(x, f)
@@ -69,7 +69,7 @@ struct pthread_rwlock_t
 end
 
 function Base.getproperty(x::Ptr{pthread_rwlock_t}, f::Symbol)
-    f === :__data && return Ptr{__JL_Ctag_1175}(x + 0)
+    f === :__data && return Ptr{__JL_Ctag_1225}(x + 0)
     f === :__size && return Ptr{NTuple{32, Cchar}}(x + 0)
     f === :__align && return Ptr{Clong}(x + 0)
     return getfield(x, f)
@@ -123,29 +123,29 @@ end
 
 const sigval_t = sigval
 
-struct __JL_Ctag_1250
+struct __JL_Ctag_1307
     data::NTuple{116, UInt8}
 end
 
-function Base.getproperty(x::Ptr{__JL_Ctag_1250}, f::Symbol)
+function Base.getproperty(x::Ptr{__JL_Ctag_1307}, f::Symbol)
     f === :_pad && return Ptr{NTuple{29, Cint}}(x + 0)
-    f === :_kill && return Ptr{__JL_Ctag_1251}(x + 0)
-    f === :_timer && return Ptr{__JL_Ctag_1252}(x + 0)
-    f === :_rt && return Ptr{__JL_Ctag_1253}(x + 0)
-    f === :_sigchld && return Ptr{__JL_Ctag_1254}(x + 0)
-    f === :_sigfault && return Ptr{__JL_Ctag_1255}(x + 0)
-    f === :_sigpoll && return Ptr{__JL_Ctag_1256}(x + 0)
+    f === :_kill && return Ptr{__JL_Ctag_1308}(x + 0)
+    f === :_timer && return Ptr{__JL_Ctag_1309}(x + 0)
+    f === :_rt && return Ptr{__JL_Ctag_1310}(x + 0)
+    f === :_sigchld && return Ptr{__JL_Ctag_1311}(x + 0)
+    f === :_sigfault && return Ptr{__JL_Ctag_1312}(x + 0)
+    f === :_sigpoll && return Ptr{__JL_Ctag_1313}(x + 0)
     return getfield(x, f)
 end
 
-function Base.getproperty(x::__JL_Ctag_1250, f::Symbol)
-    r = Ref{__JL_Ctag_1250}(x)
-    ptr = Base.unsafe_convert(Ptr{__JL_Ctag_1250}, r)
+function Base.getproperty(x::__JL_Ctag_1307, f::Symbol)
+    r = Ref{__JL_Ctag_1307}(x)
+    ptr = Base.unsafe_convert(Ptr{__JL_Ctag_1307}, r)
     fptr = getproperty(ptr, f)
     GC.@preserve r unsafe_load(fptr)
 end
 
-function Base.setproperty!(x::Ptr{__JL_Ctag_1250}, f::Symbol, v)
+function Base.setproperty!(x::Ptr{__JL_Ctag_1307}, f::Symbol, v)
     unsafe_store!(getproperty(x, f), v)
 end
 
@@ -157,7 +157,7 @@ function Base.getproperty(x::Ptr{siginfo}, f::Symbol)
     f === :si_signo && return Ptr{Cint}(x + 0)
     f === :si_errno && return Ptr{Cint}(x + 4)
     f === :si_code && return Ptr{Cint}(x + 8)
-    f === :_sifields && return Ptr{__JL_Ctag_1250}(x + 12)
+    f === :_sifields && return Ptr{__JL_Ctag_1307}(x + 12)
     return getfield(x, f)
 end
 
@@ -206,6 +206,18 @@ struct aws_allocator *aws_default_allocator(void);
 """
 function aws_default_allocator()
     ccall((:aws_default_allocator, libaws_c_common), Ptr{aws_allocator}, ())
+end
+
+"""
+    aws_aligned_allocator()
+
+### Prototype
+```c
+struct aws_allocator *aws_aligned_allocator(void);
+```
+"""
+function aws_aligned_allocator()
+    ccall((:aws_aligned_allocator, libaws_c_common), Ptr{aws_allocator}, ())
 end
 
 """
@@ -2245,6 +2257,20 @@ int aws_byte_buf_init_from_file(struct aws_byte_buf *out_buf, struct aws_allocat
 """
 function aws_byte_buf_init_from_file(out_buf, alloc, filename)
     ccall((:aws_byte_buf_init_from_file, libaws_c_common), Cint, (Ptr{aws_byte_buf}, Ptr{aws_allocator}, Ptr{Cchar}), out_buf, alloc, filename)
+end
+
+"""
+    aws_byte_buf_init_from_file_with_size_hint(out_buf, alloc, filename, size_hint)
+
+Same as [`aws_byte_buf_init_from_file`](@ref)(), but for reading "special files" like /proc/cpuinfo. These files don't accurately report their size, so size\\_hint is used as initial buffer size, and the buffer grows until the while file is read.
+
+### Prototype
+```c
+int aws_byte_buf_init_from_file_with_size_hint( struct aws_byte_buf *out_buf, struct aws_allocator *alloc, const char *filename, size_t size_hint);
+```
+"""
+function aws_byte_buf_init_from_file_with_size_hint(out_buf, alloc, filename, size_hint)
+    ccall((:aws_byte_buf_init_from_file_with_size_hint, libaws_c_common), Cint, (Ptr{aws_byte_buf}, Ptr{aws_allocator}, Ptr{Cchar}, Csize_t), out_buf, alloc, filename, size_hint)
 end
 
 """
@@ -4406,7 +4432,8 @@ end
     AWS_CPU_FEATURE_AVX512 = 4
     AWS_CPU_FEATURE_ARM_CRC = 5
     AWS_CPU_FEATURE_BMI2 = 6
-    AWS_CPU_FEATURE_COUNT = 7
+    AWS_CPU_FEATURE_VPCLMULQDQ = 7
+    AWS_CPU_FEATURE_COUNT = 8
 end
 
 """
@@ -4423,7 +4450,39 @@ function aws_cpu_has_feature(feature_name)
     ccall((:aws_cpu_has_feature, libaws_c_common), Bool, (aws_cpu_feature_name,), feature_name)
 end
 
-@cenum __JL_Ctag_267::UInt32 begin
+mutable struct aws_cross_process_lock end
+
+"""
+    aws_cross_process_lock_try_acquire(allocator, instance_nonce)
+
+Attempts to acquire a system-wide (not per process or per user) lock scoped by instance\\_nonce. For any given unique nonce, a lock will be returned by the first caller. Subsequent calls will return NULL and raise AWS\\_ERROR\\_MUTEX\\_CALLER\\_NOT\\_OWNER until the either the process owning the lock exits or the program owning the lock calls [`aws_cross_process_lock_release`](@ref)() explicitly.
+
+If the process exits before the lock is released, the kernel will unlock it for the next consumer.
+
+### Prototype
+```c
+struct aws_cross_process_lock *aws_cross_process_lock_try_acquire( struct aws_allocator *allocator, struct aws_byte_cursor instance_nonce);
+```
+"""
+function aws_cross_process_lock_try_acquire(allocator, instance_nonce)
+    ccall((:aws_cross_process_lock_try_acquire, libaws_c_common), Ptr{aws_cross_process_lock}, (Ptr{aws_allocator}, aws_byte_cursor), allocator, instance_nonce)
+end
+
+"""
+    aws_cross_process_lock_release(instance_lock)
+
+Releases the lock so the next caller (may be another process) can get an instance of the lock.
+
+### Prototype
+```c
+void aws_cross_process_lock_release(struct aws_cross_process_lock *instance_lock);
+```
+"""
+function aws_cross_process_lock_release(instance_lock)
+    ccall((:aws_cross_process_lock_release, libaws_c_common), Cvoid, (Ptr{aws_cross_process_lock},), instance_lock)
+end
+
+@cenum __JL_Ctag_292::UInt32 begin
     AWS_DATE_TIME_STR_MAX_LEN = 100
     AWS_DATE_TIME_STR_MAX_BASIC_LEN = 20
 end
@@ -4516,9 +4575,11 @@ end
 
 Initializes dt to be the time represented by date\\_str in format 'fmt'. Returns [`AWS_OP_SUCCESS`](@ref) if the string was successfully parsed, returns [`AWS_OP_ERR`](@ref) if parsing failed.
 
+The parser is lenient regarding AWS\\_DATE\\_FORMAT\\_ISO\\_8601 vs AWS\\_DATE\\_FORMAT\\_ISO\\_8601\\_BASIC. Regardless of which you pass in, both "2002-10-02T08:05:09Z" and "20021002T080509Z" would be accepted.
+
 Notes for AWS\\_DATE\\_FORMAT\\_RFC822: If no time zone information is provided, it is assumed to be local time (please don't do this).
 
-If the time zone is something other than something indicating Universal Time (e.g. Z, UT, UTC, or GMT) or an offset from UTC (e.g. +0100, -0700), parsing will fail.
+Only time zones indicating Universal Time (e.g. Z, UT, UTC, or GMT), or offsets from UTC (e.g. +0100, -0700), are accepted.
 
 Really, it's just better if you always use Universal Time.
 
@@ -5371,6 +5432,20 @@ function aws_unregister_error_info(error_info)
 end
 
 """
+    aws_translate_and_raise_io_error_or(error_no, fallback_aws_error_code)
+
+Convert a c library io error into an aws error, and raise it. If no conversion is found, fallback\\_aws\\_error\\_code is raised. Always returns [`AWS_OP_ERR`](@ref).
+
+### Prototype
+```c
+int aws_translate_and_raise_io_error_or(int error_no, int fallback_aws_error_code);
+```
+"""
+function aws_translate_and_raise_io_error_or(error_no, fallback_aws_error_code)
+    ccall((:aws_translate_and_raise_io_error_or, libaws_c_common), Cint, (Cint, Cint), error_no, fallback_aws_error_code)
+end
+
+"""
     aws_translate_and_raise_io_error(error_no)
 
 Convert a c library io error into an aws error, and raise it. If no conversion is found, AWS\\_ERROR\\_SYS\\_CALL\\_FAILURE is raised. Always returns [`AWS_OP_ERR`](@ref).
@@ -5442,6 +5517,9 @@ end
     AWS_ERROR_INVALID_UTF8 = 54
     AWS_ERROR_GET_HOME_DIRECTORY_FAILED = 55
     AWS_ERROR_INVALID_XML = 56
+    AWS_ERROR_FILE_OPEN_FAILURE = 57
+    AWS_ERROR_FILE_READ_FAILURE = 58
+    AWS_ERROR_FILE_WRITE_FAILURE = 59
     AWS_ERROR_END_COMMON_RANGE = 1023
 end
 
@@ -5457,7 +5535,7 @@ Prototype for a hash table equality check function pointer.
 
 This type is usually used for a function that compares two hash table keys, but note that the same type is used for a function that compares two hash table values in [`aws_hash_table_eq`](@ref).
 
-Equality functions used in a hash table must be reflexive (i.e., a == b if and only if b == a), and must be consistent with the hash function in use.
+Equality functions used in a hash table must be be reflexive (a == a), symmetric (a == b => b == a), transitive (a == b, b == c => a == c) and consistent (result does not change with time).
 """
 const aws_hash_callback_eq_fn = Cvoid
 
@@ -5784,7 +5862,7 @@ function aws_file_get_length(file, length)
     ccall((:aws_file_get_length, libaws_c_common), Cint, (Ptr{Libc.FILE}, Ptr{Int64}), file, length)
 end
 
-@cenum __JL_Ctag_418::UInt32 begin
+@cenum __JL_Ctag_443::UInt32 begin
     AWS_COMMON_HASH_TABLE_ITER_CONTINUE = 1
     AWS_COMMON_HASH_TABLE_ITER_DELETE = 2
     AWS_COMMON_HASH_TABLE_ITER_ERROR = 4
@@ -6004,7 +6082,7 @@ Inserts a new element at key, with the given value. If another element exists at
 
 If was\\_created is non-NULL, *was\\_created is set to 0 if an existing element was found, or 1 is a new element was created.
 
-Returns [`AWS_OP_SUCCESS`](@ref) if an item was found or created. Raises AWS\\_ERROR\\_OOM if hash table expansion was required and memory
+Returns [`AWS_OP_SUCCESS`](@ref) if an item was found or created. Raises AWS\\_ERROR\\_OOM if hash table expansion was required and memory allocation failed.
 
 ### Prototype
 ```c
@@ -6845,7 +6923,7 @@ Note: When you are finished with the [`aws_byte_buf`](@ref), you must call "[`aw
 * `value`: The [`aws_json_value`](@ref) to format.
 * `output`: The destination for the JSON string
 ### Returns
-[`AWS_OP_SUCCESS`](@ref) if the JSON string was allocated to output without any errors Will return AWS\\_ERROR\\_INVALID\\_ARGUMENT if the value passed is not an [`aws_json_value`](@ref) or if there aws an error appending the JSON into the byte buffer.
+[`AWS_OP_SUCCESS`](@ref) if the JSON string was allocated to output without any errors Will return [`AWS_OP_ERR`](@ref) if the value passed is not an [`aws_json_value`](@ref) or if there aws an error appending the JSON into the byte buffer.
 ### Prototype
 ```c
 int aws_byte_buf_append_json_string_formatted(const struct aws_json_value *value, struct aws_byte_buf *output);
@@ -7377,7 +7455,7 @@ Log subject is an enum similar to aws error: each library has its own value-spac
 """
 const aws_log_subject_t = UInt32
 
-@cenum __JL_Ctag_635::UInt32 begin
+@cenum __JL_Ctag_660::UInt32 begin
     AWS_LOG_SUBJECT_STRIDE_BITS = 10
 end
 
@@ -7662,7 +7740,7 @@ const static_assertion_at_line_61 = NTuple{1, Cchar}
 
 const static_assertion_at_line_62 = NTuple{1, Cchar}
 
-@cenum __JL_Ctag_656::UInt32 begin
+@cenum __JL_Ctag_681::UInt32 begin
     AWS_CACHE_LINE = 64
 end
 
@@ -7926,6 +8004,20 @@ function aws_priority_queue_top(queue, item)
 end
 
 """
+    aws_priority_queue_clear(queue)
+
+Removes all elements from the queue, but does not free internal memory.
+
+### Prototype
+```c
+void aws_priority_queue_clear(struct aws_priority_queue *queue);
+```
+"""
+function aws_priority_queue_clear(queue)
+    ccall((:aws_priority_queue_clear, libaws_c_common), Cvoid, (Ptr{aws_priority_queue},), queue)
+end
+
+"""
     aws_priority_queue_size(queue)
 
 Current number of elements in the queue
@@ -7951,6 +8043,40 @@ size_t aws_priority_queue_capacity(const struct aws_priority_queue *queue);
 """
 function aws_priority_queue_capacity(queue)
     ccall((:aws_priority_queue_capacity, libaws_c_common), Csize_t, (Ptr{aws_priority_queue},), queue)
+end
+
+"""
+    aws_priority_queue_node_init(node)
+
+Initializes a queue node to a default value that indicates the node is not in the queue.
+
+### Parameters
+* `node`: priority queue node to initialize with a default value
+### Prototype
+```c
+void aws_priority_queue_node_init(struct aws_priority_queue_node *node);
+```
+"""
+function aws_priority_queue_node_init(node)
+    ccall((:aws_priority_queue_node_init, libaws_c_common), Cvoid, (Ptr{aws_priority_queue_node},), node)
+end
+
+"""
+    aws_priority_queue_node_is_in_queue(node)
+
+Checks if a priority queue node is currently in a priority queue.
+
+### Parameters
+* `node`: priority queue node to check usage for
+### Returns
+true if the node is in a queue, false otherwise
+### Prototype
+```c
+bool aws_priority_queue_node_is_in_queue(const struct aws_priority_queue_node *node);
+```
+"""
+function aws_priority_queue_node_is_in_queue(node)
+    ccall((:aws_priority_queue_node_is_in_queue, libaws_c_common), Bool, (Ptr{aws_priority_queue_node},), node)
 end
 
 struct aws_run_command_result
@@ -8514,7 +8640,7 @@ end
 
 const aws_crt_statistics_category_t = UInt32
 
-@cenum __JL_Ctag_859::UInt32 begin
+@cenum __JL_Ctag_884::UInt32 begin
     AWS_CRT_STATISTICS_CATEGORY_STRIDE_BITS = 8
 end
 
@@ -8941,6 +9067,108 @@ struct aws_cpu_info
     suspected_hyper_thread::Bool
 end
 
+mutable struct aws_system_environment end
+
+"""
+    aws_system_environment_load(allocator)
+
+Allocates and initializes information about the system the current process is executing on. If successful returns an instance of [`aws_system_environment`](@ref). If it fails, it will return NULL.
+
+Note: This api is used internally and is still early in its evolution. It may change in incompatible ways in the future.
+
+### Prototype
+```c
+struct aws_system_environment *aws_system_environment_load(struct aws_allocator *allocator);
+```
+"""
+function aws_system_environment_load(allocator)
+    ccall((:aws_system_environment_load, libaws_c_common), Ptr{aws_system_environment}, (Ptr{aws_allocator},), allocator)
+end
+
+"""
+    aws_system_environment_acquire(env)
+
+### Prototype
+```c
+struct aws_system_environment *aws_system_environment_acquire(struct aws_system_environment *env);
+```
+"""
+function aws_system_environment_acquire(env)
+    ccall((:aws_system_environment_acquire, libaws_c_common), Ptr{aws_system_environment}, (Ptr{aws_system_environment},), env)
+end
+
+"""
+    aws_system_environment_release(env)
+
+### Prototype
+```c
+void aws_system_environment_release(struct aws_system_environment *env);
+```
+"""
+function aws_system_environment_release(env)
+    ccall((:aws_system_environment_release, libaws_c_common), Cvoid, (Ptr{aws_system_environment},), env)
+end
+
+"""
+    aws_system_environment_get_virtualization_vendor(env)
+
+Returns the virtualization vendor for the specified compute environment, e.g. "Xen, Amazon EC2, etc..."
+
+The return value may be empty and in that case no vendor was detected.
+
+### Prototype
+```c
+struct aws_byte_cursor aws_system_environment_get_virtualization_vendor(const struct aws_system_environment *env);
+```
+"""
+function aws_system_environment_get_virtualization_vendor(env)
+    ccall((:aws_system_environment_get_virtualization_vendor, libaws_c_common), aws_byte_cursor, (Ptr{aws_system_environment},), env)
+end
+
+"""
+    aws_system_environment_get_virtualization_product_name(env)
+
+Returns the product name for the specified compute environment. For example, the Amazon EC2 Instance type.
+
+The return value may be empty and in that case no vendor was detected.
+
+### Prototype
+```c
+struct aws_byte_cursor aws_system_environment_get_virtualization_product_name(const struct aws_system_environment *env);
+```
+"""
+function aws_system_environment_get_virtualization_product_name(env)
+    ccall((:aws_system_environment_get_virtualization_product_name, libaws_c_common), aws_byte_cursor, (Ptr{aws_system_environment},), env)
+end
+
+"""
+    aws_system_environment_get_processor_count(env)
+
+Returns the number of processors for the specified compute environment.
+
+### Prototype
+```c
+size_t aws_system_environment_get_processor_count(struct aws_system_environment *env);
+```
+"""
+function aws_system_environment_get_processor_count(env)
+    ccall((:aws_system_environment_get_processor_count, libaws_c_common), Csize_t, (Ptr{aws_system_environment},), env)
+end
+
+"""
+    aws_system_environment_get_cpu_group_count(env)
+
+Returns the number of separate cpu groupings (multi-socket configurations or NUMA).
+
+### Prototype
+```c
+size_t aws_system_environment_get_cpu_group_count(const struct aws_system_environment *env);
+```
+"""
+function aws_system_environment_get_cpu_group_count(env)
+    ccall((:aws_system_environment_get_cpu_group_count, libaws_c_common), Csize_t, (Ptr{aws_system_environment},), env)
+end
+
 """
     aws_get_platform_build_os()
 
@@ -9093,6 +9321,24 @@ function aws_backtrace_log(log_level)
     ccall((:aws_backtrace_log, libaws_c_common), Cvoid, (Cint,), log_level)
 end
 
+struct aws_memory_usage_stats
+    maxrss::Csize_t
+    page_faults::Csize_t
+    _reserved::NTuple{8, Csize_t}
+end
+
+"""
+    aws_init_memory_usage_for_current_process(memory_usage)
+
+### Prototype
+```c
+int aws_init_memory_usage_for_current_process(struct aws_memory_usage_stats *memory_usage);
+```
+"""
+function aws_init_memory_usage_for_current_process(memory_usage)
+    ccall((:aws_init_memory_usage_for_current_process, libaws_c_common), Cint, (Ptr{aws_memory_usage_stats},), memory_usage)
+end
+
 @cenum aws_task_status::UInt32 begin
     AWS_TASK_STATUS_RUN_READY = 0
     AWS_TASK_STATUS_CANCELED = 1
@@ -9104,24 +9350,24 @@ A scheduled function.
 """
 const aws_task_fn = Cvoid
 
-struct __JL_Ctag_1212
+struct __JL_Ctag_1270
     data::NTuple{4, UInt8}
 end
 
-function Base.getproperty(x::Ptr{__JL_Ctag_1212}, f::Symbol)
+function Base.getproperty(x::Ptr{__JL_Ctag_1270}, f::Symbol)
     f === :scheduled && return Ptr{Bool}(x + 0)
     f === :reserved && return Ptr{Csize_t}(x + 0)
     return getfield(x, f)
 end
 
-function Base.getproperty(x::__JL_Ctag_1212, f::Symbol)
-    r = Ref{__JL_Ctag_1212}(x)
-    ptr = Base.unsafe_convert(Ptr{__JL_Ctag_1212}, r)
+function Base.getproperty(x::__JL_Ctag_1270, f::Symbol)
+    r = Ref{__JL_Ctag_1270}(x)
+    ptr = Base.unsafe_convert(Ptr{__JL_Ctag_1270}, r)
     fptr = getproperty(ptr, f)
     GC.@preserve r unsafe_load(fptr)
 end
 
-function Base.setproperty!(x::Ptr{__JL_Ctag_1212}, f::Symbol, v)
+function Base.setproperty!(x::Ptr{__JL_Ctag_1270}, f::Symbol, v)
     unsafe_store!(getproperty(x, f), v)
 end
 
@@ -9136,7 +9382,7 @@ function Base.getproperty(x::Ptr{aws_task}, f::Symbol)
     f === :node && return Ptr{aws_linked_list_node}(x + 16)
     f === :priority_queue_node && return Ptr{aws_priority_queue_node}(x + 24)
     f === :type_tag && return Ptr{Ptr{Cchar}}(x + 28)
-    f === :abi_extension && return Ptr{__JL_Ctag_1212}(x + 32)
+    f === :abi_extension && return Ptr{__JL_Ctag_1270}(x + 32)
     return getfield(x, f)
 end
 
@@ -9764,7 +10010,7 @@ struct aws_uri
     user::aws_byte_cursor
     password::aws_byte_cursor
     host_name::aws_byte_cursor
-    port::UInt16
+    port::UInt32
     path::aws_byte_cursor
     query_string::aws_byte_cursor
     path_and_query::aws_byte_cursor
@@ -9791,7 +10037,7 @@ struct aws_uri_builder_options
     scheme::aws_byte_cursor
     path::aws_byte_cursor
     host_name::aws_byte_cursor
-    port::UInt16
+    port::UInt32
     query_params::Ptr{aws_array_list}
     query_string::aws_byte_cursor
 end
@@ -9913,11 +10159,11 @@ Returns the port portion of the authority if it was present, otherwise, returns 
 
 ### Prototype
 ```c
-uint16_t aws_uri_port(const struct aws_uri *uri);
+uint32_t aws_uri_port(const struct aws_uri *uri);
 ```
 """
 function aws_uri_port(uri)
-    ccall((:aws_uri_port, libaws_c_common), UInt16, (Ptr{aws_uri},), uri)
+    ccall((:aws_uri_port, libaws_c_common), UInt32, (Ptr{aws_uri},), uri)
 end
 
 """
@@ -9932,6 +10178,38 @@ const struct aws_byte_cursor *aws_uri_path_and_query(const struct aws_uri *uri);
 """
 function aws_uri_path_and_query(uri)
     ccall((:aws_uri_path_and_query, libaws_c_common), Ptr{aws_byte_cursor}, (Ptr{aws_uri},), uri)
+end
+
+"""
+    aws_query_string_next_param(query_string, param)
+
+For iterating over the params in the query string. `param` is an in/out argument used to track progress, it MUST be zeroed out to start. If true is returned, `param` contains the value of the next param. If false is returned, there are no further params.
+
+Edge cases: 1) Entries without '=' sign are treated as having a key and no value. Example: First param in query string "a&b=c" has key="a" value=""
+
+2) Blank entries are skipped. Example: The only param in query string "&&a=b" is key="a" value="b"
+
+### Prototype
+```c
+bool aws_query_string_next_param(struct aws_byte_cursor query_string, struct aws_uri_param *param);
+```
+"""
+function aws_query_string_next_param(query_string, param)
+    ccall((:aws_query_string_next_param, libaws_c_common), Bool, (aws_byte_cursor, Ptr{aws_uri_param}), query_string, param)
+end
+
+"""
+    aws_query_string_params(query_string, out_params)
+
+Parses query string and stores the parameters in 'out\\_params'. Returns [`AWS_OP_SUCCESS`](@ref) on success and [`AWS_OP_ERR`](@ref) on failure. The user is responsible for initializing out\\_params with item size of struct aws\\_query\\_param. The user is also responsible for cleaning up out\\_params when finished.
+
+### Prototype
+```c
+int aws_query_string_params(struct aws_byte_cursor query_string, struct aws_array_list *out_params);
+```
+"""
+function aws_query_string_params(query_string, out_params)
+    ccall((:aws_query_string_params, libaws_c_common), Cint, (aws_byte_cursor, Ptr{aws_array_list}), query_string, out_params)
 end
 
 """
@@ -10012,7 +10290,7 @@ struct aws_uuid
     uuid_data::NTuple{16, UInt8}
 end
 
-@cenum __JL_Ctag_1068::UInt32 begin
+@cenum __JL_Ctag_1118::UInt32 begin
     AWS_UUID_STR_LEN = 37
 end
 
@@ -10428,7 +10706,7 @@ function enable_vt_mode()
     ccall((:enable_vt_mode, libaws_c_common), Cint, ())
 end
 
-struct __JL_Ctag_1175
+struct __JL_Ctag_1225
     __lock::Cint
     __nr_readers::Cuint
     __readers_wakeup::Cuint
@@ -10441,7 +10719,7 @@ struct __JL_Ctag_1175
     __pad2::Cuchar
     __writer::Cint
 end
-function Base.getproperty(x::Ptr{__JL_Ctag_1175}, f::Symbol)
+function Base.getproperty(x::Ptr{__JL_Ctag_1225}, f::Symbol)
     f === :__lock && return Ptr{Cint}(x + 0)
     f === :__nr_readers && return Ptr{Cuint}(x + 4)
     f === :__readers_wakeup && return Ptr{Cuint}(x + 8)
@@ -10456,48 +10734,14 @@ function Base.getproperty(x::Ptr{__JL_Ctag_1175}, f::Symbol)
     return getfield(x, f)
 end
 
-function Base.getproperty(x::__JL_Ctag_1175, f::Symbol)
-    r = Ref{__JL_Ctag_1175}(x)
-    ptr = Base.unsafe_convert(Ptr{__JL_Ctag_1175}, r)
+function Base.getproperty(x::__JL_Ctag_1225, f::Symbol)
+    r = Ref{__JL_Ctag_1225}(x)
+    ptr = Base.unsafe_convert(Ptr{__JL_Ctag_1225}, r)
     fptr = getproperty(ptr, f)
     GC.@preserve r unsafe_load(fptr)
 end
 
-function Base.setproperty!(x::Ptr{__JL_Ctag_1175}, f::Symbol, v)
-    unsafe_store!(getproperty(x, f), v)
-end
-
-
-struct __JL_Ctag_1176
-    __lock::Cint
-    __futex::Cuint
-    __total_seq::Culonglong
-    __wakeup_seq::Culonglong
-    __woken_seq::Culonglong
-    __mutex::Ptr{Cvoid}
-    __nwaiters::Cuint
-    __broadcast_seq::Cuint
-end
-function Base.getproperty(x::Ptr{__JL_Ctag_1176}, f::Symbol)
-    f === :__lock && return Ptr{Cint}(x + 0)
-    f === :__futex && return Ptr{Cuint}(x + 4)
-    f === :__total_seq && return Ptr{Culonglong}(x + 8)
-    f === :__wakeup_seq && return Ptr{Culonglong}(x + 16)
-    f === :__woken_seq && return Ptr{Culonglong}(x + 24)
-    f === :__mutex && return Ptr{Ptr{Cvoid}}(x + 32)
-    f === :__nwaiters && return Ptr{Cuint}(x + 36)
-    f === :__broadcast_seq && return Ptr{Cuint}(x + 40)
-    return getfield(x, f)
-end
-
-function Base.getproperty(x::__JL_Ctag_1176, f::Symbol)
-    r = Ref{__JL_Ctag_1176}(x)
-    ptr = Base.unsafe_convert(Ptr{__JL_Ctag_1176}, r)
-    fptr = getproperty(ptr, f)
-    GC.@preserve r unsafe_load(fptr)
-end
-
-function Base.setproperty!(x::Ptr{__JL_Ctag_1176}, f::Symbol, v)
+function Base.setproperty!(x::Ptr{__JL_Ctag_1225}, f::Symbol, v)
     unsafe_store!(getproperty(x, f), v)
 end
 
@@ -10528,84 +10772,118 @@ function Base.setproperty!(x::Ptr{__pthread_mutex_s}, f::Symbol, v)
     unsafe_store!(getproperty(x, f), v)
 end
 
-struct __JL_Ctag_1251
+struct __JL_Ctag_1226
+    __lock::Cint
+    __futex::Cuint
+    __total_seq::Culonglong
+    __wakeup_seq::Culonglong
+    __woken_seq::Culonglong
+    __mutex::Ptr{Cvoid}
+    __nwaiters::Cuint
+    __broadcast_seq::Cuint
+end
+function Base.getproperty(x::Ptr{__JL_Ctag_1226}, f::Symbol)
+    f === :__lock && return Ptr{Cint}(x + 0)
+    f === :__futex && return Ptr{Cuint}(x + 4)
+    f === :__total_seq && return Ptr{Culonglong}(x + 8)
+    f === :__wakeup_seq && return Ptr{Culonglong}(x + 16)
+    f === :__woken_seq && return Ptr{Culonglong}(x + 24)
+    f === :__mutex && return Ptr{Ptr{Cvoid}}(x + 32)
+    f === :__nwaiters && return Ptr{Cuint}(x + 36)
+    f === :__broadcast_seq && return Ptr{Cuint}(x + 40)
+    return getfield(x, f)
+end
+
+function Base.getproperty(x::__JL_Ctag_1226, f::Symbol)
+    r = Ref{__JL_Ctag_1226}(x)
+    ptr = Base.unsafe_convert(Ptr{__JL_Ctag_1226}, r)
+    fptr = getproperty(ptr, f)
+    GC.@preserve r unsafe_load(fptr)
+end
+
+function Base.setproperty!(x::Ptr{__JL_Ctag_1226}, f::Symbol, v)
+    unsafe_store!(getproperty(x, f), v)
+end
+
+
+struct __JL_Ctag_1308
     si_pid::__pid_t
     si_uid::__uid_t
 end
-function Base.getproperty(x::Ptr{__JL_Ctag_1251}, f::Symbol)
+function Base.getproperty(x::Ptr{__JL_Ctag_1308}, f::Symbol)
     f === :si_pid && return Ptr{__pid_t}(x + 0)
     f === :si_uid && return Ptr{__uid_t}(x + 4)
     return getfield(x, f)
 end
 
-function Base.getproperty(x::__JL_Ctag_1251, f::Symbol)
-    r = Ref{__JL_Ctag_1251}(x)
-    ptr = Base.unsafe_convert(Ptr{__JL_Ctag_1251}, r)
+function Base.getproperty(x::__JL_Ctag_1308, f::Symbol)
+    r = Ref{__JL_Ctag_1308}(x)
+    ptr = Base.unsafe_convert(Ptr{__JL_Ctag_1308}, r)
     fptr = getproperty(ptr, f)
     GC.@preserve r unsafe_load(fptr)
 end
 
-function Base.setproperty!(x::Ptr{__JL_Ctag_1251}, f::Symbol, v)
+function Base.setproperty!(x::Ptr{__JL_Ctag_1308}, f::Symbol, v)
     unsafe_store!(getproperty(x, f), v)
 end
 
 
-struct __JL_Ctag_1252
+struct __JL_Ctag_1309
     si_tid::Cint
     si_overrun::Cint
     si_sigval::sigval_t
 end
-function Base.getproperty(x::Ptr{__JL_Ctag_1252}, f::Symbol)
+function Base.getproperty(x::Ptr{__JL_Ctag_1309}, f::Symbol)
     f === :si_tid && return Ptr{Cint}(x + 0)
     f === :si_overrun && return Ptr{Cint}(x + 4)
     f === :si_sigval && return Ptr{sigval_t}(x + 8)
     return getfield(x, f)
 end
 
-function Base.getproperty(x::__JL_Ctag_1252, f::Symbol)
-    r = Ref{__JL_Ctag_1252}(x)
-    ptr = Base.unsafe_convert(Ptr{__JL_Ctag_1252}, r)
+function Base.getproperty(x::__JL_Ctag_1309, f::Symbol)
+    r = Ref{__JL_Ctag_1309}(x)
+    ptr = Base.unsafe_convert(Ptr{__JL_Ctag_1309}, r)
     fptr = getproperty(ptr, f)
     GC.@preserve r unsafe_load(fptr)
 end
 
-function Base.setproperty!(x::Ptr{__JL_Ctag_1252}, f::Symbol, v)
+function Base.setproperty!(x::Ptr{__JL_Ctag_1309}, f::Symbol, v)
     unsafe_store!(getproperty(x, f), v)
 end
 
 
-struct __JL_Ctag_1253
+struct __JL_Ctag_1310
     si_pid::__pid_t
     si_uid::__uid_t
     si_sigval::sigval_t
 end
-function Base.getproperty(x::Ptr{__JL_Ctag_1253}, f::Symbol)
+function Base.getproperty(x::Ptr{__JL_Ctag_1310}, f::Symbol)
     f === :si_pid && return Ptr{__pid_t}(x + 0)
     f === :si_uid && return Ptr{__uid_t}(x + 4)
     f === :si_sigval && return Ptr{sigval_t}(x + 8)
     return getfield(x, f)
 end
 
-function Base.getproperty(x::__JL_Ctag_1253, f::Symbol)
-    r = Ref{__JL_Ctag_1253}(x)
-    ptr = Base.unsafe_convert(Ptr{__JL_Ctag_1253}, r)
+function Base.getproperty(x::__JL_Ctag_1310, f::Symbol)
+    r = Ref{__JL_Ctag_1310}(x)
+    ptr = Base.unsafe_convert(Ptr{__JL_Ctag_1310}, r)
     fptr = getproperty(ptr, f)
     GC.@preserve r unsafe_load(fptr)
 end
 
-function Base.setproperty!(x::Ptr{__JL_Ctag_1253}, f::Symbol, v)
+function Base.setproperty!(x::Ptr{__JL_Ctag_1310}, f::Symbol, v)
     unsafe_store!(getproperty(x, f), v)
 end
 
 
-struct __JL_Ctag_1254
+struct __JL_Ctag_1311
     si_pid::__pid_t
     si_uid::__uid_t
     si_status::Cint
     si_utime::__clock_t
     si_stime::__clock_t
 end
-function Base.getproperty(x::Ptr{__JL_Ctag_1254}, f::Symbol)
+function Base.getproperty(x::Ptr{__JL_Ctag_1311}, f::Symbol)
     f === :si_pid && return Ptr{__pid_t}(x + 0)
     f === :si_uid && return Ptr{__uid_t}(x + 4)
     f === :si_status && return Ptr{Cint}(x + 8)
@@ -10614,56 +10892,56 @@ function Base.getproperty(x::Ptr{__JL_Ctag_1254}, f::Symbol)
     return getfield(x, f)
 end
 
-function Base.getproperty(x::__JL_Ctag_1254, f::Symbol)
-    r = Ref{__JL_Ctag_1254}(x)
-    ptr = Base.unsafe_convert(Ptr{__JL_Ctag_1254}, r)
+function Base.getproperty(x::__JL_Ctag_1311, f::Symbol)
+    r = Ref{__JL_Ctag_1311}(x)
+    ptr = Base.unsafe_convert(Ptr{__JL_Ctag_1311}, r)
     fptr = getproperty(ptr, f)
     GC.@preserve r unsafe_load(fptr)
 end
 
-function Base.setproperty!(x::Ptr{__JL_Ctag_1254}, f::Symbol, v)
+function Base.setproperty!(x::Ptr{__JL_Ctag_1311}, f::Symbol, v)
     unsafe_store!(getproperty(x, f), v)
 end
 
 
-struct __JL_Ctag_1255
+struct __JL_Ctag_1312
     si_addr::Ptr{Cvoid}
 end
-function Base.getproperty(x::Ptr{__JL_Ctag_1255}, f::Symbol)
+function Base.getproperty(x::Ptr{__JL_Ctag_1312}, f::Symbol)
     f === :si_addr && return Ptr{Ptr{Cvoid}}(x + 0)
     return getfield(x, f)
 end
 
-function Base.getproperty(x::__JL_Ctag_1255, f::Symbol)
-    r = Ref{__JL_Ctag_1255}(x)
-    ptr = Base.unsafe_convert(Ptr{__JL_Ctag_1255}, r)
+function Base.getproperty(x::__JL_Ctag_1312, f::Symbol)
+    r = Ref{__JL_Ctag_1312}(x)
+    ptr = Base.unsafe_convert(Ptr{__JL_Ctag_1312}, r)
     fptr = getproperty(ptr, f)
     GC.@preserve r unsafe_load(fptr)
 end
 
-function Base.setproperty!(x::Ptr{__JL_Ctag_1255}, f::Symbol, v)
+function Base.setproperty!(x::Ptr{__JL_Ctag_1312}, f::Symbol, v)
     unsafe_store!(getproperty(x, f), v)
 end
 
 
-struct __JL_Ctag_1256
+struct __JL_Ctag_1313
     si_band::Clong
     si_fd::Cint
 end
-function Base.getproperty(x::Ptr{__JL_Ctag_1256}, f::Symbol)
+function Base.getproperty(x::Ptr{__JL_Ctag_1313}, f::Symbol)
     f === :si_band && return Ptr{Clong}(x + 0)
     f === :si_fd && return Ptr{Cint}(x + 4)
     return getfield(x, f)
 end
 
-function Base.getproperty(x::__JL_Ctag_1256, f::Symbol)
-    r = Ref{__JL_Ctag_1256}(x)
-    ptr = Base.unsafe_convert(Ptr{__JL_Ctag_1256}, r)
+function Base.getproperty(x::__JL_Ctag_1313, f::Symbol)
+    r = Ref{__JL_Ctag_1313}(x)
+    ptr = Base.unsafe_convert(Ptr{__JL_Ctag_1313}, r)
     fptr = getproperty(ptr, f)
     GC.@preserve r unsafe_load(fptr)
 end
 
-function Base.setproperty!(x::Ptr{__JL_Ctag_1256}, f::Symbol, v)
+function Base.setproperty!(x::Ptr{__JL_Ctag_1313}, f::Symbol, v)
     unsafe_store!(getproperty(x, f), v)
 end
 

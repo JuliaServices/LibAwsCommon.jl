@@ -2,7 +2,7 @@
 
 julia_version = "1.10.2"
 manifest_format = "2.0"
-project_hash = "ea0cf0539a06f84ee25b316a0a164f85346b6d37"
+project_hash = "17529965341e648e57dcbc863dd11933859fd679"
 
 [[deps.ArgTools]]
 uuid = "0dad84c5-d112-42e6-8d28-ef12dabb789f"
@@ -72,9 +72,9 @@ uuid = "b77e0a4c-d291-57a0-90e8-8db25a27a240"
 
 [[deps.JLLPrefixes]]
 deps = ["Artifacts", "Git", "HistoricalStdlibVersions", "Pkg", "Preferences", "SHA", "Scratch"]
-git-tree-sha1 = "9343fd4bcb8a4f4f661325e353d70aa00be884c2"
+git-tree-sha1 = "c43b83a688b86b33f5b6d8f48d70a41526d845f8"
 uuid = "afc68a34-7891-4c5a-9da1-1c62935e7b0d"
-version = "0.3.4"
+version = "0.3.5"
 
 [[deps.JLLWrappers]]
 deps = ["Artifacts", "Preferences"]
@@ -137,9 +137,9 @@ version = "1.2.0"
 
 [[deps.OpenSSL_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl"]
-git-tree-sha1 = "60e3045590bd104a16fefb12836c00c0ef8c7f8c"
+git-tree-sha1 = "3da7367955dcc5c54c1ba4d402ccdc09a1a3e046"
 uuid = "458c3c95-2e84-50aa-8efc-19380b2a3a95"
-version = "3.0.13+0"
+version = "3.0.13+1"
 
 [[deps.PCRE2_jll]]
 deps = ["Artifacts", "Libdl"]
@@ -209,9 +209,9 @@ version = "1.2.13+1"
 
 [[deps.aws_c_common_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl"]
-git-tree-sha1 = "3cbdb09867f78386555469ddecaf276ff327936a"
+git-tree-sha1 = "586a1aa2fdda172c45587b52f5329fedde14f44c"
 uuid = "73048d1d-b8c4-5092-a58d-866c5e8d1e50"
-version = "0.9.3+1"
+version = "0.9.14+0"
 
 [[deps.libLLVM_jll]]
 deps = ["Artifacts", "Libdl"]
