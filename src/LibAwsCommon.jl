@@ -37,10 +37,10 @@ end
 
 # exports
 for name in names(@__MODULE__; all=true)
-    nm = string(name)
-    if startswith(nm, "aws_") || startswith(nm, "AWS_")
-        @eval export $name
+    if name == :eval || name == :include || contains(string(name), "#")
+        continue
     end
+    @eval export $name
 end
 
 end

@@ -1,57 +1,122 @@
 using CEnum
 
+"""
+Documentation not found
+"""
 const __darwin_time_t = Clong
 
+"""
+Documentation not found
+"""
 const __darwin_pid_t = Int32
 
+"""
+Documentation not found
+"""
 const __darwin_uid_t = UInt32
 
+"""
+    __darwin_pthread_handler_rec
+
+Documentation not found
+"""
 struct __darwin_pthread_handler_rec
     __routine::Ptr{Cvoid}
     __arg::Ptr{Cvoid}
     __next::Ptr{__darwin_pthread_handler_rec}
 end
 
+"""
+    _opaque_pthread_cond_t
+
+Documentation not found
+"""
 struct _opaque_pthread_cond_t
     __sig::Clong
     __opaque::NTuple{40, Cchar}
 end
 
+"""
+    _opaque_pthread_mutex_t
+
+Documentation not found
+"""
 struct _opaque_pthread_mutex_t
     __sig::Clong
     __opaque::NTuple{56, Cchar}
 end
 
+"""
+    _opaque_pthread_once_t
+
+Documentation not found
+"""
 struct _opaque_pthread_once_t
     __sig::Clong
     __opaque::NTuple{8, Cchar}
 end
 
+"""
+    _opaque_pthread_rwlock_t
+
+Documentation not found
+"""
 struct _opaque_pthread_rwlock_t
     __sig::Clong
     __opaque::NTuple{192, Cchar}
 end
 
+"""
+    _opaque_pthread_t
+
+Documentation not found
+"""
 struct _opaque_pthread_t
     __sig::Clong
     __cleanup_stack::Ptr{__darwin_pthread_handler_rec}
     __opaque::NTuple{8176, Cchar}
 end
 
+"""
+Documentation not found
+"""
 const __darwin_pthread_cond_t = _opaque_pthread_cond_t
 
+"""
+Documentation not found
+"""
 const __darwin_pthread_mutex_t = _opaque_pthread_mutex_t
 
+"""
+Documentation not found
+"""
 const __darwin_pthread_once_t = _opaque_pthread_once_t
 
+"""
+Documentation not found
+"""
 const __darwin_pthread_rwlock_t = _opaque_pthread_rwlock_t
 
+"""
+Documentation not found
+"""
 const __darwin_pthread_t = Ptr{_opaque_pthread_t}
 
+"""
+Documentation not found
+"""
 const pid_t = __darwin_pid_t
 
+"""
+Documentation not found
+"""
 const uid_t = __darwin_uid_t
 
+"""
+    sigval
+
+Documentation not found
+"""
 struct sigval
     data::NTuple{8, UInt8}
 end
@@ -73,6 +138,11 @@ function Base.setproperty!(x::Ptr{sigval}, f::Symbol, v)
     unsafe_store!(getproperty(x, f), v)
 end
 
+"""
+    __siginfo
+
+Documentation not found
+"""
 struct __siginfo
     data::NTuple{104, UInt8}
 end
@@ -102,20 +172,46 @@ function Base.setproperty!(x::Ptr{__siginfo}, f::Symbol, v)
     unsafe_store!(getproperty(x, f), v)
 end
 
+"""
+Documentation not found
+"""
 const siginfo_t = __siginfo
 
+"""
+Documentation not found
+"""
 const time_t = __darwin_time_t
 
+"""
+Documentation not found
+"""
 const pthread_cond_t = __darwin_pthread_cond_t
 
+"""
+Documentation not found
+"""
 const pthread_mutex_t = __darwin_pthread_mutex_t
 
+"""
+Documentation not found
+"""
 const pthread_once_t = __darwin_pthread_once_t
 
+"""
+Documentation not found
+"""
 const pthread_rwlock_t = __darwin_pthread_rwlock_t
 
+"""
+Documentation not found
+"""
 const pthread_t = __darwin_pthread_t
 
+"""
+    tm
+
+Documentation not found
+"""
 struct tm
     tm_sec::Cint
     tm_min::Cint
@@ -130,6 +226,11 @@ struct tm
     tm_zone::Ptr{Cchar}
 end
 
+"""
+    aws_allocator
+
+Allocator structure. An instance of this will be passed around for anything needing memory allocation
+"""
 struct aws_allocator
     mem_acquire::Ptr{Cvoid}
     mem_release::Ptr{Cvoid}
@@ -155,6 +256,7 @@ end
 """
     aws_default_allocator()
 
+Documentation not found
 ### Prototype
 ```c
 struct aws_allocator *aws_default_allocator(void);
@@ -167,6 +269,8 @@ end
 """
     aws_aligned_allocator()
 
+Allocator that align small allocations on 8 byte boundary and big allocations on 32/64 byte boundary.
+
 ### Prototype
 ```c
 struct aws_allocator *aws_aligned_allocator(void);
@@ -176,8 +280,14 @@ function aws_aligned_allocator()
     ccall((:aws_aligned_allocator, libaws_c_common), Ptr{aws_allocator}, ())
 end
 
+"""
+Avoid pulling in CoreFoundation headers in a header file.
+"""
 mutable struct __CFAllocator end
 
+"""
+Documentation not found
+"""
 const CFAllocatorRef = Ptr{__CFAllocator}
 
 """
@@ -266,6 +376,11 @@ function aws_mem_realloc(allocator, ptr, oldsize, newsize)
     ccall((:aws_mem_realloc, libaws_c_common), Cint, (Ptr{aws_allocator}, Ptr{Ptr{Cvoid}}, Csize_t, Csize_t), allocator, ptr, oldsize, newsize)
 end
 
+"""
+    aws_mem_trace_level
+
+Maintainer note: The above function doesn't return the pointer (as with standard C realloc) as this pattern becomes error-prone when OOMs occur. In particular, we want to avoid losing the old pointer when an OOM condition occurs, so we prefer to take the old pointer as an in/out reference argument that we can leave unchanged on failure.
+"""
 @cenum aws_mem_trace_level::UInt32 begin
     AWS_MEMTRACE_NONE = 0
     AWS_MEMTRACE_BYTES = 1
@@ -274,6 +389,8 @@ end
 
 """
     aws_mem_tracer_new(allocator, deprecated, level, frames_per_stack)
+
+Wraps an allocator and tracks all external allocations. If aws\\_mem\\_trace\\_dump() is called and there are still allocations active, they will be reported to the [`aws_logger`](@ref) at TRACE level. allocator - The allocator to wrap deprecated - Deprecated arg, ignored. level - The level to track allocations at frames\\_per\\_stack is how many frames to store per callstack if AWS\\_MEMTRACE\\_STACKS is in use, otherwise it is ignored. 8 tends to be a pretty good number balancing storage space vs useful stacks. Returns the tracer allocator, which should be used for all allocations that should be tracked.
 
 ### Prototype
 ```c
@@ -287,6 +404,8 @@ end
 """
     aws_mem_tracer_destroy(trace_allocator)
 
+Unwraps the traced allocator and cleans up the tracer. Returns the original allocator
+
 ### Prototype
 ```c
 struct aws_allocator *aws_mem_tracer_destroy(struct aws_allocator *trace_allocator);
@@ -298,6 +417,8 @@ end
 
 """
     aws_mem_tracer_dump(trace_allocator)
+
+If there are outstanding allocations, dumps them to log, along with any information gathered based on the trace level set when aws\\_mem\\_trace() was called. Should be passed the tracer allocator returned from aws\\_mem\\_trace().
 
 ### Prototype
 ```c
@@ -311,6 +432,8 @@ end
 """
     aws_mem_tracer_bytes(trace_allocator)
 
+Returns the current number of bytes in outstanding allocations
+
 ### Prototype
 ```c
 size_t aws_mem_tracer_bytes(struct aws_allocator *trace_allocator);
@@ -322,6 +445,8 @@ end
 
 """
     aws_mem_tracer_count(trace_allocator)
+
+Returns the current number of outstanding allocations
 
 ### Prototype
 ```c
@@ -335,6 +460,8 @@ end
 """
     aws_small_block_allocator_new(allocator, multi_threaded)
 
+Creates a new Small Block Allocator which fronts the supplied parent allocator. The SBA will intercept and handle small allocs, and will forward anything larger to the parent allocator. If multi\\_threaded is true, the internal allocator will protect its internal data structures with a mutex
+
 ### Prototype
 ```c
 struct aws_allocator *aws_small_block_allocator_new(struct aws_allocator *allocator, bool multi_threaded);
@@ -346,6 +473,8 @@ end
 
 """
     aws_small_block_allocator_destroy(sba_allocator)
+
+Destroys a Small Block Allocator instance and frees its memory to the parent allocator. The parent allocator will otherwise be unaffected.
 
 ### Prototype
 ```c
@@ -359,6 +488,8 @@ end
 """
     aws_small_block_allocator_bytes_active(sba_allocator)
 
+Returns the number of bytes currently active in the SBA
+
 ### Prototype
 ```c
 size_t aws_small_block_allocator_bytes_active(struct aws_allocator *sba_allocator);
@@ -370,6 +501,8 @@ end
 
 """
     aws_small_block_allocator_bytes_reserved(sba_allocator)
+
+Returns the number of bytes reserved in pages/bins inside the SBA, e.g. the current system memory used by the SBA
 
 ### Prototype
 ```c
@@ -383,6 +516,8 @@ end
 """
     aws_small_block_allocator_page_size(sba_allocator)
 
+Returns the page size that the SBA is using
+
 ### Prototype
 ```c
 size_t aws_small_block_allocator_page_size(struct aws_allocator *sba_allocator);
@@ -395,6 +530,8 @@ end
 """
     aws_small_block_allocator_page_size_available(sba_allocator)
 
+Returns the amount of memory in each page available to user allocations
+
 ### Prototype
 ```c
 size_t aws_small_block_allocator_page_size_available(struct aws_allocator *sba_allocator);
@@ -406,6 +543,8 @@ end
 
 """
     aws_raise_error(err)
+
+Raises `err` to the installed callbacks, and sets the thread's error.
 
 ### Prototype
 ```c
@@ -559,6 +698,7 @@ end
 """
     aws_clz_i32(n)
 
+Documentation not found
 ### Prototype
 ```c
 AWS_STATIC_IMPL size_t aws_clz_i32(int32_t n);
@@ -571,6 +711,7 @@ end
 """
     aws_clz_u64(n)
 
+Documentation not found
 ### Prototype
 ```c
 AWS_STATIC_IMPL size_t aws_clz_u64(uint64_t n);
@@ -583,6 +724,7 @@ end
 """
     aws_clz_i64(n)
 
+Documentation not found
 ### Prototype
 ```c
 AWS_STATIC_IMPL size_t aws_clz_i64(int64_t n);
@@ -595,6 +737,7 @@ end
 """
     aws_clz_size(n)
 
+Documentation not found
 ### Prototype
 ```c
 AWS_STATIC_IMPL size_t aws_clz_size(size_t n);
@@ -621,6 +764,7 @@ end
 """
     aws_ctz_i32(n)
 
+Documentation not found
 ### Prototype
 ```c
 AWS_STATIC_IMPL size_t aws_ctz_i32(int32_t n);
@@ -633,6 +777,7 @@ end
 """
     aws_ctz_u64(n)
 
+Documentation not found
 ### Prototype
 ```c
 AWS_STATIC_IMPL size_t aws_ctz_u64(uint64_t n);
@@ -645,6 +790,7 @@ end
 """
     aws_ctz_i64(n)
 
+Documentation not found
 ### Prototype
 ```c
 AWS_STATIC_IMPL size_t aws_ctz_i64(int64_t n);
@@ -657,6 +803,7 @@ end
 """
     aws_ctz_size(n)
 
+Documentation not found
 ### Prototype
 ```c
 AWS_STATIC_IMPL size_t aws_ctz_size(size_t n);
@@ -837,6 +984,7 @@ end
 """
     aws_min_u8(a, b)
 
+Documentation not found
 ### Prototype
 ```c
 AWS_STATIC_IMPL uint8_t aws_min_u8(uint8_t a, uint8_t b);
@@ -849,6 +997,7 @@ end
 """
     aws_max_u8(a, b)
 
+Documentation not found
 ### Prototype
 ```c
 AWS_STATIC_IMPL uint8_t aws_max_u8(uint8_t a, uint8_t b);
@@ -861,6 +1010,7 @@ end
 """
     aws_min_i8(a, b)
 
+Documentation not found
 ### Prototype
 ```c
 AWS_STATIC_IMPL int8_t aws_min_i8(int8_t a, int8_t b);
@@ -873,6 +1023,7 @@ end
 """
     aws_max_i8(a, b)
 
+Documentation not found
 ### Prototype
 ```c
 AWS_STATIC_IMPL int8_t aws_max_i8(int8_t a, int8_t b);
@@ -885,6 +1036,7 @@ end
 """
     aws_min_u16(a, b)
 
+Documentation not found
 ### Prototype
 ```c
 AWS_STATIC_IMPL uint16_t aws_min_u16(uint16_t a, uint16_t b);
@@ -897,6 +1049,7 @@ end
 """
     aws_max_u16(a, b)
 
+Documentation not found
 ### Prototype
 ```c
 AWS_STATIC_IMPL uint16_t aws_max_u16(uint16_t a, uint16_t b);
@@ -909,6 +1062,7 @@ end
 """
     aws_min_i16(a, b)
 
+Documentation not found
 ### Prototype
 ```c
 AWS_STATIC_IMPL int16_t aws_min_i16(int16_t a, int16_t b);
@@ -921,6 +1075,7 @@ end
 """
     aws_max_i16(a, b)
 
+Documentation not found
 ### Prototype
 ```c
 AWS_STATIC_IMPL int16_t aws_max_i16(int16_t a, int16_t b);
@@ -933,6 +1088,7 @@ end
 """
     aws_min_u32(a, b)
 
+Documentation not found
 ### Prototype
 ```c
 AWS_STATIC_IMPL uint32_t aws_min_u32(uint32_t a, uint32_t b);
@@ -945,6 +1101,7 @@ end
 """
     aws_max_u32(a, b)
 
+Documentation not found
 ### Prototype
 ```c
 AWS_STATIC_IMPL uint32_t aws_max_u32(uint32_t a, uint32_t b);
@@ -957,6 +1114,7 @@ end
 """
     aws_min_i32(a, b)
 
+Documentation not found
 ### Prototype
 ```c
 AWS_STATIC_IMPL int32_t aws_min_i32(int32_t a, int32_t b);
@@ -969,6 +1127,7 @@ end
 """
     aws_max_i32(a, b)
 
+Documentation not found
 ### Prototype
 ```c
 AWS_STATIC_IMPL int32_t aws_max_i32(int32_t a, int32_t b);
@@ -981,6 +1140,7 @@ end
 """
     aws_min_u64(a, b)
 
+Documentation not found
 ### Prototype
 ```c
 AWS_STATIC_IMPL uint64_t aws_min_u64(uint64_t a, uint64_t b);
@@ -993,6 +1153,7 @@ end
 """
     aws_max_u64(a, b)
 
+Documentation not found
 ### Prototype
 ```c
 AWS_STATIC_IMPL uint64_t aws_max_u64(uint64_t a, uint64_t b);
@@ -1005,6 +1166,7 @@ end
 """
     aws_min_i64(a, b)
 
+Documentation not found
 ### Prototype
 ```c
 AWS_STATIC_IMPL int64_t aws_min_i64(int64_t a, int64_t b);
@@ -1017,6 +1179,7 @@ end
 """
     aws_max_i64(a, b)
 
+Documentation not found
 ### Prototype
 ```c
 AWS_STATIC_IMPL int64_t aws_max_i64(int64_t a, int64_t b);
@@ -1029,6 +1192,7 @@ end
 """
     aws_min_size(a, b)
 
+Documentation not found
 ### Prototype
 ```c
 AWS_STATIC_IMPL size_t aws_min_size(size_t a, size_t b);
@@ -1041,6 +1205,7 @@ end
 """
     aws_max_size(a, b)
 
+Documentation not found
 ### Prototype
 ```c
 AWS_STATIC_IMPL size_t aws_max_size(size_t a, size_t b);
@@ -1053,6 +1218,7 @@ end
 """
     aws_min_int(a, b)
 
+Documentation not found
 ### Prototype
 ```c
 AWS_STATIC_IMPL int aws_min_int(int a, int b);
@@ -1065,6 +1231,7 @@ end
 """
     aws_max_int(a, b)
 
+Documentation not found
 ### Prototype
 ```c
 AWS_STATIC_IMPL int aws_max_int(int a, int b);
@@ -1077,6 +1244,7 @@ end
 """
     aws_min_float(a, b)
 
+Documentation not found
 ### Prototype
 ```c
 AWS_STATIC_IMPL float aws_min_float(float a, float b);
@@ -1089,6 +1257,7 @@ end
 """
     aws_max_float(a, b)
 
+Documentation not found
 ### Prototype
 ```c
 AWS_STATIC_IMPL float aws_max_float(float a, float b);
@@ -1101,6 +1270,7 @@ end
 """
     aws_min_double(a, b)
 
+Documentation not found
 ### Prototype
 ```c
 AWS_STATIC_IMPL double aws_min_double(double a, double b);
@@ -1113,6 +1283,7 @@ end
 """
     aws_max_double(a, b)
 
+Documentation not found
 ### Prototype
 ```c
 AWS_STATIC_IMPL double aws_max_double(double a, double b);
@@ -1122,10 +1293,20 @@ function aws_max_double(a, b)
     ccall((:aws_max_double, libaws_c_common), Cdouble, (Cdouble, Cdouble), a, b)
 end
 
+"""
+    __JL_Ctag_13
+
+Documentation not found
+"""
 @cenum __JL_Ctag_13::UInt32 begin
     AWS_ARRAY_LIST_DEBUG_FILL = 221
 end
 
+"""
+    aws_array_list
+
+Documentation not found
+"""
 struct aws_array_list
     alloc::Ptr{aws_allocator}
     current_size::Csize_t
@@ -1513,6 +1694,7 @@ end
 """
     aws_fatal_assert(cond_str, file, line)
 
+Documentation not found
 ### Prototype
 ```c
 void aws_fatal_assert(const char *cond_str, const char *file, int line) AWS_ATTRIBUTE_NORETURN;
@@ -1522,6 +1704,9 @@ function aws_fatal_assert(cond_str, file, line)
     ccall((:aws_fatal_assert, libaws_c_common), Cvoid, (Ptr{Cchar}, Ptr{Cchar}, Cint), cond_str, file, line)
 end
 
+"""
+Documentation not found
+"""
 const aws_atomic_impl_int_t = Csize_t
 
 """
@@ -1533,6 +1718,13 @@ struct aws_atomic_var
     value::Ptr{Cvoid}
 end
 
+"""
+    aws_memory_order
+
+This enumeration specifies the memory ordering properties requested for a particular atomic operation. The atomic operation may provide stricter ordering than requested. Note that, within a single thread, all operations are still sequenced (that is, a thread sees its own atomic writes and reads happening in program order, but other threads may disagree on this ordering).
+
+The behavior of these memory orderings are the same as in the C11 atomics API; however, we only implement a subset that can be portably implemented on the compilers we target.
+"""
 @cenum aws_memory_order::UInt32 begin
     aws_memory_order_relaxed = 0
     aws_memory_order_acquire = 2
@@ -1954,6 +2146,7 @@ end
 """
     aws_atomic_priv_xlate_order(order)
 
+Documentation not found
 ### Prototype
 ```c
 static inline int aws_atomic_priv_xlate_order(enum aws_memory_order order);
@@ -2210,6 +2403,7 @@ end
 """
     aws_byte_buf_init(buf, allocator, capacity)
 
+Documentation not found
 ### Prototype
 ```c
 int aws_byte_buf_init(struct aws_byte_buf *buf, struct aws_allocator *allocator, size_t capacity);
@@ -2306,6 +2500,7 @@ end
 """
     aws_byte_buf_clean_up(buf)
 
+Documentation not found
 ### Prototype
 ```c
 void aws_byte_buf_clean_up(struct aws_byte_buf *buf);
@@ -2932,6 +3127,7 @@ end
 """
     aws_byte_buf_from_array(bytes, len)
 
+Documentation not found
 ### Prototype
 ```c
 struct aws_byte_buf aws_byte_buf_from_array(const void *bytes, size_t len);
@@ -2944,6 +3140,7 @@ end
 """
     aws_byte_buf_from_empty_array(bytes, capacity)
 
+Documentation not found
 ### Prototype
 ```c
 struct aws_byte_buf aws_byte_buf_from_empty_array(const void *bytes, size_t capacity);
@@ -2956,6 +3153,7 @@ end
 """
     aws_byte_cursor_from_buf(buf)
 
+Documentation not found
 ### Prototype
 ```c
 struct aws_byte_cursor aws_byte_cursor_from_buf(const struct aws_byte_buf *const buf);
@@ -2968,6 +3166,7 @@ end
 """
     aws_byte_cursor_from_c_str(c_str)
 
+Documentation not found
 ### Prototype
 ```c
 struct aws_byte_cursor aws_byte_cursor_from_c_str(const char *c_str);
@@ -2980,6 +3179,7 @@ end
 """
     aws_byte_cursor_from_array(bytes, len)
 
+Documentation not found
 ### Prototype
 ```c
 struct aws_byte_cursor aws_byte_cursor_from_array(const void *const bytes, const size_t len);
@@ -3507,6 +3707,11 @@ function aws_byte_cursor_utf8_parse_u64_hex(cursor, dst)
     ccall((:aws_byte_cursor_utf8_parse_u64_hex, libaws_c_common), Cint, (aws_byte_cursor, Ptr{UInt64}), cursor, dst)
 end
 
+"""
+    aws_linked_list_node
+
+Documentation not found
+"""
 struct aws_linked_list_node
     next::Ptr{aws_linked_list_node}
     prev::Ptr{aws_linked_list_node}
@@ -3526,6 +3731,11 @@ function aws_linked_list_node_reset(node)
     ccall((:aws_linked_list_node_reset, libaws_c_common), Cvoid, (Ptr{aws_linked_list_node},), node)
 end
 
+"""
+    aws_linked_list
+
+Documentation not found
+"""
 struct aws_linked_list
     head::aws_linked_list_node
     tail::aws_linked_list_node
@@ -3844,6 +4054,7 @@ end
 """
     aws_linked_list_swap_contents(a, b)
 
+Documentation not found
 ### Prototype
 ```c
 AWS_STATIC_IMPL void aws_linked_list_swap_contents( struct aws_linked_list *AWS_RESTRICT a, struct aws_linked_list *AWS_RESTRICT b);
@@ -3885,6 +4096,11 @@ function aws_linked_list_move_all_front(dst, src)
     ccall((:aws_linked_list_move_all_front, libaws_c_common), Cvoid, (Ptr{aws_linked_list}, Ptr{aws_linked_list}), dst, src)
 end
 
+"""
+    aws_cache_vtable
+
+Documentation not found
+"""
 struct aws_cache_vtable
     destroy::Ptr{Cvoid}
     find::Ptr{Cvoid}
@@ -3911,6 +4127,11 @@ This datastructure can be safely moved between threads, subject to the requireme
 """
 mutable struct hash_table_state end
 
+"""
+    aws_hash_table
+
+Documentation not found
+"""
 struct aws_hash_table
     p_impl::Ptr{hash_table_state}
 end
@@ -3956,6 +4177,8 @@ end
 """
     aws_cache_base_default_destroy(cache)
 
+Default implementations
+
 ### Prototype
 ```c
 void aws_cache_base_default_destroy(struct aws_cache *cache);
@@ -3968,6 +4191,7 @@ end
 """
     aws_cache_base_default_find(cache, key, p_value)
 
+Documentation not found
 ### Prototype
 ```c
 int aws_cache_base_default_find(struct aws_cache *cache, const void *key, void **p_value);
@@ -3980,6 +4204,7 @@ end
 """
     aws_cache_base_default_remove(cache, key)
 
+Documentation not found
 ### Prototype
 ```c
 int aws_cache_base_default_remove(struct aws_cache *cache, const void *key);
@@ -3992,6 +4217,7 @@ end
 """
     aws_cache_base_default_clear(cache)
 
+Documentation not found
 ### Prototype
 ```c
 void aws_cache_base_default_clear(struct aws_cache *cache);
@@ -4004,6 +4230,7 @@ end
 """
     aws_cache_base_default_get_element_count(cache)
 
+Documentation not found
 ### Prototype
 ```c
 size_t aws_cache_base_default_get_element_count(const struct aws_cache *cache);
@@ -4099,6 +4326,11 @@ function aws_cache_get_element_count(cache)
     ccall((:aws_cache_get_element_count, libaws_c_common), Csize_t, (Ptr{aws_cache},), cache)
 end
 
+"""
+    aws_timestamp_unit
+
+Documentation not found
+"""
 @cenum aws_timestamp_unit::UInt32 begin
     AWS_TIMESTAMP_SECS = 1
     AWS_TIMESTAMP_MILLIS = 1000
@@ -4162,6 +4394,11 @@ function aws_sys_clock_get_ticks(timestamp)
     ccall((:aws_sys_clock_get_ticks, libaws_c_common), Cint, (Ptr{UInt64},), timestamp)
 end
 
+"""
+    aws_cli_options_has_arg
+
+Documentation not found
+"""
 @cenum aws_cli_options_has_arg::UInt32 begin
     AWS_CLI_OPTIONS_NO_ARGUMENT = 0
     AWS_CLI_OPTIONS_REQUIRED_ARGUMENT = 1
@@ -4184,6 +4421,13 @@ struct aws_cli_subcommand_dispatch
     command_name::Ptr{Cchar}
 end
 
+"""
+    aws_cli_option
+
+Ignoring padding since we're trying to maintain getopt.h compatibility
+
+NOLINTNEXTLINE(clang-analyzer-optin.performance.Padding)
+"""
 struct aws_cli_option
     name::Ptr{Cchar}
     has_arg::aws_cli_options_has_arg
@@ -4278,6 +4522,7 @@ end
 """
     aws_common_fatal_assert_library_initialized()
 
+Documentation not found
 ### Prototype
 ```c
 void aws_common_fatal_assert_library_initialized(void);
@@ -4288,8 +4533,16 @@ function aws_common_fatal_assert_library_initialized()
 end
 
 # typedef bool ( aws_condition_predicate_fn ) ( void * )
+"""
+Documentation not found
+"""
 const aws_condition_predicate_fn = Cvoid
 
+"""
+    aws_condition_variable
+
+Documentation not found
+"""
 struct aws_condition_variable
     condition_handle::pthread_cond_t
     initialized::Bool
@@ -4351,6 +4604,11 @@ function aws_condition_variable_notify_all(condition_variable)
     ccall((:aws_condition_variable_notify_all, libaws_c_common), Cint, (Ptr{aws_condition_variable},), condition_variable)
 end
 
+"""
+    aws_mutex
+
+Documentation not found
+"""
 struct aws_mutex
     mutex_handle::pthread_mutex_t
     initialized::Bool
@@ -4412,6 +4670,11 @@ function aws_condition_variable_wait_for_pred(condition_variable, mutex, time_to
     ccall((:aws_condition_variable_wait_for_pred, libaws_c_common), Cint, (Ptr{aws_condition_variable}, Ptr{aws_mutex}, Int64, Ptr{aws_condition_predicate_fn}, Ptr{Cvoid}), condition_variable, mutex, time_to_wait, pred, pred_ctx)
 end
 
+"""
+    aws_cpu_feature_name
+
+Documentation not found
+"""
 @cenum aws_cpu_feature_name::UInt32 begin
     AWS_CPU_FEATURE_CLMUL = 0
     AWS_CPU_FEATURE_SSE_4_1 = 1
@@ -4438,6 +4701,9 @@ function aws_cpu_has_feature(feature_name)
     ccall((:aws_cpu_has_feature, libaws_c_common), Bool, (aws_cpu_feature_name,), feature_name)
 end
 
+"""
+Documentation not found
+"""
 mutable struct aws_cross_process_lock end
 
 """
@@ -4470,11 +4736,21 @@ function aws_cross_process_lock_release(instance_lock)
     ccall((:aws_cross_process_lock_release, libaws_c_common), Cvoid, (Ptr{aws_cross_process_lock},), instance_lock)
 end
 
+"""
+    __JL_Ctag_84
+
+Documentation not found
+"""
 @cenum __JL_Ctag_84::UInt32 begin
     AWS_DATE_TIME_STR_MAX_LEN = 100
     AWS_DATE_TIME_STR_MAX_BASIC_LEN = 20
 end
 
+"""
+    aws_date_format
+
+Documentation not found
+"""
 @cenum aws_date_format::UInt32 begin
     AWS_DATE_FORMAT_RFC822 = 0
     AWS_DATE_FORMAT_ISO_8601 = 1
@@ -4482,6 +4758,11 @@ end
     AWS_DATE_FORMAT_AUTO_DETECT = 3
 end
 
+"""
+    aws_date_month
+
+Documentation not found
+"""
 @cenum aws_date_month::UInt32 begin
     AWS_DATE_MONTH_JANUARY = 0
     AWS_DATE_MONTH_FEBRUARY = 1
@@ -4497,6 +4778,11 @@ end
     AWS_DATE_MONTH_DECEMBER = 11
 end
 
+"""
+    aws_date_day_of_week
+
+Documentation not found
+"""
 @cenum aws_date_day_of_week::UInt32 begin
     AWS_DATE_DAY_OF_WEEK_SUNDAY = 0
     AWS_DATE_DAY_OF_WEEK_MONDAY = 1
@@ -4507,6 +4793,11 @@ end
     AWS_DATE_DAY_OF_WEEK_SATURDAY = 6
 end
 
+"""
+    aws_date_time
+
+Documentation not found
+"""
 struct aws_date_time
     timestamp::time_t
     milliseconds::UInt16
@@ -4653,6 +4944,7 @@ end
 """
     aws_date_time_as_epoch_secs(dt)
 
+Documentation not found
 ### Prototype
 ```c
 double aws_date_time_as_epoch_secs(const struct aws_date_time *dt);
@@ -4665,6 +4957,7 @@ end
 """
     aws_date_time_as_nanos(dt)
 
+Documentation not found
 ### Prototype
 ```c
 uint64_t aws_date_time_as_nanos(const struct aws_date_time *dt);
@@ -4677,6 +4970,7 @@ end
 """
     aws_date_time_as_millis(dt)
 
+Documentation not found
 ### Prototype
 ```c
 uint64_t aws_date_time_as_millis(const struct aws_date_time *dt);
@@ -4689,6 +4983,7 @@ end
 """
     aws_date_time_year(dt, local_time)
 
+Documentation not found
 ### Prototype
 ```c
 uint16_t aws_date_time_year(const struct aws_date_time *dt, bool local_time);
@@ -4701,6 +4996,7 @@ end
 """
     aws_date_time_month(dt, local_time)
 
+Documentation not found
 ### Prototype
 ```c
 enum aws_date_month aws_date_time_month(const struct aws_date_time *dt, bool local_time);
@@ -4713,6 +5009,7 @@ end
 """
     aws_date_time_month_day(dt, local_time)
 
+Documentation not found
 ### Prototype
 ```c
 uint8_t aws_date_time_month_day(const struct aws_date_time *dt, bool local_time);
@@ -4725,6 +5022,7 @@ end
 """
     aws_date_time_day_of_week(dt, local_time)
 
+Documentation not found
 ### Prototype
 ```c
 enum aws_date_day_of_week aws_date_time_day_of_week(const struct aws_date_time *dt, bool local_time);
@@ -4737,6 +5035,7 @@ end
 """
     aws_date_time_hour(dt, local_time)
 
+Documentation not found
 ### Prototype
 ```c
 uint8_t aws_date_time_hour(const struct aws_date_time *dt, bool local_time);
@@ -4749,6 +5048,7 @@ end
 """
     aws_date_time_minute(dt, local_time)
 
+Documentation not found
 ### Prototype
 ```c
 uint8_t aws_date_time_minute(const struct aws_date_time *dt, bool local_time);
@@ -4761,6 +5061,7 @@ end
 """
     aws_date_time_second(dt, local_time)
 
+Documentation not found
 ### Prototype
 ```c
 uint8_t aws_date_time_second(const struct aws_date_time *dt, bool local_time);
@@ -4773,6 +5074,7 @@ end
 """
     aws_date_time_dst(dt, local_time)
 
+Documentation not found
 ### Prototype
 ```c
 bool aws_date_time_dst(const struct aws_date_time *dt, bool local_time);
@@ -4883,6 +5185,8 @@ end
 """
     aws_hex_compute_encoded_len(to_encode_len, encoded_length)
 
+computes the length necessary to store the result of [`aws_hex_encode`](@ref)(). returns -1 on failure, and 0 on success. encoded\\_length will be set on success.
+
 ### Prototype
 ```c
 int aws_hex_compute_encoded_len(size_t to_encode_len, size_t *encoded_length);
@@ -4894,6 +5198,8 @@ end
 
 """
     aws_hex_encode(to_encode, output)
+
+Base 16 (hex) encodes the contents of to\\_encode and stores the result in output. 0 terminates the result. Assumes the buffer is empty and does not resize on insufficient capacity.
 
 ### Prototype
 ```c
@@ -4907,6 +5213,8 @@ end
 """
     aws_hex_encode_append_dynamic(to_encode, output)
 
+Base 16 (hex) encodes the contents of to\\_encode and appends the result in output. Does not 0-terminate. Grows the destination buffer dynamically if necessary.
+
 ### Prototype
 ```c
 int aws_hex_encode_append_dynamic( const struct aws_byte_cursor *AWS_RESTRICT to_encode, struct aws_byte_buf *AWS_RESTRICT output);
@@ -4918,6 +5226,8 @@ end
 
 """
     aws_hex_compute_decoded_len(to_decode_len, decoded_len)
+
+computes the length necessary to store the result of [`aws_hex_decode`](@ref)(). returns -1 on failure, and 0 on success. decoded\\_len will be set on success.
 
 ### Prototype
 ```c
@@ -4931,6 +5241,8 @@ end
 """
     aws_hex_decode(to_decode, output)
 
+Base 16 (hex) decodes the contents of to\\_decode and stores the result in output. If output is NULL, output\\_size will be set to what the output\\_size should be.
+
 ### Prototype
 ```c
 int aws_hex_decode(const struct aws_byte_cursor *AWS_RESTRICT to_decode, struct aws_byte_buf *AWS_RESTRICT output);
@@ -4942,6 +5254,8 @@ end
 
 """
     aws_base64_compute_encoded_len(to_encode_len, encoded_len)
+
+Computes the length necessary to store the output of [`aws_base64_encode`](@ref) call. returns -1 on failure, and 0 on success. encoded\\_length will be set on success.
 
 ### Prototype
 ```c
@@ -4955,6 +5269,8 @@ end
 """
     aws_base64_encode(to_encode, output)
 
+Base 64 encodes the contents of to\\_encode and stores the result in output.
+
 ### Prototype
 ```c
 int aws_base64_encode(const struct aws_byte_cursor *AWS_RESTRICT to_encode, struct aws_byte_buf *AWS_RESTRICT output);
@@ -4966,6 +5282,8 @@ end
 
 """
     aws_base64_compute_decoded_len(to_decode, decoded_len)
+
+Computes the length necessary to store the output of [`aws_base64_decode`](@ref) call. returns -1 on failure, and 0 on success. decoded\\_len will be set on success.
 
 ### Prototype
 ```c
@@ -4979,6 +5297,8 @@ end
 """
     aws_base64_decode(to_decode, output)
 
+Base 64 decodes the contents of to\\_decode and stores the result in output.
+
 ### Prototype
 ```c
 int aws_base64_decode(const struct aws_byte_cursor *AWS_RESTRICT to_decode, struct aws_byte_buf *AWS_RESTRICT output);
@@ -4990,6 +5310,8 @@ end
 
 """
     aws_write_u64(value, buffer)
+
+Add a 64 bit unsigned integer to the buffer, ensuring network - byte order Assumes the buffer size is at least 8 bytes.
 
 ### Prototype
 ```c
@@ -5003,6 +5325,8 @@ end
 """
     aws_read_u64(buffer)
 
+Extracts a 64 bit unsigned integer from buffer. Ensures conversion from network byte order to host byte order. Assumes buffer size is at least 8 bytes.
+
 ### Prototype
 ```c
 AWS_STATIC_IMPL uint64_t aws_read_u64(const uint8_t *buffer);
@@ -5014,6 +5338,8 @@ end
 
 """
     aws_write_u32(value, buffer)
+
+Add a 32 bit unsigned integer to the buffer, ensuring network - byte order Assumes the buffer size is at least 4 bytes.
 
 ### Prototype
 ```c
@@ -5027,6 +5353,8 @@ end
 """
     aws_read_u32(buffer)
 
+Extracts a 32 bit unsigned integer from buffer. Ensures conversion from network byte order to host byte order. Assumes the buffer size is at least 4 bytes.
+
 ### Prototype
 ```c
 AWS_STATIC_IMPL uint32_t aws_read_u32(const uint8_t *buffer);
@@ -5038,6 +5366,8 @@ end
 
 """
     aws_write_u24(value, buffer)
+
+Add a 24 bit unsigned integer to the buffer, ensuring network - byte order return the new position in the buffer for the next operation. Note, since this uses uint32\\_t for storage, the 3 least significant bytes will be used. Assumes buffer is at least 3 bytes long.
 
 ### Prototype
 ```c
@@ -5051,6 +5381,8 @@ end
 """
     aws_read_u24(buffer)
 
+Extracts a 24 bit unsigned integer from buffer. Ensures conversion from network byte order to host byte order. Assumes buffer is at least 3 bytes long.
+
 ### Prototype
 ```c
 AWS_STATIC_IMPL uint32_t aws_read_u24(const uint8_t *buffer);
@@ -5062,6 +5394,8 @@ end
 
 """
     aws_write_u16(value, buffer)
+
+Add a 16 bit unsigned integer to the buffer, ensuring network-byte order return the new position in the buffer for the next operation. Assumes buffer is at least 2 bytes long.
 
 ### Prototype
 ```c
@@ -5075,6 +5409,8 @@ end
 """
     aws_read_u16(buffer)
 
+Extracts a 16 bit unsigned integer from buffer. Ensures conversion from network byte order to host byte order. Assumes buffer is at least 2 bytes long.
+
 ### Prototype
 ```c
 AWS_STATIC_IMPL uint16_t aws_read_u16(const uint8_t *buffer);
@@ -5084,6 +5420,11 @@ function aws_read_u16(buffer)
     ccall((:aws_read_u16, libaws_c_common), UInt16, (Ptr{UInt8},), buffer)
 end
 
+"""
+    aws_text_encoding
+
+Documentation not found
+"""
 @cenum aws_text_encoding::UInt32 begin
     AWS_TEXT_UNKNOWN = 0
     AWS_TEXT_UTF8 = 1
@@ -5094,6 +5435,8 @@ end
 
 """
     aws_text_detect_encoding(bytes, size)
+
+Checks the BOM in the buffer to see if encoding can be determined. If there is no BOM or it is unrecognizable, then AWS\\_TEXT\\_UNKNOWN will be returned.
 
 ### Prototype
 ```c
@@ -5107,6 +5450,8 @@ end
 """
     aws_text_is_utf8(bytes, size)
 
+Returns true if [`aws_text_detect_encoding`](@ref)() determines the text is UTF8 or ASCII. Note that this immediately returns true if the UTF8 BOM is seen. To fully validate every byte, use [`aws_decode_utf8`](@ref)().
+
 ### Prototype
 ```c
 AWS_STATIC_IMPL bool aws_text_is_utf8(const uint8_t *bytes, size_t size);
@@ -5116,6 +5461,11 @@ function aws_text_is_utf8(bytes, size)
     ccall((:aws_text_is_utf8, libaws_c_common), Bool, (Ptr{UInt8}, Csize_t), bytes, size)
 end
 
+"""
+    aws_utf8_decoder_options
+
+Documentation not found
+"""
 struct aws_utf8_decoder_options
     on_codepoint::Ptr{Cvoid}
     user_data::Ptr{Cvoid}
@@ -5140,6 +5490,9 @@ function aws_decode_utf8(bytes, options)
     ccall((:aws_decode_utf8, libaws_c_common), Cint, (aws_byte_cursor, Ptr{aws_utf8_decoder_options}), bytes, options)
 end
 
+"""
+Documentation not found
+"""
 mutable struct aws_utf8_decoder end
 
 """
@@ -5164,6 +5517,7 @@ end
 """
     aws_utf8_decoder_destroy(decoder)
 
+Documentation not found
 ### Prototype
 ```c
 void aws_utf8_decoder_destroy(struct aws_utf8_decoder *decoder);
@@ -5176,6 +5530,7 @@ end
 """
     aws_utf8_decoder_reset(decoder)
 
+Documentation not found
 ### Prototype
 ```c
 void aws_utf8_decoder_reset(struct aws_utf8_decoder *decoder);
@@ -5215,6 +5570,11 @@ function aws_utf8_decoder_finalize(decoder)
     ccall((:aws_utf8_decoder_finalize, libaws_c_common), Cint, (Ptr{aws_utf8_decoder},), decoder)
 end
 
+"""
+    aws_string
+
+Documentation not found
+"""
 struct aws_string
     allocator::Ptr{aws_allocator}
     len::Csize_t
@@ -5223,6 +5583,8 @@ end
 
 """
     aws_get_environment_value(allocator, variable_name, value_out)
+
+Get the value of an environment variable. If the variable is not set, the output string will be set to NULL. Not thread-safe
 
 ### Prototype
 ```c
@@ -5236,6 +5598,8 @@ end
 """
     aws_set_environment_value(variable_name, value)
 
+Set the value of an environment variable. On Windows, setting a variable to the empty string will actually unset it. Not thread-safe
+
 ### Prototype
 ```c
 int aws_set_environment_value(const struct aws_string *variable_name, const struct aws_string *value);
@@ -5248,6 +5612,8 @@ end
 """
     aws_unset_environment_value(variable_name)
 
+Unset an environment variable. Not thread-safe
+
 ### Prototype
 ```c
 int aws_unset_environment_value(const struct aws_string *variable_name);
@@ -5257,6 +5623,11 @@ function aws_unset_environment_value(variable_name)
     ccall((:aws_unset_environment_value, libaws_c_common), Cint, (Ptr{aws_string},), variable_name)
 end
 
+"""
+    aws_error_info
+
+Documentation not found
+"""
 struct aws_error_info
     error_code::Cint
     literal_name::Ptr{Cchar}
@@ -5265,16 +5636,26 @@ struct aws_error_info
     formatted_name::Ptr{Cchar}
 end
 
+"""
+    aws_error_info_list
+
+Documentation not found
+"""
 struct aws_error_info_list
     error_list::Ptr{aws_error_info}
     count::UInt16
 end
 
 # typedef void ( aws_error_handler_fn ) ( int err , void * ctx )
+"""
+Documentation not found
+"""
 const aws_error_handler_fn = Cvoid
 
 """
     aws_last_error()
+
+Returns the latest error code on the current thread, or 0 if none have occurred.
 
 ### Prototype
 ```c
@@ -5288,6 +5669,8 @@ end
 """
     aws_error_str(err)
 
+Returns the error str corresponding to `err`.
+
 ### Prototype
 ```c
 const char *aws_error_str(int err);
@@ -5299,6 +5682,8 @@ end
 
 """
     aws_error_name(err)
+
+Returns the enum name corresponding to `err`.
 
 ### Prototype
 ```c
@@ -5312,6 +5697,8 @@ end
 """
     aws_error_lib_name(err)
 
+Returns the error lib name corresponding to `err`.
+
 ### Prototype
 ```c
 const char *aws_error_lib_name(int err);
@@ -5323,6 +5710,8 @@ end
 
 """
     aws_error_debug_str(err)
+
+Returns libname concatenated with error string.
 
 ### Prototype
 ```c
@@ -5336,6 +5725,8 @@ end
 """
     aws_raise_error_private(err)
 
+Internal implementation detail.
+
 ### Prototype
 ```c
 void aws_raise_error_private(int err);
@@ -5347,6 +5738,8 @@ end
 
 """
     aws_reset_error()
+
+Resets the `err` back to defaults
 
 ### Prototype
 ```c
@@ -5360,6 +5753,8 @@ end
 """
     aws_restore_error(err)
 
+Sets `err` to the latest error. Does not invoke callbacks.
+
 ### Prototype
 ```c
 void aws_restore_error(int err);
@@ -5372,6 +5767,8 @@ end
 """
     aws_set_global_error_handler_fn(handler, ctx)
 
+Sets an application wide error handler function. This will be overridden by the thread local handler. The previous handler is returned, this can be used for restoring an error handler if it needs to be overridden temporarily. Setting this to NULL will turn off this error callback after it has been enabled.
+
 ### Prototype
 ```c
 aws_error_handler_fn *aws_set_global_error_handler_fn(aws_error_handler_fn *handler, void *ctx);
@@ -5383,6 +5780,8 @@ end
 
 """
     aws_set_thread_local_error_handler_fn(handler, ctx)
+
+Sets a thread-local error handler function. This will override the global handler. The previous handler is returned, this can be used for restoring an error handler if it needs to be overridden temporarily. Setting this to NULL will turn off this error callback after it has been enabled.
 
 ### Prototype
 ```c
@@ -5410,6 +5809,7 @@ end
 """
     aws_unregister_error_info(error_info)
 
+Documentation not found
 ### Prototype
 ```c
 void aws_unregister_error_info(const struct aws_error_info_list *error_info);
@@ -5447,6 +5847,11 @@ function aws_translate_and_raise_io_error(error_no)
     ccall((:aws_translate_and_raise_io_error, libaws_c_common), Cint, (Cint,), error_no)
 end
 
+"""
+    aws_common_error
+
+Documentation not found
+"""
 @cenum aws_common_error::UInt32 begin
     AWS_ERROR_SUCCESS = 0
     AWS_ERROR_OOM = 1
@@ -5541,14 +5946,27 @@ function aws_cache_new_fifo(allocator, hash_fn, equals_fn, destroy_key_fn, destr
     ccall((:aws_cache_new_fifo, libaws_c_common), Ptr{aws_cache}, (Ptr{aws_allocator}, Ptr{aws_hash_fn}, Ptr{aws_hash_callback_eq_fn}, Ptr{aws_hash_callback_destroy_fn}, Ptr{aws_hash_callback_destroy_fn}, Csize_t), allocator, hash_fn, equals_fn, destroy_key_fn, destroy_value_fn, max_items)
 end
 
+"""
+Documentation not found
+"""
 mutable struct aws_directory_iterator end
 
+"""
+    aws_file_type
+
+Documentation not found
+"""
 @cenum aws_file_type::UInt32 begin
     AWS_FILE_TYPE_FILE = 1
     AWS_FILE_TYPE_SYM_LINK = 2
     AWS_FILE_TYPE_DIRECTORY = 4
 end
 
+"""
+    aws_directory_entry
+
+Documentation not found
+"""
 struct aws_directory_entry
     path::aws_byte_cursor
     relative_path::aws_byte_cursor
@@ -5829,6 +6247,14 @@ end
 """
     aws_fseek(file, offset, whence)
 
+Wrapper for highest-resolution platform-dependent seek implementation. Maps to:
+
+\\_fseeki64() on windows fseeko() on linux
+
+whence can either be SEEK\\_SET or SEEK\\_END
+
+Returns [`AWS_OP_SUCCESS`](@ref), or [`AWS_OP_ERR`](@ref) (after an error has been raised).
+
 ### Prototype
 ```c
 int aws_fseek(FILE *file, int64_t offset, int whence);
@@ -5841,6 +6267,10 @@ end
 """
     aws_file_get_length(file, length)
 
+Wrapper for os-specific file length query. We can't use fseek(END, 0) because support for it is not technically required.
+
+Unix flavors call fstat, while Windows variants use GetFileSize on a HANDLE queried from the libc FILE pointer.
+
 ### Prototype
 ```c
 int aws_file_get_length(FILE *file, int64_t *length);
@@ -5850,6 +6280,11 @@ function aws_file_get_length(file, length)
     ccall((:aws_file_get_length, libaws_c_common), Cint, (Ptr{Libc.FILE}, Ptr{Int64}), file, length)
 end
 
+"""
+    __JL_Ctag_127
+
+Documentation not found
+"""
 @cenum __JL_Ctag_127::UInt32 begin
     AWS_COMMON_HASH_TABLE_ITER_CONTINUE = 1
     AWS_COMMON_HASH_TABLE_ITER_DELETE = 2
@@ -5868,12 +6303,22 @@ struct aws_hash_element
     value::Ptr{Cvoid}
 end
 
+"""
+    aws_hash_iter_status
+
+Documentation not found
+"""
 @cenum aws_hash_iter_status::UInt32 begin
     AWS_HASH_ITER_STATUS_DONE = 0
     AWS_HASH_ITER_STATUS_DELETE_CALLED = 1
     AWS_HASH_ITER_STATUS_READY_FOR_USE = 2
 end
 
+"""
+    aws_hash_iter
+
+Documentation not found
+"""
 struct aws_hash_iter
     map::Ptr{aws_hash_table}
     element::aws_hash_element
@@ -6228,6 +6673,7 @@ end
 """
     aws_hash_combine(item1, item2)
 
+Documentation not found
 ### Prototype
 ```c
 uint64_t aws_hash_combine(uint64_t item1, uint64_t item2);
@@ -6321,6 +6767,9 @@ function aws_hash_iter_is_valid(iter)
     ccall((:aws_hash_iter_is_valid, libaws_c_common), Bool, (Ptr{aws_hash_iter},), iter)
 end
 
+"""
+Documentation not found
+"""
 mutable struct aws_json_value end
 
 """
@@ -7185,33 +7634,69 @@ function aws_char_is_space(c)
 end
 
 # typedef int ( aws_log_channel_send_fn ) ( struct aws_log_channel * channel , struct aws_string * output )
+"""
+Documentation not found
+"""
 const aws_log_channel_send_fn = Cvoid
 
 # typedef void ( aws_log_channel_clean_up_fn ) ( struct aws_log_channel * channel )
+"""
+Documentation not found
+"""
 const aws_log_channel_clean_up_fn = Cvoid
 
+"""
+    aws_log_channel_vtable
+
+Documentation not found
+"""
 struct aws_log_channel_vtable
     send::Ptr{aws_log_channel_send_fn}
     clean_up::Ptr{aws_log_channel_clean_up_fn}
 end
 
 # typedef int ( aws_log_writer_write_fn ) ( struct aws_log_writer * writer , const struct aws_string * output )
+"""
+Documentation not found
+"""
 const aws_log_writer_write_fn = Cvoid
 
 # typedef void ( aws_log_writer_clean_up_fn ) ( struct aws_log_writer * writer )
+"""
+Documentation not found
+"""
 const aws_log_writer_clean_up_fn = Cvoid
 
+"""
+    aws_log_writer_vtable
+
+Documentation not found
+"""
 struct aws_log_writer_vtable
     write::Ptr{aws_log_writer_write_fn}
     clean_up::Ptr{aws_log_writer_clean_up_fn}
 end
 
+"""
+    aws_log_writer
+
+Log writer interface and default implementation(s)
+
+A log writer functions as a sink for formatted log lines. We provide default implementations that go to stdout, stderr, and a specified file.
+"""
 struct aws_log_writer
     vtable::Ptr{aws_log_writer_vtable}
     allocator::Ptr{aws_allocator}
     impl::Ptr{Cvoid}
 end
 
+"""
+    aws_log_channel
+
+Log channel interface and default implementations
+
+A log channel is an abstraction for the transfer of formatted log data between a source (formatter) and a sink (writer).
+"""
 struct aws_log_channel
     vtable::Ptr{aws_log_channel_vtable}
     allocator::Ptr{aws_allocator}
@@ -7221,6 +7706,10 @@ end
 
 """
     aws_log_channel_init_foreground(channel, allocator, writer)
+
+Simple channel that results in log lines being written in the same thread they were generated in.
+
+The passed in log writer is not an ownership transfer. The log channel does not clean up the writer.
 
 ### Prototype
 ```c
@@ -7234,6 +7723,10 @@ end
 """
     aws_log_channel_init_background(channel, allocator, writer)
 
+Simple channel that sends log lines to a background thread.
+
+The passed in log writer is not an ownership transfer. The log channel does not clean up the writer.
+
 ### Prototype
 ```c
 int aws_log_channel_init_background( struct aws_log_channel *channel, struct aws_allocator *allocator, struct aws_log_writer *writer);
@@ -7246,6 +7739,8 @@ end
 """
     aws_log_channel_clean_up(channel)
 
+Channel cleanup function
+
 ### Prototype
 ```c
 void aws_log_channel_clean_up(struct aws_log_channel *channel);
@@ -7256,22 +7751,45 @@ function aws_log_channel_clean_up(channel)
 end
 
 # typedef int ( aws_log_formatter_format_fn ) ( struct aws_log_formatter * formatter , struct aws_string * * formatted_output , enum aws_log_level level , aws_log_subject_t subject , const char * format , va_list args )
+"""
+Documentation not found
+"""
 const aws_log_formatter_format_fn = Cvoid
 
 # typedef void ( aws_log_formatter_clean_up_fn ) ( struct aws_log_formatter * logger )
+"""
+Documentation not found
+"""
 const aws_log_formatter_clean_up_fn = Cvoid
 
+"""
+    aws_log_formatter_vtable
+
+Documentation not found
+"""
 struct aws_log_formatter_vtable
     format::Ptr{aws_log_formatter_format_fn}
     clean_up::Ptr{aws_log_formatter_clean_up_fn}
 end
 
+"""
+    aws_log_formatter
+
+Log formatter interface and default implementation
+
+Log formatters are invoked by the LOGF\\_* macros to transform a set of arguments into one or more lines of text to be output to a logging sink (writer).
+"""
 struct aws_log_formatter
     vtable::Ptr{aws_log_formatter_vtable}
     allocator::Ptr{aws_allocator}
     impl::Ptr{Cvoid}
 end
 
+"""
+    aws_log_formatter_standard_options
+
+Documentation not found
+"""
 struct aws_log_formatter_standard_options
     date_format::aws_date_format
 end
@@ -7294,6 +7812,11 @@ You can filter both dynamically (by setting the log level on the logger object) 
     AWS_LL_COUNT = 7
 end
 
+"""
+    aws_logging_standard_formatting_data
+
+Documentation not found
+"""
 struct aws_logging_standard_formatting_data
     log_line_buffer::Ptr{Cchar}
     total_length::Csize_t
@@ -7308,6 +7831,10 @@ end
 """
     aws_log_formatter_init_default(formatter, allocator, options)
 
+Initializes the default log formatter which outputs lines in the format:
+
+[<LogLevel>] [<Timestamp>] [<ThreadId>] - <User content>
+
 ### Prototype
 ```c
 int aws_log_formatter_init_default( struct aws_log_formatter *formatter, struct aws_allocator *allocator, struct aws_log_formatter_standard_options *options);
@@ -7320,6 +7847,8 @@ end
 """
     aws_log_formatter_clean_up(formatter)
 
+Cleans up a log formatter (minus the base structure memory) by calling the formatter's clean\\_up function via the vtable.
+
 ### Prototype
 ```c
 void aws_log_formatter_clean_up(struct aws_log_formatter *formatter);
@@ -7329,6 +7858,11 @@ function aws_log_formatter_clean_up(formatter)
     ccall((:aws_log_formatter_clean_up, libaws_c_common), Cvoid, (Ptr{aws_log_formatter},), formatter)
 end
 
+"""
+    aws_log_writer_file_options
+
+Documentation not found
+"""
 struct aws_log_writer_file_options
     filename::Ptr{Cchar}
     file::Ptr{Libc.FILE}
@@ -7336,6 +7870,8 @@ end
 
 """
     aws_log_writer_init_stdout(writer, allocator)
+
+Initialize a log writer that sends log lines to stdout. Uses C library IO.
 
 ### Prototype
 ```c
@@ -7349,6 +7885,8 @@ end
 """
     aws_log_writer_init_stderr(writer, allocator)
 
+Initialize a log writer that sends log lines to stderr. Uses C library IO.
+
 ### Prototype
 ```c
 int aws_log_writer_init_stderr(struct aws_log_writer *writer, struct aws_allocator *allocator);
@@ -7361,6 +7899,8 @@ end
 """
     aws_log_writer_init_file(writer, allocator, options)
 
+Initialize a log writer that sends log lines to a file. Uses C library IO.
+
 ### Prototype
 ```c
 int aws_log_writer_init_file( struct aws_log_writer *writer, struct aws_allocator *allocator, struct aws_log_writer_file_options *options);
@@ -7372,6 +7912,8 @@ end
 
 """
     aws_log_writer_clean_up(writer)
+
+Frees all resources used by a log writer with the exception of the base structure memory
 
 ### Prototype
 ```c
@@ -7412,6 +7954,11 @@ function Base.setproperty!(x::Ptr{aws_logger_vtable}, f::Symbol, v)
     unsafe_store!(getproperty(x, f), v)
 end
 
+"""
+    aws_logger
+
+Documentation not found
+"""
 struct aws_logger
     vtable::Ptr{aws_logger_vtable}
     allocator::Ptr{aws_allocator}
@@ -7443,21 +7990,41 @@ Log subject is an enum similar to aws error: each library has its own value-spac
 """
 const aws_log_subject_t = UInt32
 
+"""
+    __JL_Ctag_194
+
+Each library gets space for 2^^10 log subject entries
+"""
 @cenum __JL_Ctag_194::UInt32 begin
     AWS_LOG_SUBJECT_STRIDE_BITS = 10
 end
 
+"""
+    aws_log_subject_info
+
+Documentation not found
+"""
 struct aws_log_subject_info
     subject_id::aws_log_subject_t
     subject_name::Ptr{Cchar}
     subject_description::Ptr{Cchar}
 end
 
+"""
+    aws_log_subject_info_list
+
+Documentation not found
+"""
 struct aws_log_subject_info_list
     subject_list::Ptr{aws_log_subject_info}
     count::Csize_t
 end
 
+"""
+    aws_common_log_subject
+
+Documentation not found
+"""
 @cenum aws_common_log_subject::UInt32 begin
     AWS_LS_COMMON_GENERAL = 0
     AWS_LS_COMMON_TASK_SCHEDULER = 1
@@ -7471,6 +8038,13 @@ end
     AWS_LS_COMMON_LAST = 1023
 end
 
+"""
+    aws_logger_pipeline
+
+Standard logger implementation composing three sub-components:
+
+The formatter takes var args input from the user and produces a formatted log line The writer takes a formatted log line and outputs it somewhere The channel is the transport between the two
+"""
 struct aws_logger_pipeline
     formatter::Ptr{aws_log_formatter}
     channel::Ptr{aws_log_channel}
@@ -7586,6 +8160,9 @@ function aws_string_to_log_level(level_string, log_level)
     ccall((:aws_string_to_log_level, libaws_c_common), Cint, (Ptr{Cchar}, Ptr{aws_log_level}), level_string, log_level)
 end
 
+"""
+Documentation not found
+"""
 const aws_thread_id_t = pthread_t
 
 """
@@ -7647,6 +8224,8 @@ end
 """
     aws_logger_init_standard(logger, allocator, options)
 
+Initializes a pipeline logger that is built from the default formatter, a background thread-based channel, and a file writer. The default logger in almost all circumstances.
+
 ### Prototype
 ```c
 int aws_logger_init_standard( struct aws_logger *logger, struct aws_allocator *allocator, struct aws_logger_standard_options *options);
@@ -7659,6 +8238,8 @@ end
 """
     aws_logger_init_from_external(logger, allocator, formatter, channel, writer, level)
 
+Initializes a pipeline logger from components that have already been initialized. This is not an ownership transfer. After the pipeline logger is cleaned up, the components will have to manually be cleaned up by the user.
+
 ### Prototype
 ```c
 int aws_logger_init_from_external( struct aws_logger *logger, struct aws_allocator *allocator, struct aws_log_formatter *formatter, struct aws_log_channel *channel, struct aws_log_writer *writer, enum aws_log_level level);
@@ -7670,6 +8251,8 @@ end
 
 """
     aws_logger_init_noalloc(logger, allocator, options)
+
+Initializes a logger that does not perform any allocation during logging. Log lines larger than the internal constant are truncated. Formatting matches the standard logger. Used for memory tracing logging. If no file or filename is set in the [`aws_logger_standard_options`](@ref), then it will use stderr.
 
 ### Prototype
 ```c
@@ -7722,12 +8305,26 @@ function aws_lru_cache_get_mru_element(cache)
     ccall((:aws_lru_cache_get_mru_element, libaws_c_common), Ptr{Cvoid}, (Ptr{aws_cache},), cache)
 end
 
+"""
+Documentation not found
+"""
 const static_assertion_at_line_60 = NTuple{1, Cchar}
 
+"""
+Documentation not found
+"""
 const static_assertion_at_line_61 = NTuple{1, Cchar}
 
+"""
+Documentation not found
+"""
 const static_assertion_at_line_62 = NTuple{1, Cchar}
 
+"""
+    __JL_Ctag_201
+
+Documentation not found
+"""
 @cenum __JL_Ctag_201::UInt32 begin
     AWS_CACHE_LINE = 64
 end
@@ -7803,14 +8400,27 @@ function aws_mutex_unlock(mutex)
 end
 
 # typedef int ( aws_priority_queue_compare_fn ) ( const void * a , const void * b )
+"""
+The comparator should return a positive value if the second argument has a higher priority than the first; Otherwise, it should return a negative value or zero. NOTE: priority\\_queue pops its highest priority element first. For example: int cmp(const void *a, const void *b) { return a < b; } would result in a max heap, while: int cmp(const void *a, const void *b) { return a > b; } would result in a min heap.
+"""
 const aws_priority_queue_compare_fn = Cvoid
 
+"""
+    aws_priority_queue
+
+Documentation not found
+"""
 struct aws_priority_queue
     pred::Ptr{aws_priority_queue_compare_fn}
     container::aws_array_list
     backpointers::aws_array_list
 end
 
+"""
+    aws_priority_queue_node
+
+Documentation not found
+"""
 struct aws_priority_queue_node
     current_index::Csize_t
 end
@@ -8067,12 +8677,22 @@ function aws_priority_queue_node_is_in_queue(node)
     ccall((:aws_priority_queue_node_is_in_queue, libaws_c_common), Bool, (Ptr{aws_priority_queue_node},), node)
 end
 
+"""
+    aws_run_command_result
+
+Documentation not found
+"""
 struct aws_run_command_result
     ret_code::Cint
     std_out::Ptr{aws_string}
     std_err::Ptr{aws_string}
 end
 
+"""
+    aws_run_command_options
+
+Documentation not found
+"""
 struct aws_run_command_options
     command::Ptr{Cchar}
 end
@@ -8140,6 +8760,7 @@ end
 """
     aws_run_command_result_init(allocator, result)
 
+Documentation not found
 ### Prototype
 ```c
 int aws_run_command_result_init(struct aws_allocator *allocator, struct aws_run_command_result *result);
@@ -8152,6 +8773,7 @@ end
 """
     aws_run_command_result_cleanup(result)
 
+Documentation not found
 ### Prototype
 ```c
 void aws_run_command_result_cleanup(struct aws_run_command_result *result);
@@ -8175,10 +8797,15 @@ function aws_run_command(allocator, options, result)
     ccall((:aws_run_command, libaws_c_common), Cint, (Ptr{aws_allocator}, Ptr{aws_run_command_options}, Ptr{aws_run_command_result}), allocator, options, result)
 end
 
+"""
+Standard promise interface. Promise can be waited on by multiple threads, and as long as it is ref-counted correctly, will provide the resultant value/error code to all waiters. All promise API calls are internally thread-safe.
+"""
 mutable struct aws_promise end
 
 """
     aws_promise_new(allocator)
+
+Creates a new promise
 
 ### Prototype
 ```c
@@ -8192,6 +8819,8 @@ end
 """
     aws_promise_acquire(promise)
 
+Indicate a new reference to a promise. At minimum, each new thread making use of the promise should acquire it.
+
 ### Prototype
 ```c
 struct aws_promise *aws_promise_acquire(struct aws_promise *promise);
@@ -8203,6 +8832,8 @@ end
 
 """
     aws_promise_release(promise)
+
+Releases a reference on the promise. When the refcount hits 0, the promise is cleaned up and freed.
 
 ### Prototype
 ```c
@@ -8216,6 +8847,8 @@ end
 """
     aws_promise_wait(promise)
 
+Waits infinitely for the promise to be completed
+
 ### Prototype
 ```c
 void aws_promise_wait(struct aws_promise *promise);
@@ -8227,6 +8860,8 @@ end
 
 """
     aws_promise_wait_for(promise, nanoseconds)
+
+Waits for the requested time in nanoseconds. Returns true if the promise was completed.
 
 ### Prototype
 ```c
@@ -8240,6 +8875,8 @@ end
 """
     aws_promise_complete(promise, value, dtor)
 
+Completes the promise and stores the result along with an optional destructor. If the value is not taken via [`aws_promise_take_value`](@ref), it will be destroyed when the promise's reference count reaches zero. NOTE: Promise cannot be completed twice
+
 ### Prototype
 ```c
 void aws_promise_complete(struct aws_promise *promise, void *value, void (*dtor)(void *));
@@ -8251,6 +8888,8 @@ end
 
 """
     aws_promise_fail(promise, error_code)
+
+Completes the promise and stores the error code NOTE: Promise cannot be completed twice
 
 ### Prototype
 ```c
@@ -8264,6 +8903,8 @@ end
 """
     aws_promise_is_complete(promise)
 
+Returns whether or not the promise has completed (regardless of success or failure)
+
 ### Prototype
 ```c
 bool aws_promise_is_complete(struct aws_promise *promise);
@@ -8275,6 +8916,8 @@ end
 
 """
     aws_promise_error_code(promise)
+
+Returns the error code recorded if the promise failed, or 0 if it succeeded NOTE: It is fatal to attempt to retrieve the error code before the promise is completed
 
 ### Prototype
 ```c
@@ -8288,6 +8931,8 @@ end
 """
     aws_promise_value(promise)
 
+Returns the value provided to the promise if it succeeded, or NULL if none was provided or the promise failed. Check [`aws_promise_error_code`](@ref) to be sure. NOTE: The ownership of the value is retained by the promise. NOTE: It is fatal to attempt to retrieve the value before the promise is completed
+
 ### Prototype
 ```c
 void *aws_promise_value(struct aws_promise *promise);
@@ -8300,6 +8945,8 @@ end
 """
     aws_promise_take_value(promise)
 
+Returns the value provided to the promise if it succeeded, or NULL if none was provided or the promise failed. Check [`aws_promise_error_code`](@ref) to be sure. NOTE: The promise relinquishes ownership of the value, the caller is now responsible for freeing any resources associated with the value NOTE: It is fatal to attempt to take the value before the promise is completed
+
 ### Prototype
 ```c
 void *aws_promise_take_value(struct aws_promise *promise);
@@ -8310,14 +8957,27 @@ function aws_promise_take_value(promise)
 end
 
 # typedef void ( aws_simple_completion_callback ) ( void * )
+"""
+Documentation not found
+"""
 const aws_simple_completion_callback = Cvoid
 
+"""
+    aws_ref_count
+
+A utility type for making ref-counted types, reminiscent of std::shared\\_ptr in C++
+"""
 struct aws_ref_count
     ref_count::aws_atomic_var
     object::Ptr{Cvoid}
     on_zero_fn::Ptr{aws_simple_completion_callback}
 end
 
+"""
+    aws_shutdown_callback_options
+
+Documentation not found
+"""
 struct aws_shutdown_callback_options
     shutdown_callback_fn::Ptr{aws_simple_completion_callback}
     shutdown_callback_user_data::Ptr{Cvoid}
@@ -8408,6 +9068,8 @@ end
 
 """
     aws_ring_buffer_check_atomic_ptr(ring_buf, atomic_ptr)
+
+Checks whether atomic\\_ptr correctly points to a memory location within the bounds of the [`aws_ring_buffer`](@ref)
 
 ### Prototype
 ```c
@@ -8516,6 +9178,11 @@ function aws_ring_buffer_buf_belongs_to_pool(ring_buffer, buf)
     ccall((:aws_ring_buffer_buf_belongs_to_pool, libaws_c_common), Bool, (Ptr{aws_ring_buffer}, Ptr{aws_byte_buf}), ring_buffer, buf)
 end
 
+"""
+    aws_rw_lock
+
+Documentation not found
+"""
 struct aws_rw_lock
     lock_handle::pthread_rwlock_t
 end
@@ -8565,6 +9232,7 @@ end
 """
     aws_rw_lock_wlock(lock)
 
+Documentation not found
 ### Prototype
 ```c
 int aws_rw_lock_wlock(struct aws_rw_lock *lock);
@@ -8591,6 +9259,7 @@ end
 """
     aws_rw_lock_try_wlock(lock)
 
+Documentation not found
 ### Prototype
 ```c
 int aws_rw_lock_try_wlock(struct aws_rw_lock *lock);
@@ -8617,6 +9286,7 @@ end
 """
     aws_rw_lock_wunlock(lock)
 
+Documentation not found
 ### Prototype
 ```c
 int aws_rw_lock_wunlock(struct aws_rw_lock *lock);
@@ -8626,8 +9296,16 @@ function aws_rw_lock_wunlock(lock)
     ccall((:aws_rw_lock_wunlock, libaws_c_common), Cint, (Ptr{aws_rw_lock},), lock)
 end
 
+"""
+Documentation not found
+"""
 const aws_crt_statistics_category_t = UInt32
 
+"""
+    __JL_Ctag_260
+
+Each library gets space for 2^^8 category entries
+"""
 @cenum __JL_Ctag_260::UInt32 begin
     AWS_CRT_STATISTICS_CATEGORY_STRIDE_BITS = 8
 end
@@ -8665,12 +9343,21 @@ struct aws_crt_statistics_sample_interval
 end
 
 # typedef void ( aws_crt_statistics_handler_process_statistics_fn ) ( struct aws_crt_statistics_handler * handler , struct aws_crt_statistics_sample_interval * interval , struct aws_array_list * stats , void * context )
+"""
+Statistics intake function. The array\\_list is a list of pointers to [`aws_crt_statistics_base`](@ref) "derived" (via pattern) objects. The handler should iterate the list and downcast elements whose RTTI category it understands, while skipping those it does not understand.
+"""
 const aws_crt_statistics_handler_process_statistics_fn = Cvoid
 
 # typedef void ( aws_crt_statistics_handler_destroy_fn ) ( struct aws_crt_statistics_handler * handler )
+"""
+Destroys a statistics handler implementation
+"""
 const aws_crt_statistics_handler_destroy_fn = Cvoid
 
 # typedef uint64_t ( aws_crt_statistics_handler_get_report_interval_ms_fn ) ( struct aws_crt_statistics_handler * )
+"""
+The period, in milliseconds, that the handler would like to be informed of statistics. Statistics generators are not required to honor this value, but should if able.
+"""
 const aws_crt_statistics_handler_get_report_interval_ms_fn = Cvoid
 
 """
@@ -8835,6 +9522,7 @@ end
 """
     aws_string_eq_c_str(str, c_str)
 
+Documentation not found
 ### Prototype
 ```c
 bool aws_string_eq_c_str(const struct aws_string *str, const char *c_str);
@@ -9044,17 +9732,30 @@ function aws_secure_strlen(str, max_read_len, str_len)
     ccall((:aws_secure_strlen, libaws_c_common), Cint, (Ptr{Cchar}, Csize_t, Ptr{Csize_t}), str, max_read_len, str_len)
 end
 
+"""
+    aws_platform_os
+
+Documentation not found
+"""
 @cenum aws_platform_os::UInt32 begin
     AWS_PLATFORM_OS_WINDOWS = 0
     AWS_PLATFORM_OS_MAC = 1
     AWS_PLATFORM_OS_UNIX = 2
 end
 
+"""
+    aws_cpu_info
+
+Documentation not found
+"""
 struct aws_cpu_info
     cpu_id::Int32
     suspected_hyper_thread::Bool
 end
 
+"""
+Documentation not found
+"""
 mutable struct aws_system_environment end
 
 """
@@ -9076,6 +9777,7 @@ end
 """
     aws_system_environment_acquire(env)
 
+Documentation not found
 ### Prototype
 ```c
 struct aws_system_environment *aws_system_environment_acquire(struct aws_system_environment *env);
@@ -9088,6 +9790,7 @@ end
 """
     aws_system_environment_release(env)
 
+Documentation not found
 ### Prototype
 ```c
 void aws_system_environment_release(struct aws_system_environment *env);
@@ -9160,6 +9863,8 @@ end
 """
     aws_get_platform_build_os()
 
+Returns the OS this was built under
+
 ### Prototype
 ```c
 enum aws_platform_os aws_get_platform_build_os(void);
@@ -9171,6 +9876,8 @@ end
 
 """
     aws_system_info_processor_count()
+
+Returns the number of online processors available for usage.
 
 ### Prototype
 ```c
@@ -9226,6 +9933,8 @@ end
 """
     aws_is_debugger_present()
 
+Returns true if a debugger is currently attached to the process.
+
 ### Prototype
 ```c
 bool aws_is_debugger_present(void);
@@ -9237,6 +9946,8 @@ end
 
 """
     aws_debug_break()
+
+If a debugger is attached to the process, trip a breakpoint.
 
 ### Prototype
 ```c
@@ -9250,6 +9961,8 @@ end
 """
     aws_backtrace(stack_frames, num_frames)
 
+Records a stack trace from the call site. Returns the number of stack entries/stack depth captured, or 0 if the operation is not supported on this platform
+
 ### Prototype
 ```c
 size_t aws_backtrace(void **stack_frames, size_t num_frames);
@@ -9262,6 +9975,8 @@ end
 """
     aws_backtrace_symbols(stack_frames, stack_depth)
 
+Converts stack frame pointers to symbols, if symbols are available Returns an array up to stack\\_depth long, that needs to be free()ed. stack\\_depth should be the length of frames. Returns NULL if the platform does not support stack frame translation or an error occurs
+
 ### Prototype
 ```c
 char **aws_backtrace_symbols(void *const *stack_frames, size_t stack_depth);
@@ -9273,6 +9988,8 @@ end
 
 """
     aws_backtrace_addr2line(stack_frames, stack_depth)
+
+Converts stack frame pointers to symbols, using all available system tools to try to produce a human readable result. This call will not be quick, as it shells out to addr2line or similar tools. On Windows, this is the same as [`aws_backtrace_symbols`](@ref)() Returns an array up to stack\\_depth long that needs to be free()ed. Missing frames will be NULL. Returns NULL if the platform does not support stack frame translation or an error occurs
 
 ### Prototype
 ```c
@@ -9300,6 +10017,8 @@ end
 """
     aws_backtrace_log(log_level)
 
+Log the callstack from the current stack to the currently configured [`aws_logger`](@ref)
+
 ### Prototype
 ```c
 void aws_backtrace_log(int log_level);
@@ -9309,6 +10028,11 @@ function aws_backtrace_log(log_level)
     ccall((:aws_backtrace_log, libaws_c_common), Cvoid, (Cint,), log_level)
 end
 
+"""
+    aws_memory_usage_stats
+
+Documentation not found
+"""
 struct aws_memory_usage_stats
     maxrss::Csize_t
     page_faults::Csize_t
@@ -9317,6 +10041,8 @@ end
 
 """
     aws_init_memory_usage_for_current_process(memory_usage)
+
+Get memory usage for current process. Raises AWS\\_ERROR\\_SYS\\_CALL\\_FAILURE on failure.
 
 ### Prototype
 ```c
@@ -9327,6 +10053,11 @@ function aws_init_memory_usage_for_current_process(memory_usage)
     ccall((:aws_init_memory_usage_for_current_process, libaws_c_common), Cint, (Ptr{aws_memory_usage_stats},), memory_usage)
 end
 
+"""
+    aws_task_status
+
+Documentation not found
+"""
 @cenum aws_task_status::UInt32 begin
     AWS_TASK_STATUS_RUN_READY = 0
     AWS_TASK_STATUS_CANCELED = 1
@@ -9338,6 +10069,11 @@ A scheduled function.
 """
 const aws_task_fn = Cvoid
 
+"""
+    __JL_Ctag_369
+
+honor the ABI compat
+"""
 struct __JL_Ctag_369
     data::NTuple{8, UInt8}
 end
@@ -9359,6 +10095,11 @@ function Base.setproperty!(x::Ptr{__JL_Ctag_369}, f::Symbol, v)
     unsafe_store!(getproperty(x, f), v)
 end
 
+"""
+    aws_task
+
+A task object. Once added to the scheduler, a task must remain in memory until its function is executed.
+"""
 struct aws_task
     data::NTuple{64, UInt8}
 end
@@ -9385,6 +10126,11 @@ function Base.setproperty!(x::Ptr{aws_task}, f::Symbol, v)
     unsafe_store!(getproperty(x, f), v)
 end
 
+"""
+    aws_task_scheduler
+
+Documentation not found
+"""
 struct aws_task_scheduler
     alloc::Ptr{aws_allocator}
     timed_queue::aws_priority_queue
@@ -9408,6 +10154,8 @@ end
 
 """
     aws_task_run(task, status)
+
+Runs or cancels a task
 
 ### Prototype
 ```c
@@ -9449,6 +10197,7 @@ end
 """
     aws_task_scheduler_is_valid(scheduler)
 
+Documentation not found
 ### Prototype
 ```c
 bool aws_task_scheduler_is_valid(const struct aws_task_scheduler *scheduler);
@@ -9544,6 +10293,11 @@ function aws_task_status_to_c_str(status)
     ccall((:aws_task_status_to_c_str, libaws_c_common), Ptr{Cchar}, (aws_task_status,), status)
 end
 
+"""
+    aws_thread_detach_state
+
+Documentation not found
+"""
 @cenum aws_thread_detach_state::UInt32 begin
     AWS_THREAD_NOT_CREATED = 1
     AWS_THREAD_JOINABLE = 2
@@ -9571,6 +10325,11 @@ Currently, only event loop group async cleanup and host resolver threads partici
     AWS_TJS_MANAGED = 1
 end
 
+"""
+    aws_thread_options
+
+Documentation not found
+"""
 struct aws_thread_options
     stack_size::Csize_t
     cpu_id::Int32
@@ -9578,8 +10337,16 @@ struct aws_thread_options
     name::aws_byte_cursor
 end
 
+"""
+Documentation not found
+"""
 const aws_thread_once = pthread_once_t
 
+"""
+    aws_thread
+
+Documentation not found
+"""
 struct aws_thread
     allocator::Ptr{aws_allocator}
     detach_state::aws_thread_detach_state
@@ -9603,6 +10370,7 @@ end
 """
     aws_thread_call_once(flag, call_once, user_data)
 
+Documentation not found
 ### Prototype
 ```c
 void aws_thread_call_once(aws_thread_once *flag, void (*call_once)(void *), void *user_data);
@@ -9775,6 +10543,9 @@ function aws_thread_current_sleep(nanos)
 end
 
 # typedef void ( aws_thread_atexit_fn ) ( void * user_data )
+"""
+Documentation not found
+"""
 const aws_thread_atexit_fn = Cvoid
 
 """
@@ -9851,6 +10622,9 @@ function aws_thread_name(allocator, thread_id, out_name)
     ccall((:aws_thread_name, libaws_c_common), Cint, (Ptr{aws_allocator}, aws_thread_id_t, Ptr{Ptr{aws_string}}), allocator, thread_id, out_name)
 end
 
+"""
+Documentation not found
+"""
 mutable struct aws_thread_scheduler end
 
 """
@@ -10061,6 +10835,7 @@ end
 """
     aws_uri_clean_up(uri)
 
+Documentation not found
 ### Prototype
 ```c
 void aws_uri_clean_up(struct aws_uri *uri);
@@ -10274,10 +11049,20 @@ function aws_byte_buf_append_decoding_uri(buffer, cursor)
     ccall((:aws_byte_buf_append_decoding_uri, libaws_c_common), Cint, (Ptr{aws_byte_buf}, Ptr{aws_byte_cursor}), buffer, cursor)
 end
 
+"""
+    aws_uuid
+
+Documentation not found
+"""
 struct aws_uuid
     uuid_data::NTuple{16, UInt8}
 end
 
+"""
+    __JL_Ctag_332
+
+36 bytes for the UUID plus one more for the null terminator.
+"""
 @cenum __JL_Ctag_332::UInt32 begin
     AWS_UUID_STR_LEN = 37
 end
@@ -10285,6 +11070,7 @@ end
 """
     aws_uuid_init(uuid)
 
+Documentation not found
 ### Prototype
 ```c
 int aws_uuid_init(struct aws_uuid *uuid);
@@ -10297,6 +11083,7 @@ end
 """
     aws_uuid_init_from_str(uuid, uuid_str)
 
+Documentation not found
 ### Prototype
 ```c
 int aws_uuid_init_from_str(struct aws_uuid *uuid, const struct aws_byte_cursor *uuid_str);
@@ -10309,6 +11096,7 @@ end
 """
     aws_uuid_to_str(uuid, output)
 
+Documentation not found
 ### Prototype
 ```c
 int aws_uuid_to_str(const struct aws_uuid *uuid, struct aws_byte_buf *output);
@@ -10321,6 +11109,7 @@ end
 """
     aws_uuid_equals(a, b)
 
+Documentation not found
 ### Prototype
 ```c
 bool aws_uuid_equals(const struct aws_uuid *a, const struct aws_uuid *b);
@@ -10330,8 +11119,16 @@ function aws_uuid_equals(a, b)
     ccall((:aws_uuid_equals, libaws_c_common), Bool, (Ptr{aws_uuid}, Ptr{aws_uuid}), a, b)
 end
 
+"""
+Documentation not found
+"""
 mutable struct aws_xml_node end
 
+"""
+    aws_xml_attribute
+
+Documentation not found
+"""
 struct aws_xml_attribute
     name::aws_byte_cursor
     value::aws_byte_cursor
@@ -10349,6 +11146,11 @@ return true to continue the parsing operation.
 """
 const aws_xml_parser_on_node_encountered_fn = Cvoid
 
+"""
+    aws_xml_parser_options
+
+Documentation not found
+"""
 struct aws_xml_parser_options
     doc::aws_byte_cursor
     max_depth::Csize_t
@@ -10401,6 +11203,8 @@ end
 """
     aws_xml_node_get_name(node)
 
+Get the name of an xml node.
+
 ### Prototype
 ```c
 struct aws_byte_cursor aws_xml_node_get_name(const struct aws_xml_node *node);
@@ -10413,6 +11217,8 @@ end
 """
     aws_xml_node_get_num_attributes(node)
 
+Get the number of attributes for an xml node.
+
 ### Prototype
 ```c
 size_t aws_xml_node_get_num_attributes(const struct aws_xml_node *node);
@@ -10424,6 +11230,8 @@ end
 
 """
     aws_xml_node_get_attribute(node, attribute_index)
+
+Get an attribute for an xml node by its index.
 
 ### Prototype
 ```c
@@ -10641,14 +11449,28 @@ describes the type of context metadata
 end
 
 # typedef int ( aws_test_before_fn ) ( struct aws_allocator * allocator , void * ctx )
+"""
+Documentation not found
+"""
 const aws_test_before_fn = Cvoid
 
 # typedef int ( aws_test_run_fn ) ( struct aws_allocator * allocator , void * ctx )
+"""
+Documentation not found
+"""
 const aws_test_run_fn = Cvoid
 
 # typedef int ( aws_test_after_fn ) ( struct aws_allocator * allocator , int setup_result , void * ctx )
+"""
+Documentation not found
+"""
 const aws_test_after_fn = Cvoid
 
+"""
+    aws_test_harness
+
+Documentation not found
+"""
 struct aws_test_harness
     on_before::Ptr{aws_test_before_fn}
     run::Ptr{aws_test_run_fn}
@@ -10661,6 +11483,7 @@ end
 """
     s_aws_run_test_case(harness)
 
+Documentation not found
 ### Prototype
 ```c
 static inline int s_aws_run_test_case(struct aws_test_harness *harness);
@@ -10673,6 +11496,7 @@ end
 """
     s_print_stack_trace(sig, sig_info, user_data)
 
+Documentation not found
 ### Prototype
 ```c
 static void s_print_stack_trace(int sig, siginfo_t *sig_info, void *user_data);
@@ -10685,6 +11509,7 @@ end
 """
     enable_vt_mode()
 
+Documentation not found
 ### Prototype
 ```c
 static inline int enable_vt_mode(void);
@@ -10694,38 +11519,86 @@ function enable_vt_mode()
     ccall((:enable_vt_mode, libaws_c_common), Cint, ())
 end
 
+"""
+Documentation not found
+"""
 const AWS_OP_SUCCESS = 0
 
+"""
+Documentation not found
+"""
 # Skipping MacroDefinition: AWS_CONDITION_VARIABLE_INIT { . condition_handle = PTHREAD_COND_INITIALIZER , . initialized = true }
 
+"""
+Documentation not found
+"""
 const AWS_OP_ERR = -1
 
+"""
+Documentation not found
+"""
 const AWS_ERROR_ENUM_STRIDE_BITS = 10
 
+"""
+Documentation not found
+"""
 const AWS_ERROR_ENUM_STRIDE = Cuint(1) << AWS_ERROR_ENUM_STRIDE_BITS
 
 # Skipping MacroDefinition: AWS_STATIC_IMPL static inline
 
+"""
+Documentation not found
+"""
 const AWS_PATH_DELIM = Cchar('/')
 
+"""
+Documentation not found
+"""
 const AWS_PATH_DELIM_STR = "/"
 
+"""
+Documentation not found
+"""
 const AWS_LOG_LEVEL_NONE = 0
 
+"""
+Documentation not found
+"""
 const AWS_LOG_LEVEL_FATAL = 1
 
+"""
+Documentation not found
+"""
 const AWS_LOG_LEVEL_ERROR = 2
 
+"""
+Documentation not found
+"""
 const AWS_LOG_LEVEL_WARN = 3
 
+"""
+Documentation not found
+"""
 const AWS_LOG_LEVEL_INFO = 4
 
+"""
+Documentation not found
+"""
 const AWS_LOG_LEVEL_DEBUG = 5
 
+"""
+Documentation not found
+"""
 const AWS_LOG_LEVEL_TRACE = 6
 
+"""
+Documentation not found
+"""
 const AWS_LOG_SUBJECT_STRIDE = Cuint(1) << AWS_LOG_SUBJECT_STRIDE_BITS
 
+"""
+Documentation not found
+"""
 const PRInSTR = "%.*s"
 
 # Skipping MacroDefinition: AWS_FORCE_INLINE __attribute__ ( ( always_inline ) )
@@ -10734,18 +11607,39 @@ const PRInSTR = "%.*s"
 
 # Skipping MacroDefinition: AWS_ATTRIBUTE_NORETURN __attribute__ ( ( noreturn ) )
 
+"""
+Documentation not found
+"""
 const SIZE_BITS = 64
 
+"""
+Documentation not found
+"""
 # Skipping MacroDefinition: AWS_MUTEX_INIT { . mutex_handle = PTHREAD_MUTEX_INITIALIZER , . initialized = true }
 
+"""
+Documentation not found
+"""
 const AWS_PACKAGE_SLOTS = 16
 
+"""
+Documentation not found
+"""
 const AWS_C_COMMON_PACKAGE_ID = 0
 
+"""
+Documentation not found
+"""
 # Skipping MacroDefinition: AWS_RW_LOCK_INIT { . lock_handle = PTHREAD_RWLOCK_INITIALIZER }
 
+"""
+Documentation not found
+"""
 const AWS_CRT_STATISTICS_CATEGORY_STRIDE = Cuint(1) << AWS_CRT_STATISTICS_CATEGORY_STRIDE_BITS
 
+"""
+Documentation not found
+"""
 const AWS_THREAD_NAME_RECOMMENDED_STRLEN = 15
 
 # Skipping MacroDefinition: AWS_THREAD_ID_T_REPR_BUFSZ ( sizeof ( aws_thread_id_t ) * 2 + 1 )
@@ -10754,15 +11648,33 @@ const AWS_THREAD_NAME_RECOMMENDED_STRLEN = 15
 
 # Skipping MacroDefinition: ITT_INLINE_ATTRIBUTE __attribute__ ( ( always_inline , unused ) )
 
+"""
+Documentation not found
+"""
 const AWS_OP_SKIP = -2
 
+"""
+Documentation not found
+"""
 const AWS_TESTING_REPORT_FD = stderr
 
+"""
+Documentation not found
+"""
 const FAIL_PREFIX = "***FAILURE*** "
 
+"""
+Documentation not found
+"""
 const SUCCESS = 0
 
+"""
+Documentation not found
+"""
 const FAILURE = -1
 
+"""
+Documentation not found
+"""
 const SKIP = 103
 
