@@ -5,5 +5,3 @@
 # LibAwsCommon.jl
 
 Julia bindings for the [aws-c-common](https://github.com/awslabs/aws-c-common) library.
-
-For documentation, please refer to the files under [lib](https://github.com/JuliaServices/LibAwsCommon.jl/blob/main/lib) source file where the original AWS documentation is included.
