@@ -70,9 +70,21 @@ function get_docs(node, docs)
     return docs
 end
 
+function should_skip_target(target)
+    # aws_c_common_jll does not support i686 windows https://github.com/JuliaPackaging/Yggdrasil/blob/bbab3a916ae5543902b025a4a873cf9ee4a7de68/A/aws_c_common/build_tarballs.jl#L48-L49
+    return target == "i686-w64-mingw32"
+end
+
+# download toolchains in parallel
+Threads.@threads for target in JLLEnvs.JLL_ENV_TRIPLES
+    if should_skip_target(target)
+        continue
+    end
+    get_default_args(target) # downloads the toolchain
+end
+
 for target in JLLEnvs.JLL_ENV_TRIPLES
-    if target == "i686-w64-mingw32"
-        # aws_c_common_jll does not support i686 windows https://github.com/JuliaPackaging/Yggdrasil/blob/bbab3a916ae5543902b025a4a873cf9ee4a7de68/A/aws_c_common/build_tarballs.jl#L48-L49
+    if should_skip_target(target)
         continue
     end
     options = load_options(joinpath(@__DIR__, "generator.toml"))
