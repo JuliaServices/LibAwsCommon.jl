@@ -1,53 +1,53 @@
 using CEnum
 
 """
-Documentation not found
+Documentation not found.
 """
 const __uid_t = Cuint
 
 """
-Documentation not found
+Documentation not found.
 """
 const __pid_t = Cint
 
 """
-Documentation not found
+Documentation not found.
 """
 const __clock_t = Clong
 
 """
-Documentation not found
+Documentation not found.
 """
 const __time_t = Clong
 
 """
-Documentation not found
+Documentation not found.
 """
 const time_t = __time_t
 
 """
-Documentation not found
+Documentation not found.
 """
 const pthread_t = Culong
 
 """
     __pthread_internal_slist
 
-Documentation not found
+Documentation not found.
 """
 struct __pthread_internal_slist
     __next::Ptr{__pthread_internal_slist}
 end
 
 """
-Documentation not found
+Documentation not found.
 """
 const __pthread_slist_t = __pthread_internal_slist
 
 """
     pthread_mutex_t
 
-Documentation not found
+Documentation not found.
 """
 struct pthread_mutex_t
     data::NTuple{24, UInt8}
@@ -74,7 +74,7 @@ end
 """
     pthread_cond_t
 
-Documentation not found
+Documentation not found.
 """
 struct pthread_cond_t
     data::NTuple{48, UInt8}
@@ -99,14 +99,14 @@ function Base.setproperty!(x::Ptr{pthread_cond_t}, f::Symbol, v)
 end
 
 """
-Documentation not found
+Documentation not found.
 """
 const pthread_once_t = Cint
 
 """
     pthread_rwlock_t
 
-Documentation not found
+Documentation not found.
 """
 struct pthread_rwlock_t
     data::NTuple{32, UInt8}
@@ -133,7 +133,7 @@ end
 """
     tm
 
-Documentation not found
+Documentation not found.
 """
 struct tm
     tm_sec::Cint
@@ -152,7 +152,7 @@ end
 """
     sigval
 
-Documentation not found
+Documentation not found.
 """
 struct sigval
     data::NTuple{4, UInt8}
@@ -176,14 +176,14 @@ function Base.setproperty!(x::Ptr{sigval}, f::Symbol, v)
 end
 
 """
-Documentation not found
+Documentation not found.
 """
 const sigval_t = sigval
 
 """
     __JL_Ctag_1213
 
-Documentation not found
+Documentation not found.
 """
 struct __JL_Ctag_1213
     data::NTuple{116, UInt8}
@@ -215,7 +215,7 @@ end
 """
     siginfo_t
 
-Documentation not found
+Documentation not found.
 """
 struct siginfo_t
     data::NTuple{128, UInt8}
@@ -270,7 +270,7 @@ end
 """
     aws_default_allocator()
 
-Documentation not found
+Documentation not found.
 ### Prototype
 ```c
 struct aws_allocator *aws_default_allocator(void);
@@ -674,7 +674,7 @@ end
 """
     aws_clz_i32(n)
 
-Documentation not found
+Documentation not found.
 ### Prototype
 ```c
 AWS_STATIC_IMPL size_t aws_clz_i32(int32_t n);
@@ -687,7 +687,7 @@ end
 """
     aws_clz_u64(n)
 
-Documentation not found
+Documentation not found.
 ### Prototype
 ```c
 AWS_STATIC_IMPL size_t aws_clz_u64(uint64_t n);
@@ -700,7 +700,7 @@ end
 """
     aws_clz_i64(n)
 
-Documentation not found
+Documentation not found.
 ### Prototype
 ```c
 AWS_STATIC_IMPL size_t aws_clz_i64(int64_t n);
@@ -713,7 +713,7 @@ end
 """
     aws_clz_size(n)
 
-Documentation not found
+Documentation not found.
 ### Prototype
 ```c
 AWS_STATIC_IMPL size_t aws_clz_size(size_t n);
@@ -740,7 +740,7 @@ end
 """
     aws_ctz_i32(n)
 
-Documentation not found
+Documentation not found.
 ### Prototype
 ```c
 AWS_STATIC_IMPL size_t aws_ctz_i32(int32_t n);
@@ -753,7 +753,7 @@ end
 """
     aws_ctz_u64(n)
 
-Documentation not found
+Documentation not found.
 ### Prototype
 ```c
 AWS_STATIC_IMPL size_t aws_ctz_u64(uint64_t n);
@@ -766,7 +766,7 @@ end
 """
     aws_ctz_i64(n)
 
-Documentation not found
+Documentation not found.
 ### Prototype
 ```c
 AWS_STATIC_IMPL size_t aws_ctz_i64(int64_t n);
@@ -779,7 +779,7 @@ end
 """
     aws_ctz_size(n)
 
-Documentation not found
+Documentation not found.
 ### Prototype
 ```c
 AWS_STATIC_IMPL size_t aws_ctz_size(size_t n);
@@ -960,7 +960,7 @@ end
 """
     aws_min_u8(a, b)
 
-Documentation not found
+Documentation not found.
 ### Prototype
 ```c
 AWS_STATIC_IMPL uint8_t aws_min_u8(uint8_t a, uint8_t b);
@@ -973,7 +973,7 @@ end
 """
     aws_max_u8(a, b)
 
-Documentation not found
+Documentation not found.
 ### Prototype
 ```c
 AWS_STATIC_IMPL uint8_t aws_max_u8(uint8_t a, uint8_t b);
@@ -986,7 +986,7 @@ end
 """
     aws_min_i8(a, b)
 
-Documentation not found
+Documentation not found.
 ### Prototype
 ```c
 AWS_STATIC_IMPL int8_t aws_min_i8(int8_t a, int8_t b);
@@ -999,7 +999,7 @@ end
 """
     aws_max_i8(a, b)
 
-Documentation not found
+Documentation not found.
 ### Prototype
 ```c
 AWS_STATIC_IMPL int8_t aws_max_i8(int8_t a, int8_t b);
@@ -1012,7 +1012,7 @@ end
 """
     aws_min_u16(a, b)
 
-Documentation not found
+Documentation not found.
 ### Prototype
 ```c
 AWS_STATIC_IMPL uint16_t aws_min_u16(uint16_t a, uint16_t b);
@@ -1025,7 +1025,7 @@ end
 """
     aws_max_u16(a, b)
 
-Documentation not found
+Documentation not found.
 ### Prototype
 ```c
 AWS_STATIC_IMPL uint16_t aws_max_u16(uint16_t a, uint16_t b);
@@ -1038,7 +1038,7 @@ end
 """
     aws_min_i16(a, b)
 
-Documentation not found
+Documentation not found.
 ### Prototype
 ```c
 AWS_STATIC_IMPL int16_t aws_min_i16(int16_t a, int16_t b);
@@ -1051,7 +1051,7 @@ end
 """
     aws_max_i16(a, b)
 
-Documentation not found
+Documentation not found.
 ### Prototype
 ```c
 AWS_STATIC_IMPL int16_t aws_max_i16(int16_t a, int16_t b);
@@ -1064,7 +1064,7 @@ end
 """
     aws_min_u32(a, b)
 
-Documentation not found
+Documentation not found.
 ### Prototype
 ```c
 AWS_STATIC_IMPL uint32_t aws_min_u32(uint32_t a, uint32_t b);
@@ -1077,7 +1077,7 @@ end
 """
     aws_max_u32(a, b)
 
-Documentation not found
+Documentation not found.
 ### Prototype
 ```c
 AWS_STATIC_IMPL uint32_t aws_max_u32(uint32_t a, uint32_t b);
@@ -1090,7 +1090,7 @@ end
 """
     aws_min_i32(a, b)
 
-Documentation not found
+Documentation not found.
 ### Prototype
 ```c
 AWS_STATIC_IMPL int32_t aws_min_i32(int32_t a, int32_t b);
@@ -1103,7 +1103,7 @@ end
 """
     aws_max_i32(a, b)
 
-Documentation not found
+Documentation not found.
 ### Prototype
 ```c
 AWS_STATIC_IMPL int32_t aws_max_i32(int32_t a, int32_t b);
@@ -1116,7 +1116,7 @@ end
 """
     aws_min_u64(a, b)
 
-Documentation not found
+Documentation not found.
 ### Prototype
 ```c
 AWS_STATIC_IMPL uint64_t aws_min_u64(uint64_t a, uint64_t b);
@@ -1129,7 +1129,7 @@ end
 """
     aws_max_u64(a, b)
 
-Documentation not found
+Documentation not found.
 ### Prototype
 ```c
 AWS_STATIC_IMPL uint64_t aws_max_u64(uint64_t a, uint64_t b);
@@ -1142,7 +1142,7 @@ end
 """
     aws_min_i64(a, b)
 
-Documentation not found
+Documentation not found.
 ### Prototype
 ```c
 AWS_STATIC_IMPL int64_t aws_min_i64(int64_t a, int64_t b);
@@ -1155,7 +1155,7 @@ end
 """
     aws_max_i64(a, b)
 
-Documentation not found
+Documentation not found.
 ### Prototype
 ```c
 AWS_STATIC_IMPL int64_t aws_max_i64(int64_t a, int64_t b);
@@ -1168,7 +1168,7 @@ end
 """
     aws_min_size(a, b)
 
-Documentation not found
+Documentation not found.
 ### Prototype
 ```c
 AWS_STATIC_IMPL size_t aws_min_size(size_t a, size_t b);
@@ -1181,7 +1181,7 @@ end
 """
     aws_max_size(a, b)
 
-Documentation not found
+Documentation not found.
 ### Prototype
 ```c
 AWS_STATIC_IMPL size_t aws_max_size(size_t a, size_t b);
@@ -1194,7 +1194,7 @@ end
 """
     aws_min_int(a, b)
 
-Documentation not found
+Documentation not found.
 ### Prototype
 ```c
 AWS_STATIC_IMPL int aws_min_int(int a, int b);
@@ -1207,7 +1207,7 @@ end
 """
     aws_max_int(a, b)
 
-Documentation not found
+Documentation not found.
 ### Prototype
 ```c
 AWS_STATIC_IMPL int aws_max_int(int a, int b);
@@ -1220,7 +1220,7 @@ end
 """
     aws_min_float(a, b)
 
-Documentation not found
+Documentation not found.
 ### Prototype
 ```c
 AWS_STATIC_IMPL float aws_min_float(float a, float b);
@@ -1233,7 +1233,7 @@ end
 """
     aws_max_float(a, b)
 
-Documentation not found
+Documentation not found.
 ### Prototype
 ```c
 AWS_STATIC_IMPL float aws_max_float(float a, float b);
@@ -1246,7 +1246,7 @@ end
 """
     aws_min_double(a, b)
 
-Documentation not found
+Documentation not found.
 ### Prototype
 ```c
 AWS_STATIC_IMPL double aws_min_double(double a, double b);
@@ -1259,7 +1259,7 @@ end
 """
     aws_max_double(a, b)
 
-Documentation not found
+Documentation not found.
 ### Prototype
 ```c
 AWS_STATIC_IMPL double aws_max_double(double a, double b);
@@ -1272,7 +1272,7 @@ end
 """
     __JL_Ctag_39
 
-Documentation not found
+Documentation not found.
 """
 @cenum __JL_Ctag_39::UInt32 begin
     AWS_ARRAY_LIST_DEBUG_FILL = 221
@@ -1281,7 +1281,7 @@ end
 """
     aws_array_list
 
-Documentation not found
+Documentation not found.
 """
 struct aws_array_list
     alloc::Ptr{aws_allocator}
@@ -1670,7 +1670,7 @@ end
 """
     aws_fatal_assert(cond_str, file, line)
 
-Documentation not found
+Documentation not found.
 ### Prototype
 ```c
 void aws_fatal_assert(const char *cond_str, const char *file, int line) AWS_ATTRIBUTE_NORETURN;
@@ -1681,7 +1681,7 @@ function aws_fatal_assert(cond_str, file, line)
 end
 
 """
-Documentation not found
+Documentation not found.
 """
 const aws_atomic_impl_int_t = Csize_t
 
@@ -2122,7 +2122,7 @@ end
 """
     aws_atomic_priv_xlate_order(order)
 
-Documentation not found
+Documentation not found.
 ### Prototype
 ```c
 static inline int aws_atomic_priv_xlate_order(enum aws_memory_order order);
@@ -2379,7 +2379,7 @@ end
 """
     aws_byte_buf_init(buf, allocator, capacity)
 
-Documentation not found
+Documentation not found.
 ### Prototype
 ```c
 int aws_byte_buf_init(struct aws_byte_buf *buf, struct aws_allocator *allocator, size_t capacity);
@@ -2476,7 +2476,7 @@ end
 """
     aws_byte_buf_clean_up(buf)
 
-Documentation not found
+Documentation not found.
 ### Prototype
 ```c
 void aws_byte_buf_clean_up(struct aws_byte_buf *buf);
@@ -3103,7 +3103,7 @@ end
 """
     aws_byte_buf_from_array(bytes, len)
 
-Documentation not found
+Documentation not found.
 ### Prototype
 ```c
 struct aws_byte_buf aws_byte_buf_from_array(const void *bytes, size_t len);
@@ -3116,7 +3116,7 @@ end
 """
     aws_byte_buf_from_empty_array(bytes, capacity)
 
-Documentation not found
+Documentation not found.
 ### Prototype
 ```c
 struct aws_byte_buf aws_byte_buf_from_empty_array(const void *bytes, size_t capacity);
@@ -3129,7 +3129,7 @@ end
 """
     aws_byte_cursor_from_buf(buf)
 
-Documentation not found
+Documentation not found.
 ### Prototype
 ```c
 struct aws_byte_cursor aws_byte_cursor_from_buf(const struct aws_byte_buf *const buf);
@@ -3142,7 +3142,7 @@ end
 """
     aws_byte_cursor_from_c_str(c_str)
 
-Documentation not found
+Documentation not found.
 ### Prototype
 ```c
 struct aws_byte_cursor aws_byte_cursor_from_c_str(const char *c_str);
@@ -3155,7 +3155,7 @@ end
 """
     aws_byte_cursor_from_array(bytes, len)
 
-Documentation not found
+Documentation not found.
 ### Prototype
 ```c
 struct aws_byte_cursor aws_byte_cursor_from_array(const void *const bytes, const size_t len);
@@ -3686,7 +3686,7 @@ end
 """
     aws_linked_list_node
 
-Documentation not found
+Documentation not found.
 """
 struct aws_linked_list_node
     next::Ptr{aws_linked_list_node}
@@ -3710,7 +3710,7 @@ end
 """
     aws_linked_list
 
-Documentation not found
+Documentation not found.
 """
 struct aws_linked_list
     head::aws_linked_list_node
@@ -4030,7 +4030,7 @@ end
 """
     aws_linked_list_swap_contents(a, b)
 
-Documentation not found
+Documentation not found.
 ### Prototype
 ```c
 AWS_STATIC_IMPL void aws_linked_list_swap_contents( struct aws_linked_list *AWS_RESTRICT a, struct aws_linked_list *AWS_RESTRICT b);
@@ -4075,7 +4075,7 @@ end
 """
     aws_cache_vtable
 
-Documentation not found
+Documentation not found.
 """
 struct aws_cache_vtable
     destroy::Ptr{Cvoid}
@@ -4106,7 +4106,7 @@ mutable struct hash_table_state end
 """
     aws_hash_table
 
-Documentation not found
+Documentation not found.
 """
 struct aws_hash_table
     p_impl::Ptr{hash_table_state}
@@ -4167,7 +4167,7 @@ end
 """
     aws_cache_base_default_find(cache, key, p_value)
 
-Documentation not found
+Documentation not found.
 ### Prototype
 ```c
 int aws_cache_base_default_find(struct aws_cache *cache, const void *key, void **p_value);
@@ -4180,7 +4180,7 @@ end
 """
     aws_cache_base_default_remove(cache, key)
 
-Documentation not found
+Documentation not found.
 ### Prototype
 ```c
 int aws_cache_base_default_remove(struct aws_cache *cache, const void *key);
@@ -4193,7 +4193,7 @@ end
 """
     aws_cache_base_default_clear(cache)
 
-Documentation not found
+Documentation not found.
 ### Prototype
 ```c
 void aws_cache_base_default_clear(struct aws_cache *cache);
@@ -4206,7 +4206,7 @@ end
 """
     aws_cache_base_default_get_element_count(cache)
 
-Documentation not found
+Documentation not found.
 ### Prototype
 ```c
 size_t aws_cache_base_default_get_element_count(const struct aws_cache *cache);
@@ -4305,7 +4305,7 @@ end
 """
     aws_timestamp_unit
 
-Documentation not found
+Documentation not found.
 """
 @cenum aws_timestamp_unit::UInt32 begin
     AWS_TIMESTAMP_SECS = 1
@@ -4373,7 +4373,7 @@ end
 """
     aws_cli_options_has_arg
 
-Documentation not found
+Documentation not found.
 """
 @cenum aws_cli_options_has_arg::UInt32 begin
     AWS_CLI_OPTIONS_NO_ARGUMENT = 0
@@ -4450,13 +4450,13 @@ end
 
 Dispatches the current command line arguments with a subcommand from the second input argument in argv[], if dispatch table contains a command that matches the argument. When the command is dispatched, argc and argv will be updated to reflect the new argument count. The cli options are required to come after the subcommand. If either, no dispatch was found or there was no argument passed to the program, this function will return [`AWS_OP_ERR`](@ref). Check [`aws_last_error`](@ref)() for details on the error.
 
-### Parameters
+# Arguments
 * `argc`: number of arguments passed to int main()
 * `argv`: the arguments passed to int main()
 * `parse_cb,`: optional, specify NULL if you don't want to handle this. This argument is for parsing "meta" commands from the command line options prior to dispatch occurring.
 * `dispatch_table`: table containing functions and command name to dispatch on.
 * `table_length`: number of entries in dispatch\\_table.
-### Returns
+# Returns
 [`AWS_OP_SUCCESS`](@ref)(0) on success, [`AWS_OP_ERR`](@ref)(-1) on failure
 ### Prototype
 ```c
@@ -4498,7 +4498,7 @@ end
 """
     aws_common_fatal_assert_library_initialized()
 
-Documentation not found
+Documentation not found.
 ### Prototype
 ```c
 void aws_common_fatal_assert_library_initialized(void);
@@ -4510,14 +4510,14 @@ end
 
 # typedef bool ( aws_condition_predicate_fn ) ( void * )
 """
-Documentation not found
+Documentation not found.
 """
 const aws_condition_predicate_fn = Cvoid
 
 """
     aws_condition_variable
 
-Documentation not found
+Documentation not found.
 """
 struct aws_condition_variable
     condition_handle::pthread_cond_t
@@ -4583,7 +4583,7 @@ end
 """
     aws_mutex
 
-Documentation not found
+Documentation not found.
 """
 struct aws_mutex
     mutex_handle::pthread_mutex_t
@@ -4649,7 +4649,7 @@ end
 """
     aws_cpu_feature_name
 
-Documentation not found
+Documentation not found.
 """
 @cenum aws_cpu_feature_name::UInt32 begin
     AWS_CPU_FEATURE_CLMUL = 0
@@ -4678,7 +4678,7 @@ function aws_cpu_has_feature(feature_name)
 end
 
 """
-Documentation not found
+Documentation not found.
 """
 mutable struct aws_cross_process_lock end
 
@@ -4715,7 +4715,7 @@ end
 """
     __JL_Ctag_283
 
-Documentation not found
+Documentation not found.
 """
 @cenum __JL_Ctag_283::UInt32 begin
     AWS_DATE_TIME_STR_MAX_LEN = 100
@@ -4725,7 +4725,7 @@ end
 """
     aws_date_format
 
-Documentation not found
+Documentation not found.
 """
 @cenum aws_date_format::UInt32 begin
     AWS_DATE_FORMAT_RFC822 = 0
@@ -4737,7 +4737,7 @@ end
 """
     aws_date_month
 
-Documentation not found
+Documentation not found.
 """
 @cenum aws_date_month::UInt32 begin
     AWS_DATE_MONTH_JANUARY = 0
@@ -4757,7 +4757,7 @@ end
 """
     aws_date_day_of_week
 
-Documentation not found
+Documentation not found.
 """
 @cenum aws_date_day_of_week::UInt32 begin
     AWS_DATE_DAY_OF_WEEK_SUNDAY = 0
@@ -4772,7 +4772,7 @@ end
 """
     aws_date_time
 
-Documentation not found
+Documentation not found.
 """
 struct aws_date_time
     timestamp::time_t
@@ -4920,7 +4920,7 @@ end
 """
     aws_date_time_as_epoch_secs(dt)
 
-Documentation not found
+Documentation not found.
 ### Prototype
 ```c
 double aws_date_time_as_epoch_secs(const struct aws_date_time *dt);
@@ -4933,7 +4933,7 @@ end
 """
     aws_date_time_as_nanos(dt)
 
-Documentation not found
+Documentation not found.
 ### Prototype
 ```c
 uint64_t aws_date_time_as_nanos(const struct aws_date_time *dt);
@@ -4946,7 +4946,7 @@ end
 """
     aws_date_time_as_millis(dt)
 
-Documentation not found
+Documentation not found.
 ### Prototype
 ```c
 uint64_t aws_date_time_as_millis(const struct aws_date_time *dt);
@@ -4959,7 +4959,7 @@ end
 """
     aws_date_time_year(dt, local_time)
 
-Documentation not found
+Documentation not found.
 ### Prototype
 ```c
 uint16_t aws_date_time_year(const struct aws_date_time *dt, bool local_time);
@@ -4972,7 +4972,7 @@ end
 """
     aws_date_time_month(dt, local_time)
 
-Documentation not found
+Documentation not found.
 ### Prototype
 ```c
 enum aws_date_month aws_date_time_month(const struct aws_date_time *dt, bool local_time);
@@ -4985,7 +4985,7 @@ end
 """
     aws_date_time_month_day(dt, local_time)
 
-Documentation not found
+Documentation not found.
 ### Prototype
 ```c
 uint8_t aws_date_time_month_day(const struct aws_date_time *dt, bool local_time);
@@ -4998,7 +4998,7 @@ end
 """
     aws_date_time_day_of_week(dt, local_time)
 
-Documentation not found
+Documentation not found.
 ### Prototype
 ```c
 enum aws_date_day_of_week aws_date_time_day_of_week(const struct aws_date_time *dt, bool local_time);
@@ -5011,7 +5011,7 @@ end
 """
     aws_date_time_hour(dt, local_time)
 
-Documentation not found
+Documentation not found.
 ### Prototype
 ```c
 uint8_t aws_date_time_hour(const struct aws_date_time *dt, bool local_time);
@@ -5024,7 +5024,7 @@ end
 """
     aws_date_time_minute(dt, local_time)
 
-Documentation not found
+Documentation not found.
 ### Prototype
 ```c
 uint8_t aws_date_time_minute(const struct aws_date_time *dt, bool local_time);
@@ -5037,7 +5037,7 @@ end
 """
     aws_date_time_second(dt, local_time)
 
-Documentation not found
+Documentation not found.
 ### Prototype
 ```c
 uint8_t aws_date_time_second(const struct aws_date_time *dt, bool local_time);
@@ -5050,7 +5050,7 @@ end
 """
     aws_date_time_dst(dt, local_time)
 
-Documentation not found
+Documentation not found.
 ### Prototype
 ```c
 bool aws_date_time_dst(const struct aws_date_time *dt, bool local_time);
@@ -5399,7 +5399,7 @@ end
 """
     aws_text_encoding
 
-Documentation not found
+Documentation not found.
 """
 @cenum aws_text_encoding::UInt32 begin
     AWS_TEXT_UNKNOWN = 0
@@ -5440,7 +5440,7 @@ end
 """
     aws_utf8_decoder_options
 
-Documentation not found
+Documentation not found.
 """
 struct aws_utf8_decoder_options
     on_codepoint::Ptr{Cvoid}
@@ -5452,10 +5452,10 @@ end
 
 Decode a complete string of UTF8/ASCII text. Text is always validated according to RFC-3629 (you may perform additional validation in the on\\_codepoint callback). The text does not need to begin with a UTF8 BOM. If you need to decode text incrementally as you receive it, use [`aws_utf8_decoder_new`](@ref)() instead.
 
-### Parameters
+# Arguments
 * `bytes`: Text to decode.
 * `options`: Options for decoding. If NULL is passed, the text is simply validated.
-### Returns
+# Returns
 [`AWS_OP_SUCCESS`](@ref) if successful. An error is raised if the text is not valid, or the on\\_codepoint callback raises an error.
 ### Prototype
 ```c
@@ -5467,7 +5467,7 @@ function aws_decode_utf8(bytes, options)
 end
 
 """
-Documentation not found
+Documentation not found.
 """
 mutable struct aws_utf8_decoder end
 
@@ -5478,7 +5478,7 @@ Create a UTF8/ASCII decoder, which can process text incrementally as you receive
 
 Feed bytes into the decoder with [`aws_utf8_decoder_update`](@ref)(), and call [`aws_utf8_decoder_finalize`](@ref)() when the text is complete.
 
-### Parameters
+# Arguments
 * `allocator`: Allocator
 * `options`: Options for decoder. If NULL is passed, the text is simply validated.
 ### Prototype
@@ -5493,7 +5493,7 @@ end
 """
     aws_utf8_decoder_destroy(decoder)
 
-Documentation not found
+Documentation not found.
 ### Prototype
 ```c
 void aws_utf8_decoder_destroy(struct aws_utf8_decoder *decoder);
@@ -5506,7 +5506,7 @@ end
 """
     aws_utf8_decoder_reset(decoder)
 
-Documentation not found
+Documentation not found.
 ### Prototype
 ```c
 void aws_utf8_decoder_reset(struct aws_utf8_decoder *decoder);
@@ -5549,7 +5549,7 @@ end
 """
     aws_string
 
-Documentation not found
+Documentation not found.
 """
 struct aws_string
     allocator::Ptr{aws_allocator}
@@ -5602,7 +5602,7 @@ end
 """
     aws_error_info
 
-Documentation not found
+Documentation not found.
 """
 struct aws_error_info
     error_code::Cint
@@ -5615,7 +5615,7 @@ end
 """
     aws_error_info_list
 
-Documentation not found
+Documentation not found.
 """
 struct aws_error_info_list
     error_list::Ptr{aws_error_info}
@@ -5624,7 +5624,7 @@ end
 
 # typedef void ( aws_error_handler_fn ) ( int err , void * ctx )
 """
-Documentation not found
+Documentation not found.
 """
 const aws_error_handler_fn = Cvoid
 
@@ -5785,7 +5785,7 @@ end
 """
     aws_unregister_error_info(error_info)
 
-Documentation not found
+Documentation not found.
 ### Prototype
 ```c
 void aws_unregister_error_info(const struct aws_error_info_list *error_info);
@@ -5826,7 +5826,7 @@ end
 """
     aws_common_error
 
-Documentation not found
+Documentation not found.
 """
 @cenum aws_common_error::UInt32 begin
     AWS_ERROR_SUCCESS = 0
@@ -5923,14 +5923,14 @@ function aws_cache_new_fifo(allocator, hash_fn, equals_fn, destroy_key_fn, destr
 end
 
 """
-Documentation not found
+Documentation not found.
 """
 mutable struct aws_directory_iterator end
 
 """
     aws_file_type
 
-Documentation not found
+Documentation not found.
 """
 @cenum aws_file_type::UInt32 begin
     AWS_FILE_TYPE_FILE = 1
@@ -5941,7 +5941,7 @@ end
 """
     aws_directory_entry
 
-Documentation not found
+Documentation not found.
 """
 struct aws_directory_entry
     path::aws_byte_cursor
@@ -6181,7 +6181,7 @@ end
 
 Normalizes the path by replacing any directory separator with the local platform's directory separator.
 
-### Parameters
+# Arguments
 * `path`: path to normalize. Must be writeable.
 ### Prototype
 ```c
@@ -6259,7 +6259,7 @@ end
 """
     __JL_Ctag_429
 
-Documentation not found
+Documentation not found.
 """
 @cenum __JL_Ctag_429::UInt32 begin
     AWS_COMMON_HASH_TABLE_ITER_CONTINUE = 1
@@ -6282,7 +6282,7 @@ end
 """
     aws_hash_iter_status
 
-Documentation not found
+Documentation not found.
 """
 @cenum aws_hash_iter_status::UInt32 begin
     AWS_HASH_ITER_STATUS_DONE = 0
@@ -6293,7 +6293,7 @@ end
 """
     aws_hash_iter
 
-Documentation not found
+Documentation not found.
 """
 struct aws_hash_iter
     map::Ptr{aws_hash_table}
@@ -6419,7 +6419,7 @@ Updates iterator so that it points to next element of hash table.
 
 This and the two previous functions are designed to be used together with the following idiom:
 
-for (struct [`aws_hash_iter`](@ref) iter = [`aws_hash_iter_begin`](@ref)(&map); ![`aws_hash_iter_done`](@ref)(&iter); [`aws_hash_iter_next`](@ref)(&iter)) { const key\\_type key = *(const key\\_type *)iter.element.key; value\\_type value = *(value\\_type *)iter.element.value; // etc. }
+`for (struct aws_hash_iter iter = aws_hash_iter_begin(&map); !aws_hash_iter_done(&iter); aws_hash_iter_next(&iter)) { const key\\_type key = *(const key\\_type *)iter.element.key; value\\_type value = *(value\\_type *)iter.element.value; // etc. }`
 
 Note that calling this on an iter which is "done" is idempotent: i.e. it will return another iter which is "done".
 
@@ -6437,7 +6437,7 @@ end
 
 Deletes the element currently pointed-to by the hash iterator. After calling this method, the element member of the iterator should not be accessed until the next call to [`aws_hash_iter_next`](@ref).
 
-### Parameters
+# Arguments
 * `destroy_contents`: If true, the destructors for the key and value will be called.
 ### Prototype
 ```c
@@ -6649,7 +6649,7 @@ end
 """
     aws_hash_combine(item1, item2)
 
-Documentation not found
+Documentation not found.
 ### Prototype
 ```c
 uint64_t aws_hash_combine(uint64_t item1, uint64_t item2);
@@ -6744,7 +6744,7 @@ function aws_hash_iter_is_valid(iter)
 end
 
 """
-Documentation not found
+Documentation not found.
 """
 mutable struct aws_json_value end
 
@@ -6755,10 +6755,10 @@ Creates a new string [`aws_json_value`](@ref) with the given string and returns 
 
 Note: You will need to free the memory for the [`aws_json_value`](@ref) using aws\\_json\\_destroy on the [`aws_json_value`](@ref) or on the object/array containing the [`aws_json_value`](@ref).
 
-### Parameters
+# Arguments
 * `string`: A byte pointer to the string you want to store in the [`aws_json_value`](@ref)
 * `allocator`: The allocator to use when creating the value
-### Returns
+# Returns
 A new string [`aws_json_value`](@ref)
 ### Prototype
 ```c
@@ -6776,10 +6776,10 @@ Creates a new number [`aws_json_value`](@ref) with the given number and returns 
 
 Note: You will need to free the memory for the [`aws_json_value`](@ref) using aws\\_json\\_destroy on the [`aws_json_value`](@ref) or on the object/array containing the [`aws_json_value`](@ref).
 
-### Parameters
+# Arguments
 * `number`: The number you want to store in the [`aws_json_value`](@ref)
 * `allocator`: The allocator to use when creating the value
-### Returns
+# Returns
 A new number [`aws_json_value`](@ref)
 ### Prototype
 ```c
@@ -6797,9 +6797,9 @@ Creates a new array [`aws_json_value`](@ref) and returns a pointer to it.
 
 Note: You will need to free the memory for the [`aws_json_value`](@ref) using aws\\_json\\_destroy on the [`aws_json_value`](@ref) or on the object/array containing the [`aws_json_value`](@ref). Deleting this array will also destroy any aws\\_json\\_values it contains.
 
-### Parameters
+# Arguments
 * `allocator`: The allocator to use when creating the value
-### Returns
+# Returns
 A new array [`aws_json_value`](@ref)
 ### Prototype
 ```c
@@ -6817,10 +6817,10 @@ Creates a new boolean [`aws_json_value`](@ref) with the given boolean and return
 
 Note: You will need to free the memory for the [`aws_json_value`](@ref) using aws\\_json\\_destroy on the [`aws_json_value`](@ref) or on the object/array containing the [`aws_json_value`](@ref).
 
-### Parameters
+# Arguments
 * `boolean`: The boolean you want to store in the [`aws_json_value`](@ref)
 * `allocator`: The allocator to use when creating the value
-### Returns
+# Returns
 A new boolean [`aws_json_value`](@ref)
 ### Prototype
 ```c
@@ -6838,9 +6838,9 @@ Creates a new null [`aws_json_value`](@ref) and returns a pointer to it.
 
 Note: You will need to free the memory for the [`aws_json_value`](@ref) using aws\\_json\\_destroy on the [`aws_json_value`](@ref) or on the object/array containing the [`aws_json_value`](@ref).
 
-### Parameters
+# Arguments
 * `allocator`: The allocator to use when creating the value
-### Returns
+# Returns
 A new null [`aws_json_value`](@ref)
 ### Prototype
 ```c
@@ -6858,9 +6858,9 @@ Creates a new object [`aws_json_value`](@ref) and returns a pointer to it.
 
 Note: You will need to free the memory for the [`aws_json_value`](@ref) using aws\\_json\\_destroy on the [`aws_json_value`](@ref) or on the object/array containing the [`aws_json_value`](@ref). Deleting this object will also destroy any aws\\_json\\_values it contains.
 
-### Parameters
+# Arguments
 * `allocator`: The allocator to use when creating the value
-### Returns
+# Returns
 A new object [`aws_json_value`](@ref)
 ### Prototype
 ```c
@@ -6876,10 +6876,10 @@ end
 
 Gets the string of a string [`aws_json_value`](@ref).
 
-### Parameters
+# Arguments
 * `value`: The string [`aws_json_value`](@ref).
 * `output`: The string
-### Returns
+# Returns
 [`AWS_OP_SUCCESS`](@ref) if the value is a string, otherwise [`AWS_OP_ERR`](@ref).
 ### Prototype
 ```c
@@ -6895,10 +6895,10 @@ end
 
 Gets the number of a number [`aws_json_value`](@ref).
 
-### Parameters
+# Arguments
 * `value`: The number [`aws_json_value`](@ref).
 * `output`: The number
-### Returns
+# Returns
 [`AWS_OP_SUCCESS`](@ref) if the value is a number, otherwise [`AWS_OP_ERR`](@ref).
 ### Prototype
 ```c
@@ -6914,10 +6914,10 @@ end
 
 Gets the boolean of a boolean [`aws_json_value`](@ref).
 
-### Parameters
+# Arguments
 * `value`: The boolean [`aws_json_value`](@ref).
 * `output`: The boolean
-### Returns
+# Returns
 [`AWS_OP_SUCCESS`](@ref) if the value is a boolean, otherwise [`AWS_OP_ERR`](@ref).
 ### Prototype
 ```c
@@ -6935,11 +6935,11 @@ Adds a [`aws_json_value`](@ref) to a object [`aws_json_value`](@ref).
 
 Note that the [`aws_json_value`](@ref) will be destroyed when the [`aws_json_value`](@ref) object is destroyed by calling "aws\\_json\\_destroy()"
 
-### Parameters
+# Arguments
 * `object`: The object [`aws_json_value`](@ref) you want to add a value to.
 * `key`: The key to add the [`aws_json_value`](@ref) at.
 * `value`: The [`aws_json_value`](@ref) you want to add.
-### Returns
+# Returns
 [`AWS_OP_SUCCESS`](@ref) if adding was successful. Will return AWS\\_OP\\_ERROR if the object passed is invalid or if the passed key is already in use in the object.
 ### Prototype
 ```c
@@ -6955,10 +6955,10 @@ end
 
 Returns the [`aws_json_value`](@ref) at the given key.
 
-### Parameters
+# Arguments
 * `object`: The object [`aws_json_value`](@ref) you want to get the value from.
 * `key`: The key that the [`aws_json_value`](@ref) is at. Is case sensitive.
-### Returns
+# Returns
 The [`aws_json_value`](@ref) at the given key, otherwise NULL.
 ### Prototype
 ```c
@@ -6974,10 +6974,10 @@ end
 
 Checks if there is a [`aws_json_value`](@ref) at the given key.
 
-### Parameters
+# Arguments
 * `object`: The value [`aws_json_value`](@ref) you want to check a key in.
 * `key`: The key that you want to check. Is case sensitive.
-### Returns
+# Returns
 True if a [`aws_json_value`](@ref) is found.
 ### Prototype
 ```c
@@ -6993,10 +6993,10 @@ end
 
 Removes the [`aws_json_value`](@ref) at the given key.
 
-### Parameters
+# Arguments
 * `object`: The object [`aws_json_value`](@ref) you want to remove a [`aws_json_value`](@ref) in.
 * `key`: The key that the [`aws_json_value`](@ref) is at. Is case sensitive.
-### Returns
+# Returns
 [`AWS_OP_SUCCESS`](@ref) if the [`aws_json_value`](@ref) was removed. Will return [`AWS_OP_ERR`](@ref) if the object passed is invalid or if the value at the key cannot be found.
 ### Prototype
 ```c
@@ -7018,11 +7018,11 @@ const aws_json_on_member_encountered_const_fn = Cvoid
 
 iterates through members of the object. iteration is sequential in order fields were initially parsed.
 
-### Parameters
+# Arguments
 * `object`: object to iterate over.
 * `on_member`: callback for when member is encountered.
 * `user_data`: user data to pass back in callback.
-### Returns
+# Returns
 [`AWS_OP_SUCCESS`](@ref) when iteration finishes completely or exits early, [`AWS_OP_ERR`](@ref) if value is not an object.
 ### Prototype
 ```c
@@ -7040,10 +7040,10 @@ Adds a [`aws_json_value`](@ref) to the given array [`aws_json_value`](@ref).
 
 Note that the [`aws_json_value`](@ref) will be destroyed when the [`aws_json_value`](@ref) array is destroyed by calling "aws\\_json\\_destroy()"
 
-### Parameters
+# Arguments
 * `array`: The array [`aws_json_value`](@ref) you want to add an [`aws_json_value`](@ref) to.
 * `value`: The [`aws_json_value`](@ref) you want to add.
-### Returns
+# Returns
 [`AWS_OP_SUCCESS`](@ref) if adding the [`aws_json_value`](@ref) was successful. Will return [`AWS_OP_ERR`](@ref) if the array passed is invalid.
 ### Prototype
 ```c
@@ -7059,10 +7059,10 @@ end
 
 Returns the [`aws_json_value`](@ref) at the given index in the array [`aws_json_value`](@ref).
 
-### Parameters
+# Arguments
 * `array`: The array [`aws_json_value`](@ref).
 * `index`: The index of the [`aws_json_value`](@ref) you want to access.
-### Returns
+# Returns
 A pointer to the [`aws_json_value`](@ref) at the given index in the array, otherwise NULL.
 ### Prototype
 ```c
@@ -7078,9 +7078,9 @@ end
 
 Returns the number of items in the array [`aws_json_value`](@ref).
 
-### Parameters
+# Arguments
 * `array`: The array [`aws_json_value`](@ref).
-### Returns
+# Returns
 The number of items in the array\\_json\\_value.
 ### Prototype
 ```c
@@ -7096,10 +7096,10 @@ end
 
 Removes the [`aws_json_value`](@ref) at the given index in the array [`aws_json_value`](@ref).
 
-### Parameters
+# Arguments
 * `array`: The array [`aws_json_value`](@ref).
 * `index`: The index containing the [`aws_json_value`](@ref) you want to remove.
-### Returns
+# Returns
 [`AWS_OP_SUCCESS`](@ref) if the [`aws_json_value`](@ref) at the index was removed. Will return [`AWS_OP_ERR`](@ref) if the array passed is invalid or if the index passed is out of range.
 ### Prototype
 ```c
@@ -7121,11 +7121,11 @@ const aws_json_on_value_encountered_const_fn = Cvoid
 
 iterates through values of an array. iteration is sequential starting with 0th element.
 
-### Parameters
+# Arguments
 * `array`: array to iterate over.
 * `on_value`: callback for when value is encountered.
 * `user_data`: user data to pass back in callback.
-### Returns
+# Returns
 [`AWS_OP_SUCCESS`](@ref) when iteration finishes completely or exits early, [`AWS_OP_ERR`](@ref) if value is not an array.
 ### Prototype
 ```c
@@ -7141,11 +7141,11 @@ end
 
 Checks whether two json values are equivalent.
 
-### Parameters
+# Arguments
 * `a`: first value to compare.
 * `b`: second value to compare.
 * `is_case_sensitive`: case sensitive compare or not.
-### Returns
+# Returns
 True is values are equal, false otherwise
 ### Prototype
 ```c
@@ -7161,9 +7161,9 @@ end
 
 Duplicates json value.
 
-### Parameters
+# Arguments
 * `value`: first value to compare.
-### Returns
+# Returns
 duplicated value. NULL and last error set if value cannot be duplicated.
 ### Prototype
 ```c
@@ -7179,9 +7179,9 @@ end
 
 Checks if the [`aws_json_value`](@ref) is a string.
 
-### Parameters
+# Arguments
 * `value`: The [`aws_json_value`](@ref) to check.
-### Returns
+# Returns
 True if the [`aws_json_value`](@ref) is a string [`aws_json_value`](@ref), otherwise false.
 ### Prototype
 ```c
@@ -7197,9 +7197,9 @@ end
 
 Checks if the [`aws_json_value`](@ref) is a number.
 
-### Parameters
+# Arguments
 * `value`: The [`aws_json_value`](@ref) to check.
-### Returns
+# Returns
 True if the [`aws_json_value`](@ref) is a number [`aws_json_value`](@ref), otherwise false.
 ### Prototype
 ```c
@@ -7215,9 +7215,9 @@ end
 
 Checks if the [`aws_json_value`](@ref) is a array.
 
-### Parameters
+# Arguments
 * `value`: The [`aws_json_value`](@ref) to check.
-### Returns
+# Returns
 True if the [`aws_json_value`](@ref) is a array [`aws_json_value`](@ref), otherwise false.
 ### Prototype
 ```c
@@ -7233,9 +7233,9 @@ end
 
 Checks if the [`aws_json_value`](@ref) is a boolean.
 
-### Parameters
+# Arguments
 * `value`: The [`aws_json_value`](@ref) to check.
-### Returns
+# Returns
 True if the [`aws_json_value`](@ref) is a boolean [`aws_json_value`](@ref), otherwise false.
 ### Prototype
 ```c
@@ -7251,9 +7251,9 @@ end
 
 Checks if the [`aws_json_value`](@ref) is a null [`aws_json_value`](@ref).
 
-### Parameters
+# Arguments
 * `value`: The [`aws_json_value`](@ref) to check.
-### Returns
+# Returns
 True if the [`aws_json_value`](@ref) is a null [`aws_json_value`](@ref), otherwise false.
 ### Prototype
 ```c
@@ -7269,9 +7269,9 @@ end
 
 Checks if the [`aws_json_value`](@ref) is a object [`aws_json_value`](@ref).
 
-### Parameters
+# Arguments
 * `value`: The [`aws_json_value`](@ref) to check.
-### Returns
+# Returns
 True if the [`aws_json_value`](@ref) is a object [`aws_json_value`](@ref), otherwise false.
 ### Prototype
 ```c
@@ -7289,7 +7289,7 @@ Removes the [`aws_json_value`](@ref) from memory. If the [`aws_json_value`](@ref
 
 For example, if you called "aws\\_json\\_array\\_add(b, a)" to add an object "a" to an array "b", if you call "aws\\_json\\_destroy(b)" then it will also free "a" automatically. All children/attached aws\\_json\\_values are freed when the parent/root [`aws_json_value`](@ref) is destroyed.
 
-### Parameters
+# Arguments
 * `value`: The [`aws_json_value`](@ref) to destroy.
 ### Prototype
 ```c
@@ -7309,10 +7309,10 @@ Note: The byte buffer will automatically have its size extended if the JSON stri
 
 Note: When you are finished with the [`aws_byte_buf`](@ref), you must call "[`aws_byte_buf_clean_up_secure`](@ref)" to free the memory used, as it will NOT be called automatically.
 
-### Parameters
+# Arguments
 * `value`: The [`aws_json_value`](@ref) to format.
 * `output`: The destination for the JSON string
-### Returns
+# Returns
 [`AWS_OP_SUCCESS`](@ref) if the JSON string was allocated to output without any errors Will return [`AWS_OP_ERR`](@ref) if the value passed is not an [`aws_json_value`](@ref) or if there was an error appending the JSON into the byte buffer.
 ### Prototype
 ```c
@@ -7332,10 +7332,10 @@ Note: The byte buffer will automatically have its size extended if the JSON stri
 
 Note: When you are finished with the [`aws_byte_buf`](@ref), you must call "[`aws_byte_buf_clean_up_secure`](@ref)" to free the memory used, as it will NOT be called automatically.
 
-### Parameters
+# Arguments
 * `value`: The [`aws_json_value`](@ref) to format.
 * `output`: The destination for the JSON string
-### Returns
+# Returns
 [`AWS_OP_SUCCESS`](@ref) if the JSON string was allocated to output without any errors Will return [`AWS_OP_ERR`](@ref) if the value passed is not an [`aws_json_value`](@ref) or if there aws an error appending the JSON into the byte buffer.
 ### Prototype
 ```c
@@ -7351,10 +7351,10 @@ end
 
 Parses the JSON string and returns a [`aws_json_value`](@ref) containing the root of the JSON.
 
-### Parameters
+# Arguments
 * `allocator`: The allocator used to create the value
 * `string`: The string containing the JSON.
-### Returns
+# Returns
 The root [`aws_json_value`](@ref) of the JSON.
 ### Prototype
 ```c
@@ -7528,7 +7528,7 @@ end
 
 returns the underlying linked list for iteration.
 
-The returned list has nodes of the type: [`aws_linked_hash_table_node`](@ref). Use [`AWS_CONTAINER_OF`](@ref) for access to the element.
+The returned list has nodes of the type: [`aws_linked_hash_table_node`](@ref). Use `AWS_CONTAINER_OF` for access to the element.
 
 ### Prototype
 ```c
@@ -7611,20 +7611,20 @@ end
 
 # typedef int ( aws_log_channel_send_fn ) ( struct aws_log_channel * channel , struct aws_string * output )
 """
-Documentation not found
+Documentation not found.
 """
 const aws_log_channel_send_fn = Cvoid
 
 # typedef void ( aws_log_channel_clean_up_fn ) ( struct aws_log_channel * channel )
 """
-Documentation not found
+Documentation not found.
 """
 const aws_log_channel_clean_up_fn = Cvoid
 
 """
     aws_log_channel_vtable
 
-Documentation not found
+Documentation not found.
 """
 struct aws_log_channel_vtable
     send::Ptr{aws_log_channel_send_fn}
@@ -7633,20 +7633,20 @@ end
 
 # typedef int ( aws_log_writer_write_fn ) ( struct aws_log_writer * writer , const struct aws_string * output )
 """
-Documentation not found
+Documentation not found.
 """
 const aws_log_writer_write_fn = Cvoid
 
 # typedef void ( aws_log_writer_clean_up_fn ) ( struct aws_log_writer * writer )
 """
-Documentation not found
+Documentation not found.
 """
 const aws_log_writer_clean_up_fn = Cvoid
 
 """
     aws_log_writer_vtable
 
-Documentation not found
+Documentation not found.
 """
 struct aws_log_writer_vtable
     write::Ptr{aws_log_writer_write_fn}
@@ -7728,20 +7728,20 @@ end
 
 # typedef int ( aws_log_formatter_format_fn ) ( struct aws_log_formatter * formatter , struct aws_string * * formatted_output , enum aws_log_level level , aws_log_subject_t subject , const char * format , va_list args )
 """
-Documentation not found
+Documentation not found.
 """
 const aws_log_formatter_format_fn = Cvoid
 
 # typedef void ( aws_log_formatter_clean_up_fn ) ( struct aws_log_formatter * logger )
 """
-Documentation not found
+Documentation not found.
 """
 const aws_log_formatter_clean_up_fn = Cvoid
 
 """
     aws_log_formatter_vtable
 
-Documentation not found
+Documentation not found.
 """
 struct aws_log_formatter_vtable
     format::Ptr{aws_log_formatter_format_fn}
@@ -7764,7 +7764,7 @@ end
 """
     aws_log_formatter_standard_options
 
-Documentation not found
+Documentation not found.
 """
 struct aws_log_formatter_standard_options
     date_format::aws_date_format
@@ -7791,7 +7791,7 @@ end
 """
     aws_logging_standard_formatting_data
 
-Documentation not found
+Documentation not found.
 """
 struct aws_logging_standard_formatting_data
     log_line_buffer::Ptr{Cchar}
@@ -7837,7 +7837,7 @@ end
 """
     aws_log_writer_file_options
 
-Documentation not found
+Documentation not found.
 """
 struct aws_log_writer_file_options
     filename::Ptr{Cchar}
@@ -7933,7 +7933,7 @@ end
 """
     aws_logger
 
-Documentation not found
+Documentation not found.
 """
 struct aws_logger
     vtable::Ptr{aws_logger_vtable}
@@ -7978,7 +7978,7 @@ end
 """
     aws_log_subject_info
 
-Documentation not found
+Documentation not found.
 """
 struct aws_log_subject_info
     subject_id::aws_log_subject_t
@@ -7989,7 +7989,7 @@ end
 """
     aws_log_subject_info_list
 
-Documentation not found
+Documentation not found.
 """
 struct aws_log_subject_info_list
     subject_list::Ptr{aws_log_subject_info}
@@ -7999,7 +7999,7 @@ end
 """
     aws_common_log_subject
 
-Documentation not found
+Documentation not found.
 """
 @cenum aws_common_log_subject::UInt32 begin
     AWS_LS_COMMON_GENERAL = 0
@@ -8059,10 +8059,10 @@ end
 
 Gets the aws logger used globally across the process if the logging level is at least the inputted level.
 
-### Parameters
+# Arguments
 * `subject`: log subject to perform the level check versus, not currently used
 * `level`: logging level to check against in order to return the logger
-### Returns
+# Returns
 the current logger if the current logging level is at or more detailed then the supplied logging level
 ### Prototype
 ```c
@@ -8092,10 +8092,10 @@ end
 
 Sets the current logging level for the logger. Loggers are not require to support this.
 
-### Parameters
+# Arguments
 * `logger`: logger to set the log level for
 * `level`: new log level for the logger
-### Returns
+# Returns
 [`AWS_OP_SUCCESS`](@ref) if the level was successfully set, [`AWS_OP_ERR`](@ref) otherwise
 ### Prototype
 ```c
@@ -8137,7 +8137,7 @@ function aws_string_to_log_level(level_string, log_level)
 end
 
 """
-Documentation not found
+Documentation not found.
 """
 const aws_thread_id_t = pthread_t
 
@@ -8282,24 +8282,24 @@ function aws_lru_cache_get_mru_element(cache)
 end
 
 """
-Documentation not found
+Documentation not found.
 """
 const static_assertion_at_line_60 = NTuple{1, Cchar}
 
 """
-Documentation not found
+Documentation not found.
 """
 const static_assertion_at_line_61 = NTuple{1, Cchar}
 
 """
-Documentation not found
+Documentation not found.
 """
 const static_assertion_at_line_62 = NTuple{1, Cchar}
 
 """
     __JL_Ctag_665
 
-Documentation not found
+Documentation not found.
 """
 @cenum __JL_Ctag_665::UInt32 begin
     AWS_CACHE_LINE = 64
@@ -8384,7 +8384,7 @@ const aws_priority_queue_compare_fn = Cvoid
 """
     aws_priority_queue
 
-Documentation not found
+Documentation not found.
 """
 struct aws_priority_queue
     pred::Ptr{aws_priority_queue_compare_fn}
@@ -8395,7 +8395,7 @@ end
 """
     aws_priority_queue_node
 
-Documentation not found
+Documentation not found.
 """
 struct aws_priority_queue_node
     current_index::Csize_t
@@ -8624,7 +8624,7 @@ end
 
 Initializes a queue node to a default value that indicates the node is not in the queue.
 
-### Parameters
+# Arguments
 * `node`: priority queue node to initialize with a default value
 ### Prototype
 ```c
@@ -8640,9 +8640,9 @@ end
 
 Checks if a priority queue node is currently in a priority queue.
 
-### Parameters
+# Arguments
 * `node`: priority queue node to check usage for
-### Returns
+# Returns
 true if the node is in a queue, false otherwise
 ### Prototype
 ```c
@@ -8656,7 +8656,7 @@ end
 """
     aws_run_command_result
 
-Documentation not found
+Documentation not found.
 """
 struct aws_run_command_result
     ret_code::Cint
@@ -8667,7 +8667,7 @@ end
 """
     aws_run_command_options
 
-Documentation not found
+Documentation not found.
 """
 struct aws_run_command_options
     command::Ptr{Cchar}
@@ -8678,7 +8678,7 @@ end
 
 Returns the current process's PID (process id).
 
-### Returns
+# Returns
 PID as int
 ### Prototype
 ```c
@@ -8736,7 +8736,7 @@ end
 """
     aws_run_command_result_init(allocator, result)
 
-Documentation not found
+Documentation not found.
 ### Prototype
 ```c
 int aws_run_command_result_init(struct aws_allocator *allocator, struct aws_run_command_result *result);
@@ -8749,7 +8749,7 @@ end
 """
     aws_run_command_result_cleanup(result)
 
-Documentation not found
+Documentation not found.
 ### Prototype
 ```c
 void aws_run_command_result_cleanup(struct aws_run_command_result *result);
@@ -8934,7 +8934,7 @@ end
 
 # typedef void ( aws_simple_completion_callback ) ( void * )
 """
-Documentation not found
+Documentation not found.
 """
 const aws_simple_completion_callback = Cvoid
 
@@ -8952,7 +8952,7 @@ end
 """
     aws_shutdown_callback_options
 
-Documentation not found
+Documentation not found.
 """
 struct aws_shutdown_callback_options
     shutdown_callback_fn::Ptr{aws_simple_completion_callback}
@@ -8964,7 +8964,7 @@ end
 
 Initializes a ref-counter structure. After initialization, the ref count will be 1.
 
-### Parameters
+# Arguments
 * `ref_count`: ref-counter to initialize
 * `object`: object being ref counted
 * `on_zero_fn`: function to invoke when the ref count reaches zero
@@ -8982,9 +8982,9 @@ end
 
 Increments a ref-counter's ref count
 
-### Parameters
+# Arguments
 * `ref_count`: ref-counter to increment the count for
-### Returns
+# Returns
 the object being ref-counted
 ### Prototype
 ```c
@@ -9000,9 +9000,9 @@ end
 
 Decrements a ref-counter's ref count. Invokes the on\\_zero callback if the ref count drops to zero
 
-### Parameters
+# Arguments
 * `ref_count`: ref-counter to decrement the count for
-### Returns
+# Returns
 the value of the decremented ref count
 ### Prototype
 ```c
@@ -9157,7 +9157,7 @@ end
 """
     aws_rw_lock
 
-Documentation not found
+Documentation not found.
 """
 struct aws_rw_lock
     lock_handle::pthread_rwlock_t
@@ -9208,7 +9208,7 @@ end
 """
     aws_rw_lock_wlock(lock)
 
-Documentation not found
+Documentation not found.
 ### Prototype
 ```c
 int aws_rw_lock_wlock(struct aws_rw_lock *lock);
@@ -9235,7 +9235,7 @@ end
 """
     aws_rw_lock_try_wlock(lock)
 
-Documentation not found
+Documentation not found.
 ### Prototype
 ```c
 int aws_rw_lock_try_wlock(struct aws_rw_lock *lock);
@@ -9262,7 +9262,7 @@ end
 """
     aws_rw_lock_wunlock(lock)
 
-Documentation not found
+Documentation not found.
 ### Prototype
 ```c
 int aws_rw_lock_wunlock(struct aws_rw_lock *lock);
@@ -9273,7 +9273,7 @@ function aws_rw_lock_wunlock(lock)
 end
 
 """
-Documentation not found
+Documentation not found.
 """
 const aws_crt_statistics_category_t = UInt32
 
@@ -9407,7 +9407,9 @@ function aws_crt_statistics_handler_destroy(handler)
 end
 
 """
-\\deprecated Use int64\\_t instead for offsets in public APIs.
+!!! compat "Deprecated"
+
+    Use int64\\_t instead for offsets in public APIs.
 """
 const aws_off_t = Int64
 
@@ -9498,7 +9500,7 @@ end
 """
     aws_string_eq_c_str(str, c_str)
 
-Documentation not found
+Documentation not found.
 ### Prototype
 ```c
 bool aws_string_eq_c_str(const struct aws_string *str, const char *c_str);
@@ -9609,7 +9611,7 @@ end
 """
     aws_string_destroy_secure(str)
 
-Zeroes out the data bytes of string and then deallocates the memory. Not safe to run on a string created with [`AWS_STATIC_STRING_FROM_LITERAL`](@ref).
+Zeroes out the data bytes of string and then deallocates the memory. Not safe to run on a string created with `AWS_STATIC_STRING_FROM_LITERAL`.
 
 ### Prototype
 ```c
@@ -9711,7 +9713,7 @@ end
 """
     aws_platform_os
 
-Documentation not found
+Documentation not found.
 """
 @cenum aws_platform_os::UInt32 begin
     AWS_PLATFORM_OS_WINDOWS = 0
@@ -9722,7 +9724,7 @@ end
 """
     aws_cpu_info
 
-Documentation not found
+Documentation not found.
 """
 struct aws_cpu_info
     cpu_id::Int32
@@ -9730,7 +9732,7 @@ struct aws_cpu_info
 end
 
 """
-Documentation not found
+Documentation not found.
 """
 mutable struct aws_system_environment end
 
@@ -9753,7 +9755,7 @@ end
 """
     aws_system_environment_acquire(env)
 
-Documentation not found
+Documentation not found.
 ### Prototype
 ```c
 struct aws_system_environment *aws_system_environment_acquire(struct aws_system_environment *env);
@@ -9766,7 +9768,7 @@ end
 """
     aws_system_environment_release(env)
 
-Documentation not found
+Documentation not found.
 ### Prototype
 ```c
 void aws_system_environment_release(struct aws_system_environment *env);
@@ -10007,7 +10009,7 @@ end
 """
     aws_memory_usage_stats
 
-Documentation not found
+Documentation not found.
 """
 struct aws_memory_usage_stats
     maxrss::Csize_t
@@ -10032,7 +10034,7 @@ end
 """
     aws_task_status
 
-Documentation not found
+Documentation not found.
 """
 @cenum aws_task_status::UInt32 begin
     AWS_TASK_STATUS_RUN_READY = 0
@@ -10105,7 +10107,7 @@ end
 """
     aws_task_scheduler
 
-Documentation not found
+Documentation not found.
 """
 struct aws_task_scheduler
     alloc::Ptr{aws_allocator}
@@ -10173,7 +10175,7 @@ end
 """
     aws_task_scheduler_is_valid(scheduler)
 
-Documentation not found
+Documentation not found.
 ### Prototype
 ```c
 bool aws_task_scheduler_is_valid(const struct aws_task_scheduler *scheduler);
@@ -10272,7 +10274,7 @@ end
 """
     aws_thread_detach_state
 
-Documentation not found
+Documentation not found.
 """
 @cenum aws_thread_detach_state::UInt32 begin
     AWS_THREAD_NOT_CREATED = 1
@@ -10304,7 +10306,7 @@ end
 """
     aws_thread_options
 
-Documentation not found
+Documentation not found.
 """
 struct aws_thread_options
     stack_size::Csize_t
@@ -10314,14 +10316,14 @@ struct aws_thread_options
 end
 
 """
-Documentation not found
+Documentation not found.
 """
 const aws_thread_once = pthread_once_t
 
 """
     aws_thread
 
-Documentation not found
+Documentation not found.
 """
 struct aws_thread
     allocator::Ptr{aws_allocator}
@@ -10346,7 +10348,7 @@ end
 """
     aws_thread_call_once(flag, call_once, user_data)
 
-Documentation not found
+Documentation not found.
 ### Prototype
 ```c
 void aws_thread_call_once(aws_thread_once *flag, void (*call_once)(void *), void *user_data);
@@ -10520,7 +10522,7 @@ end
 
 # typedef void ( aws_thread_atexit_fn ) ( void * user_data )
 """
-Documentation not found
+Documentation not found.
 """
 const aws_thread_atexit_fn = Cvoid
 
@@ -10599,7 +10601,7 @@ function aws_thread_name(allocator, thread_id, out_name)
 end
 
 """
-Documentation not found
+Documentation not found.
 """
 mutable struct aws_thread_scheduler end
 
@@ -10811,7 +10813,7 @@ end
 """
     aws_uri_clean_up(uri)
 
-Documentation not found
+Documentation not found.
 ### Prototype
 ```c
 void aws_uri_clean_up(struct aws_uri *uri);
@@ -11028,7 +11030,7 @@ end
 """
     aws_uuid
 
-Documentation not found
+Documentation not found.
 """
 struct aws_uuid
     uuid_data::NTuple{16, UInt8}
@@ -11046,7 +11048,7 @@ end
 """
     aws_uuid_init(uuid)
 
-Documentation not found
+Documentation not found.
 ### Prototype
 ```c
 int aws_uuid_init(struct aws_uuid *uuid);
@@ -11059,7 +11061,7 @@ end
 """
     aws_uuid_init_from_str(uuid, uuid_str)
 
-Documentation not found
+Documentation not found.
 ### Prototype
 ```c
 int aws_uuid_init_from_str(struct aws_uuid *uuid, const struct aws_byte_cursor *uuid_str);
@@ -11072,7 +11074,7 @@ end
 """
     aws_uuid_to_str(uuid, output)
 
-Documentation not found
+Documentation not found.
 ### Prototype
 ```c
 int aws_uuid_to_str(const struct aws_uuid *uuid, struct aws_byte_buf *output);
@@ -11085,7 +11087,7 @@ end
 """
     aws_uuid_equals(a, b)
 
-Documentation not found
+Documentation not found.
 ### Prototype
 ```c
 bool aws_uuid_equals(const struct aws_uuid *a, const struct aws_uuid *b);
@@ -11096,14 +11098,14 @@ function aws_uuid_equals(a, b)
 end
 
 """
-Documentation not found
+Documentation not found.
 """
 mutable struct aws_xml_node end
 
 """
     aws_xml_attribute
 
-Documentation not found
+Documentation not found.
 """
 struct aws_xml_attribute
     name::aws_byte_cursor
@@ -11125,7 +11127,7 @@ const aws_xml_parser_on_node_encountered_fn = Cvoid
 """
     aws_xml_parser_options
 
-Documentation not found
+Documentation not found.
 """
 struct aws_xml_parser_options
     doc::aws_byte_cursor
@@ -11426,26 +11428,26 @@ end
 
 # typedef int ( aws_test_before_fn ) ( struct aws_allocator * allocator , void * ctx )
 """
-Documentation not found
+Documentation not found.
 """
 const aws_test_before_fn = Cvoid
 
 # typedef int ( aws_test_run_fn ) ( struct aws_allocator * allocator , void * ctx )
 """
-Documentation not found
+Documentation not found.
 """
 const aws_test_run_fn = Cvoid
 
 # typedef int ( aws_test_after_fn ) ( struct aws_allocator * allocator , int setup_result , void * ctx )
 """
-Documentation not found
+Documentation not found.
 """
 const aws_test_after_fn = Cvoid
 
 """
     aws_test_harness
 
-Documentation not found
+Documentation not found.
 """
 struct aws_test_harness
     on_before::Ptr{aws_test_before_fn}
@@ -11459,7 +11461,7 @@ end
 """
     s_aws_run_test_case(harness)
 
-Documentation not found
+Documentation not found.
 ### Prototype
 ```c
 static inline int s_aws_run_test_case(struct aws_test_harness *harness);
@@ -11472,7 +11474,7 @@ end
 """
     s_print_stack_trace(sig, sig_info, user_data)
 
-Documentation not found
+Documentation not found.
 ### Prototype
 ```c
 static void s_print_stack_trace(int sig, siginfo_t *sig_info, void *user_data);
@@ -11485,7 +11487,7 @@ end
 """
     enable_vt_mode()
 
-Documentation not found
+Documentation not found.
 ### Prototype
 ```c
 static inline int enable_vt_mode(void);
@@ -11498,7 +11500,7 @@ end
 """
     __JL_Ctag_1196
 
-Documentation not found
+Documentation not found.
 """
 struct __JL_Ctag_1196
     __lock::Cint
@@ -11537,7 +11539,7 @@ end
 """
     __JL_Ctag_1197
 
-Documentation not found
+Documentation not found.
 """
 struct __JL_Ctag_1197
     __lock::Cint
@@ -11582,7 +11584,7 @@ end
 """
     __pthread_mutex_s
 
-Documentation not found
+Documentation not found.
 """
 struct __pthread_mutex_s
     data::NTuple{24, UInt8}
@@ -11613,7 +11615,7 @@ end
 """
     __JL_Ctag_1214
 
-Documentation not found
+Documentation not found.
 """
 struct __JL_Ctag_1214
     si_pid::__pid_t
@@ -11640,7 +11642,7 @@ end
 """
     __JL_Ctag_1215
 
-Documentation not found
+Documentation not found.
 """
 struct __JL_Ctag_1215
     si_tid::Cint
@@ -11669,7 +11671,7 @@ end
 """
     __JL_Ctag_1216
 
-Documentation not found
+Documentation not found.
 """
 struct __JL_Ctag_1216
     si_pid::__pid_t
@@ -11698,7 +11700,7 @@ end
 """
     __JL_Ctag_1217
 
-Documentation not found
+Documentation not found.
 """
 struct __JL_Ctag_1217
     si_pid::__pid_t
@@ -11731,7 +11733,7 @@ end
 """
     __JL_Ctag_1218
 
-Documentation not found
+Documentation not found.
 """
 struct __JL_Ctag_1218
     si_addr::Ptr{Cvoid}
@@ -11758,7 +11760,7 @@ end
 """
     __JL_Ctag_1219
 
-Documentation not found
+Documentation not found.
 """
 struct __JL_Ctag_1219
     si_band::Clong
@@ -11785,7 +11787,7 @@ end
 """
     __JL_Ctag_1220
 
-Documentation not found
+Documentation not found.
 """
 struct __JL_Ctag_1220
     _call_addr::Ptr{Cvoid}
@@ -11812,84 +11814,84 @@ end
 
 
 """
-Documentation not found
+Documentation not found.
 """
 const AWS_OP_SUCCESS = 0
 
 """
-Documentation not found
+Documentation not found.
 """
 # Skipping MacroDefinition: AWS_CONDITION_VARIABLE_INIT { . condition_handle = PTHREAD_COND_INITIALIZER , . initialized = true }
 
 """
-Documentation not found
+Documentation not found.
 """
 const AWS_OP_ERR = -1
 
 """
-Documentation not found
+Documentation not found.
 """
 const AWS_ERROR_ENUM_STRIDE_BITS = 10
 
 """
-Documentation not found
+Documentation not found.
 """
 const AWS_ERROR_ENUM_STRIDE = Cuint(1) << AWS_ERROR_ENUM_STRIDE_BITS
 
 # Skipping MacroDefinition: AWS_STATIC_IMPL static inline
 
 """
-Documentation not found
+Documentation not found.
 """
 const AWS_PATH_DELIM = Cchar('/')
 
 """
-Documentation not found
+Documentation not found.
 """
 const AWS_PATH_DELIM_STR = "/"
 
 """
-Documentation not found
+Documentation not found.
 """
 const AWS_LOG_LEVEL_NONE = 0
 
 """
-Documentation not found
+Documentation not found.
 """
 const AWS_LOG_LEVEL_FATAL = 1
 
 """
-Documentation not found
+Documentation not found.
 """
 const AWS_LOG_LEVEL_ERROR = 2
 
 """
-Documentation not found
+Documentation not found.
 """
 const AWS_LOG_LEVEL_WARN = 3
 
 """
-Documentation not found
+Documentation not found.
 """
 const AWS_LOG_LEVEL_INFO = 4
 
 """
-Documentation not found
+Documentation not found.
 """
 const AWS_LOG_LEVEL_DEBUG = 5
 
 """
-Documentation not found
+Documentation not found.
 """
 const AWS_LOG_LEVEL_TRACE = 6
 
 """
-Documentation not found
+Documentation not found.
 """
 const AWS_LOG_SUBJECT_STRIDE = Cuint(1) << AWS_LOG_SUBJECT_STRIDE_BITS
 
 """
-Documentation not found
+Documentation not found.
 """
 const PRInSTR = "%.*s"
 
@@ -11900,37 +11902,37 @@ const PRInSTR = "%.*s"
 # Skipping MacroDefinition: AWS_ATTRIBUTE_NORETURN __attribute__ ( ( noreturn ) )
 
 """
-Documentation not found
+Documentation not found.
 """
 const SIZE_BITS = 32
 
 """
-Documentation not found
+Documentation not found.
 """
 # Skipping MacroDefinition: AWS_MUTEX_INIT { . mutex_handle = PTHREAD_MUTEX_INITIALIZER , . initialized = true }
 
 """
-Documentation not found
+Documentation not found.
 """
 const AWS_PACKAGE_SLOTS = 16
 
 """
-Documentation not found
+Documentation not found.
 """
 const AWS_C_COMMON_PACKAGE_ID = 0
 
 """
-Documentation not found
+Documentation not found.
 """
 # Skipping MacroDefinition: AWS_RW_LOCK_INIT { . lock_handle = PTHREAD_RWLOCK_INITIALIZER }
 
 """
-Documentation not found
+Documentation not found.
 """
 const AWS_CRT_STATISTICS_CATEGORY_STRIDE = Cuint(1) << AWS_CRT_STATISTICS_CATEGORY_STRIDE_BITS
 
 """
-Documentation not found
+Documentation not found.
 """
 const AWS_THREAD_NAME_RECOMMENDED_STRLEN = 15
 
@@ -11941,32 +11943,32 @@ const AWS_THREAD_NAME_RECOMMENDED_STRLEN = 15
 # Skipping MacroDefinition: ITT_INLINE_ATTRIBUTE __attribute__ ( ( always_inline , unused ) )
 
 """
-Documentation not found
+Documentation not found.
 """
 const AWS_OP_SKIP = -2
 
 """
-Documentation not found
+Documentation not found.
 """
 const AWS_TESTING_REPORT_FD = stderr
 
 """
-Documentation not found
+Documentation not found.
 """
 const FAIL_PREFIX = "***FAILURE*** "
 
 """
-Documentation not found
+Documentation not found.
 """
 const SUCCESS = 0
 
 """
-Documentation not found
+Documentation not found.
 """
 const FAILURE = -1
 
 """
-Documentation not found
+Documentation not found.
 """
 const SKIP = 103
 
