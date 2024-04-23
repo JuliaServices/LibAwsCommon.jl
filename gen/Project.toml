@@ -4,6 +4,6 @@ JLLPrefixes = "afc68a34-7891-4c5a-9da1-1c62935e7b0d"
 aws_c_common_jll = "73048d1d-b8c4-5092-a58d-866c5e8d1e50"
 
 [compat]
-Clang = "0.17"
+Clang = "0.18.3"
 JLLPrefixes = "0.3"
 aws_c_common_jll = "=0.9.14"
