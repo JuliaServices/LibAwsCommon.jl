@@ -3,21 +3,6 @@ using CEnum
 """
 Documentation not found.
 """
-const __uid_t = Cuint
-
-"""
-Documentation not found.
-"""
-const __pid_t = Cint
-
-"""
-Documentation not found.
-"""
-const __clock_t = Clong
-
-"""
-Documentation not found.
-"""
 const __time_t = Clong
 
 """
@@ -50,12 +35,12 @@ const __pthread_slist_t = __pthread_internal_slist
 Documentation not found.
 """
 struct pthread_mutex_t
-    data::NTuple{24, UInt8}
+    data::NTuple{24,UInt8}
 end
 
 function Base.getproperty(x::Ptr{pthread_mutex_t}, f::Symbol)
     f === :__data && return Ptr{__pthread_mutex_s}(x + 0)
-    f === :__size && return Ptr{NTuple{24, Cchar}}(x + 0)
+    f === :__size && return Ptr{NTuple{24,Cchar}}(x + 0)
     f === :__align && return Ptr{Clong}(x + 0)
     return getfield(x, f)
 end
@@ -77,12 +62,12 @@ end
 Documentation not found.
 """
 struct pthread_cond_t
-    data::NTuple{48, UInt8}
+    data::NTuple{48,UInt8}
 end
 
 function Base.getproperty(x::Ptr{pthread_cond_t}, f::Symbol)
     f === :__data && return Ptr{__JL_Ctag_1196}(x + 0)
-    f === :__size && return Ptr{NTuple{48, Cchar}}(x + 0)
+    f === :__size && return Ptr{NTuple{48,Cchar}}(x + 0)
     f === :__align && return Ptr{Clonglong}(x + 0)
     return getfield(x, f)
 end
@@ -109,12 +94,12 @@ const pthread_once_t = Cint
 Documentation not found.
 """
 struct pthread_rwlock_t
-    data::NTuple{32, UInt8}
+    data::NTuple{32,UInt8}
 end
 
 function Base.getproperty(x::Ptr{pthread_rwlock_t}, f::Symbol)
     f === :__data && return Ptr{__JL_Ctag_1197}(x + 0)
-    f === :__size && return Ptr{NTuple{32, Cchar}}(x + 0)
+    f === :__size && return Ptr{NTuple{32,Cchar}}(x + 0)
     f === :__align && return Ptr{Clong}(x + 0)
     return getfield(x, f)
 end
@@ -155,7 +140,7 @@ end
 Documentation not found.
 """
 struct sigval
-    data::NTuple{4, UInt8}
+    data::NTuple{4,UInt8}
 end
 
 function Base.getproperty(x::Ptr{sigval}, f::Symbol)
@@ -186,11 +171,11 @@ const sigval_t = sigval
 Documentation not found.
 """
 struct __JL_Ctag_1213
-    data::NTuple{116, UInt8}
+    data::NTuple{116,UInt8}
 end
 
 function Base.getproperty(x::Ptr{__JL_Ctag_1213}, f::Symbol)
-    f === :_pad && return Ptr{NTuple{29, Cint}}(x + 0)
+    f === :_pad && return Ptr{NTuple{29,Cint}}(x + 0)
     f === :_kill && return Ptr{__JL_Ctag_1214}(x + 0)
     f === :_timer && return Ptr{__JL_Ctag_1215}(x + 0)
     f === :_rt && return Ptr{__JL_Ctag_1216}(x + 0)
@@ -218,7 +203,7 @@ end
 Documentation not found.
 """
 struct siginfo_t
-    data::NTuple{128, UInt8}
+    data::NTuple{128,UInt8}
 end
 
 function Base.getproperty(x::Ptr{siginfo_t}, f::Symbol)
@@ -4777,7 +4762,7 @@ Documentation not found.
 struct aws_date_time
     timestamp::time_t
     milliseconds::UInt16
-    tz::NTuple{6, Cchar}
+    tz::NTuple{6,Cchar}
     gmt_time::tm
     local_time::tm
     utc_assumed::Bool
@@ -5554,7 +5539,7 @@ Documentation not found.
 struct aws_string
     allocator::Ptr{aws_allocator}
     len::Csize_t
-    bytes::NTuple{1, UInt8}
+    bytes::NTuple{1,UInt8}
 end
 
 """
@@ -7908,7 +7893,7 @@ We separate the log level function from the log call itself so that we can do th
 By doing so, we make it so that the variadic format arguments are not even evaluated if the filter check does not succeed.
 """
 struct aws_logger_vtable
-    data::NTuple{16, UInt8}
+    data::NTuple{16,UInt8}
 end
 
 function Base.getproperty(x::Ptr{aws_logger_vtable}, f::Symbol)
@@ -8284,17 +8269,17 @@ end
 """
 Documentation not found.
 """
-const static_assertion_at_line_60 = NTuple{1, Cchar}
+const static_assertion_at_line_60 = NTuple{1,Cchar}
 
 """
 Documentation not found.
 """
-const static_assertion_at_line_61 = NTuple{1, Cchar}
+const static_assertion_at_line_61 = NTuple{1,Cchar}
 
 """
 Documentation not found.
 """
-const static_assertion_at_line_62 = NTuple{1, Cchar}
+const static_assertion_at_line_62 = NTuple{1,Cchar}
 
 """
     __JL_Ctag_665
@@ -10014,7 +9999,7 @@ Documentation not found.
 struct aws_memory_usage_stats
     maxrss::Csize_t
     page_faults::Csize_t
-    _reserved::NTuple{8, Csize_t}
+    _reserved::NTuple{8,Csize_t}
 end
 
 """
@@ -10053,7 +10038,7 @@ const aws_task_fn = Cvoid
 honor the ABI compat
 """
 struct __JL_Ctag_1249
-    data::NTuple{4, UInt8}
+    data::NTuple{4,UInt8}
 end
 
 function Base.getproperty(x::Ptr{__JL_Ctag_1249}, f::Symbol)
@@ -10079,7 +10064,7 @@ end
 A task object. Once added to the scheduler, a task must remain in memory until its function is executed.
 """
 struct aws_task
-    data::NTuple{40, UInt8}
+    data::NTuple{40,UInt8}
 end
 
 function Base.getproperty(x::Ptr{aws_task}, f::Symbol)
@@ -11033,7 +11018,7 @@ end
 Documentation not found.
 """
 struct aws_uuid
-    uuid_data::NTuple{16, UInt8}
+    uuid_data::NTuple{16,UInt8}
 end
 
 """
@@ -11587,7 +11572,7 @@ end
 Documentation not found.
 """
 struct __pthread_mutex_s
-    data::NTuple{24, UInt8}
+    data::NTuple{24,UInt8}
 end
 
 function Base.getproperty(x::Ptr{__pthread_mutex_s}, f::Symbol)
