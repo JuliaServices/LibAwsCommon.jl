@@ -7,6 +7,7 @@ using Test, Aqua, LibAwsCommon
     end
     @testset "basic usage to test the library loads" begin
         allocator = aws_default_allocator()
+        LibAwsCommon.init(allocator)
         logpath = joinpath(mktempdir(), "log.txt")
         GC.@preserve logpath begin
             logger = Ref(aws_logger(C_NULL, C_NULL, C_NULL))

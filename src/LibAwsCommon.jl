@@ -43,4 +43,9 @@ for name in names(@__MODULE__; all=true)
     @eval export $name
 end
 
+function init(allocator=aws_default_allocator())
+    aws_common_library_init(allocator)
+    return
+end
+
 end
