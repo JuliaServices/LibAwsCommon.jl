@@ -44,17 +44,22 @@ for name in names(@__MODULE__; all=true)
 end
 
 const DEFAULT_AWS_ALLOCATOR = Ref{Ptr{aws_allocator}}(C_NULL)
-
-function default_aws_allocator()
-    if DEFAULT_AWS_ALLOCATOR[] == C_NULL
-        DEFAULT_AWS_ALLOCATOR[] = aws_default_allocator()
-    end
-    return DEFAULT_AWS_ALLOCATOR[]
-end
+const DEFAULT_AWS_ALLOCATOR_LOCK = ReentrantLock()
 
 function set_default_aws_allocator!(allocator)
-    DEFAULT_AWS_ALLOCATOR[] = allocator
-    return
+    @lock DEFAULT_AWS_ALLOCATOR_LOCK begin
+        DEFAULT_AWS_ALLOCATOR[] = allocator
+        return
+    end
+end
+
+function default_aws_allocator()
+    @lock DEFAULT_AWS_ALLOCATOR_LOCK begin
+        if DEFAULT_AWS_ALLOCATOR[] == C_NULL
+            set_default_aws_allocator!(aws_default_allocator())
+        end
+        return DEFAULT_AWS_ALLOCATOR[]
+    end
 end
 
 export default_aws_allocator, set_default_aws_allocator!
