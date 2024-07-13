@@ -82,7 +82,7 @@ struct pthread_cond_t
 end
 
 function Base.getproperty(x::Ptr{pthread_cond_t}, f::Symbol)
-    f === :__data && return Ptr{__JL_Ctag_1197}(x + 0)
+    f === :__data && return Ptr{__JL_Ctag_1222}(x + 0)
     f === :__size && return Ptr{NTuple{48, Cchar}}(x + 0)
     f === :__align && return Ptr{Clong}(x + 0)
     return getfield(x, f)
@@ -114,7 +114,7 @@ struct pthread_rwlock_t
 end
 
 function Base.getproperty(x::Ptr{pthread_rwlock_t}, f::Symbol)
-    f === :__data && return Ptr{__JL_Ctag_1198}(x + 0)
+    f === :__data && return Ptr{__JL_Ctag_1223}(x + 0)
     f === :__size && return Ptr{NTuple{56, Cchar}}(x + 0)
     f === :__align && return Ptr{Clong}(x + 0)
     return getfield(x, f)
@@ -182,34 +182,34 @@ Documentation not found.
 const sigval_t = sigval
 
 """
-    __JL_Ctag_1214
+    __JL_Ctag_1299
 
 Documentation not found.
 """
-struct __JL_Ctag_1214
+struct __JL_Ctag_1299
     data::NTuple{112, UInt8}
 end
 
-function Base.getproperty(x::Ptr{__JL_Ctag_1214}, f::Symbol)
+function Base.getproperty(x::Ptr{__JL_Ctag_1299}, f::Symbol)
     f === :_pad && return Ptr{NTuple{28, Cint}}(x + 0)
-    f === :_kill && return Ptr{__JL_Ctag_1215}(x + 0)
-    f === :_timer && return Ptr{__JL_Ctag_1216}(x + 0)
-    f === :_rt && return Ptr{__JL_Ctag_1217}(x + 0)
-    f === :_sigchld && return Ptr{__JL_Ctag_1218}(x + 0)
-    f === :_sigfault && return Ptr{__JL_Ctag_1219}(x + 0)
-    f === :_sigpoll && return Ptr{__JL_Ctag_1220}(x + 0)
-    f === :_sigsys && return Ptr{__JL_Ctag_1221}(x + 0)
+    f === :_kill && return Ptr{__JL_Ctag_1300}(x + 0)
+    f === :_timer && return Ptr{__JL_Ctag_1301}(x + 0)
+    f === :_rt && return Ptr{__JL_Ctag_1302}(x + 0)
+    f === :_sigchld && return Ptr{__JL_Ctag_1303}(x + 0)
+    f === :_sigfault && return Ptr{__JL_Ctag_1304}(x + 0)
+    f === :_sigpoll && return Ptr{__JL_Ctag_1305}(x + 0)
+    f === :_sigsys && return Ptr{__JL_Ctag_1306}(x + 0)
     return getfield(x, f)
 end
 
-function Base.getproperty(x::__JL_Ctag_1214, f::Symbol)
-    r = Ref{__JL_Ctag_1214}(x)
-    ptr = Base.unsafe_convert(Ptr{__JL_Ctag_1214}, r)
+function Base.getproperty(x::__JL_Ctag_1299, f::Symbol)
+    r = Ref{__JL_Ctag_1299}(x)
+    ptr = Base.unsafe_convert(Ptr{__JL_Ctag_1299}, r)
     fptr = getproperty(ptr, f)
     GC.@preserve r unsafe_load(fptr)
 end
 
-function Base.setproperty!(x::Ptr{__JL_Ctag_1214}, f::Symbol, v)
+function Base.setproperty!(x::Ptr{__JL_Ctag_1299}, f::Symbol, v)
     unsafe_store!(getproperty(x, f), v)
 end
 
@@ -226,7 +226,7 @@ function Base.getproperty(x::Ptr{siginfo_t}, f::Symbol)
     f === :si_signo && return Ptr{Cint}(x + 0)
     f === :si_errno && return Ptr{Cint}(x + 4)
     f === :si_code && return Ptr{Cint}(x + 8)
-    f === :_sifields && return Ptr{__JL_Ctag_1214}(x + 16)
+    f === :_sifields && return Ptr{__JL_Ctag_1299}(x + 16)
     return getfield(x, f)
 end
 
@@ -4074,6 +4074,20 @@ function aws_linked_list_move_all_front(dst, src)
 end
 
 """
+    aws_linked_list_node_is_in_list(node)
+
+Returns true if the node is currently in a list, false otherwise.
+
+### Prototype
+```c
+AWS_STATIC_IMPL bool aws_linked_list_node_is_in_list(struct aws_linked_list_node *node);
+```
+"""
+function aws_linked_list_node_is_in_list(node)
+    ccall((:aws_linked_list_node_is_in_list, libaws_c_common), Bool, (Ptr{aws_linked_list_node},), node)
+end
+
+"""
     aws_cache_vtable
 
 Documentation not found.
@@ -4301,6 +4315,648 @@ size_t aws_cache_get_element_count(const struct aws_cache *cache);
 """
 function aws_cache_get_element_count(cache)
     ccall((:aws_cache_get_element_count, libaws_c_common), Csize_t, (Ptr{aws_cache},), cache)
+end
+
+"""
+    aws_cbor_type
+
+The types use by APIs, not 1:1 with major type. It's an extension for cbor major type in RFC8949 section 3.1 Major type 0 - AWS\\_CBOR\\_TYPE\\_UINT Major type 1 - AWS\\_CBOR\\_TYPE\\_NEGINT Major type 2 - AWS\\_CBOR\\_TYPE\\_BYTES/AWS\\_CBOR\\_TYPE\\_INDEF\\_BYTES\\_START Major type 3 - AWS\\_CBOR\\_TYPE\\_TEXT/AWS\\_CBOR\\_TYPE\\_INDEF\\_TEXT\\_START Major type 4 - AWS\\_CBOR\\_TYPE\\_ARRAY\\_START/AWS\\_CBOR\\_TYPE\\_INDEF\\_ARRAY\\_START Major type 5 - AWS\\_CBOR\\_TYPE\\_MAP\\_START/AWS\\_CBOR\\_TYPE\\_INDEF\\_MAP\\_START Major type 6 - AWS\\_CBOR\\_TYPE\\_TAG Major type 7 - 20/21 - AWS\\_CBOR\\_TYPE\\_BOOL - 22 - AWS\\_CBOR\\_TYPE\\_NULL - 23 - AWS\\_CBOR\\_TYPE\\_UNDEFINED - 25/26/27 - AWS\\_CBOR\\_TYPE\\_FLOAT - 31 - AWS\\_CBOR\\_TYPE\\_BREAK - rest of value are not supported.
+"""
+@cenum aws_cbor_type::UInt32 begin
+    AWS_CBOR_TYPE_UNKNOWN = 0
+    AWS_CBOR_TYPE_UINT = 1
+    AWS_CBOR_TYPE_NEGINT = 2
+    AWS_CBOR_TYPE_FLOAT = 3
+    AWS_CBOR_TYPE_BYTES = 4
+    AWS_CBOR_TYPE_TEXT = 5
+    AWS_CBOR_TYPE_ARRAY_START = 6
+    AWS_CBOR_TYPE_MAP_START = 7
+    AWS_CBOR_TYPE_TAG = 8
+    AWS_CBOR_TYPE_BOOL = 9
+    AWS_CBOR_TYPE_NULL = 10
+    AWS_CBOR_TYPE_UNDEFINED = 11
+    AWS_CBOR_TYPE_BREAK = 12
+    AWS_CBOR_TYPE_INDEF_BYTES_START = 13
+    AWS_CBOR_TYPE_INDEF_TEXT_START = 14
+    AWS_CBOR_TYPE_INDEF_ARRAY_START = 15
+    AWS_CBOR_TYPE_INDEF_MAP_START = 16
+end
+
+"""
+Documentation not found.
+"""
+mutable struct aws_cbor_encoder end
+
+"""
+Documentation not found.
+"""
+mutable struct aws_cbor_decoder end
+
+"""
+    aws_cbor_type_cstr(type)
+
+Return c-string for [`aws_cbor_type`](@ref)
+
+### Prototype
+```c
+const char *aws_cbor_type_cstr(enum aws_cbor_type type);
+```
+"""
+function aws_cbor_type_cstr(type)
+    ccall((:aws_cbor_type_cstr, libaws_c_common), Ptr{Cchar}, (aws_cbor_type,), type)
+end
+
+"""
+    aws_cbor_encoder_new(allocator)
+
+Create a new cbor encoder. Creating a encoder with a temporay buffer. Every aws\\_cbor\\_encoder\\_write\\_* will encode directly into the buffer to follow the encoded data.
+
+# Arguments
+* `allocator`:
+# Returns
+[`aws_cbor_encoder`](@ref)
+### Prototype
+```c
+struct aws_cbor_encoder *aws_cbor_encoder_new(struct aws_allocator *allocator);
+```
+"""
+function aws_cbor_encoder_new(allocator)
+    ccall((:aws_cbor_encoder_new, libaws_c_common), Ptr{aws_cbor_encoder}, (Ptr{aws_allocator},), allocator)
+end
+
+"""
+    aws_cbor_encoder_destroy(encoder)
+
+Documentation not found.
+### Prototype
+```c
+struct aws_cbor_encoder *aws_cbor_encoder_destroy(struct aws_cbor_encoder *encoder);
+```
+"""
+function aws_cbor_encoder_destroy(encoder)
+    ccall((:aws_cbor_encoder_destroy, libaws_c_common), Ptr{aws_cbor_encoder}, (Ptr{aws_cbor_encoder},), encoder)
+end
+
+"""
+    aws_cbor_encoder_get_encoded_data(encoder)
+
+Get the current encoded data from encoder. The encoded data has the same lifetime as the encoder, and once any other function call invoked for the encoder, the encoded data is no longer valid.
+
+# Arguments
+* `encoder`:
+# Returns
+struct [`aws_byte_cursor`](@ref) from the encoder buffer.
+### Prototype
+```c
+struct aws_byte_cursor aws_cbor_encoder_get_encoded_data(const struct aws_cbor_encoder *encoder);
+```
+"""
+function aws_cbor_encoder_get_encoded_data(encoder)
+    ccall((:aws_cbor_encoder_get_encoded_data, libaws_c_common), aws_byte_cursor, (Ptr{aws_cbor_encoder},), encoder)
+end
+
+"""
+    aws_cbor_encoder_reset(encoder)
+
+Clear the current encoded buffer from encoder.
+
+# Arguments
+* `encoder`:
+### Prototype
+```c
+void aws_cbor_encoder_reset(struct aws_cbor_encoder *encoder);
+```
+"""
+function aws_cbor_encoder_reset(encoder)
+    ccall((:aws_cbor_encoder_reset, libaws_c_common), Cvoid, (Ptr{aws_cbor_encoder},), encoder)
+end
+
+"""
+    aws_cbor_encoder_write_uint(encoder, value)
+
+Encode a AWS\\_CBOR\\_TYPE\\_UINT value to "smallest possible" in encoder's buffer. Referring to RFC8949 section 4.2.1
+
+TODO: maybe add a width of the encoded value.
+
+# Arguments
+* `encoder`:
+* `value`: value to encode.
+### Prototype
+```c
+void aws_cbor_encoder_write_uint(struct aws_cbor_encoder *encoder, uint64_t value);
+```
+"""
+function aws_cbor_encoder_write_uint(encoder, value)
+    ccall((:aws_cbor_encoder_write_uint, libaws_c_common), Cvoid, (Ptr{aws_cbor_encoder}, UInt64), encoder, value)
+end
+
+"""
+    aws_cbor_encoder_write_negint(encoder, value)
+
+Encode a AWS\\_CBOR\\_TYPE\\_NEGINT value to "smallest possible" in encoder's buffer. It represents (-1 - value). Referring to RFC8949 section 4.2.1
+
+# Arguments
+* `encoder`:
+* `value`: The argument to encode to negative integer, which is (-1 - expected\\_val)
+### Prototype
+```c
+void aws_cbor_encoder_write_negint(struct aws_cbor_encoder *encoder, uint64_t value);
+```
+"""
+function aws_cbor_encoder_write_negint(encoder, value)
+    ccall((:aws_cbor_encoder_write_negint, libaws_c_common), Cvoid, (Ptr{aws_cbor_encoder}, UInt64), encoder, value)
+end
+
+"""
+    aws_cbor_encoder_write_float(encoder, value)
+
+Encode a AWS\\_CBOR\\_TYPE\\_FLOAT value to "smallest possible", but will not be encoded into half-precision float, as it's not well supported cross languages.
+
+To be more specific, it will be encoded into integer/negative/float (Order with priority) when the conversation will not cause precision loss.
+
+# Arguments
+* `encoder`:
+* `value`: value to encode.
+### Prototype
+```c
+void aws_cbor_encoder_write_float(struct aws_cbor_encoder *encoder, double value);
+```
+"""
+function aws_cbor_encoder_write_float(encoder, value)
+    ccall((:aws_cbor_encoder_write_float, libaws_c_common), Cvoid, (Ptr{aws_cbor_encoder}, Cdouble), encoder, value)
+end
+
+"""
+    aws_cbor_encoder_write_bytes(encoder, from)
+
+Encode a AWS\\_CBOR\\_TYPE\\_BYTES value to "smallest possible" in encoder's buffer. Referring to RFC8949 section 4.2.1, the length of "from" will be encoded first and then the value of "from" will be followed.
+
+# Arguments
+* `encoder`:
+* `from`: value to encode.
+### Prototype
+```c
+void aws_cbor_encoder_write_bytes(struct aws_cbor_encoder *encoder, struct aws_byte_cursor from);
+```
+"""
+function aws_cbor_encoder_write_bytes(encoder, from)
+    ccall((:aws_cbor_encoder_write_bytes, libaws_c_common), Cvoid, (Ptr{aws_cbor_encoder}, aws_byte_cursor), encoder, from)
+end
+
+"""
+    aws_cbor_encoder_write_text(encoder, from)
+
+Encode a AWS\\_CBOR\\_TYPE\\_TEXT value to "smallest possible" in encoder's buffer. Referring to RFC8949 section 4.2.1, the length of "from" will be encoded first and then the value of "from" will be followed.
+
+# Arguments
+* `encoder`:
+* `from`: value to encode.
+### Prototype
+```c
+void aws_cbor_encoder_write_text(struct aws_cbor_encoder *encoder, struct aws_byte_cursor from);
+```
+"""
+function aws_cbor_encoder_write_text(encoder, from)
+    ccall((:aws_cbor_encoder_write_text, libaws_c_common), Cvoid, (Ptr{aws_cbor_encoder}, aws_byte_cursor), encoder, from)
+end
+
+"""
+    aws_cbor_encoder_write_array_start(encoder, number_entries)
+
+Encode a AWS\\_CBOR\\_TYPE\\_ARRAY\\_START value to "smallest possible" in encoder's buffer. Referring to RFC8949 section 4.2.1 The "number\\_entries" is the cbor data items should be followed as the content of the array. Notes: it's user's responsibility to keep the integrity of the array to be encoded.
+
+# Arguments
+* `encoder`:
+* `number_entries`: The number of data item in array.
+### Prototype
+```c
+void aws_cbor_encoder_write_array_start(struct aws_cbor_encoder *encoder, size_t number_entries);
+```
+"""
+function aws_cbor_encoder_write_array_start(encoder, number_entries)
+    ccall((:aws_cbor_encoder_write_array_start, libaws_c_common), Cvoid, (Ptr{aws_cbor_encoder}, Csize_t), encoder, number_entries)
+end
+
+"""
+    aws_cbor_encoder_write_map_start(encoder, number_entries)
+
+Encode a AWS\\_CBOR\\_TYPE\\_MAP\\_START value to "smallest possible" in encoder's buffer. Referring to RFC8949 section 4.2.1 The "number\\_entries" is the number of pair of cbor data items as key and value should be followed as the content of the map.
+
+Notes: it's user's responsibility to keep the integrity of the map to be encoded.
+
+# Arguments
+* `encoder`:
+* `number_entries`: The number of data item in map.
+### Prototype
+```c
+void aws_cbor_encoder_write_map_start(struct aws_cbor_encoder *encoder, size_t number_entries);
+```
+"""
+function aws_cbor_encoder_write_map_start(encoder, number_entries)
+    ccall((:aws_cbor_encoder_write_map_start, libaws_c_common), Cvoid, (Ptr{aws_cbor_encoder}, Csize_t), encoder, number_entries)
+end
+
+"""
+    aws_cbor_encoder_write_tag(encoder, tag_number)
+
+Encode a AWS\\_CBOR\\_TYPE\\_TAG value to "smallest possible" in encoder's buffer. Referring to RFC8949 section 4.2.1 The following cbor data item will be the content of the tagged value. Notes: it's user's responsibility to keep the integrity of the tagged value to follow the RFC8949 section 3.4
+
+# Arguments
+* `encoder`:
+* `tag_number`: The tag value to encode.
+### Prototype
+```c
+void aws_cbor_encoder_write_tag(struct aws_cbor_encoder *encoder, uint64_t tag_number);
+```
+"""
+function aws_cbor_encoder_write_tag(encoder, tag_number)
+    ccall((:aws_cbor_encoder_write_tag, libaws_c_common), Cvoid, (Ptr{aws_cbor_encoder}, UInt64), encoder, tag_number)
+end
+
+"""
+    aws_cbor_encoder_write_null(encoder)
+
+Encode a simple value AWS\\_CBOR\\_TYPE\\_NULL
+
+# Arguments
+* `encoder`:
+### Prototype
+```c
+void aws_cbor_encoder_write_null(struct aws_cbor_encoder *encoder);
+```
+"""
+function aws_cbor_encoder_write_null(encoder)
+    ccall((:aws_cbor_encoder_write_null, libaws_c_common), Cvoid, (Ptr{aws_cbor_encoder},), encoder)
+end
+
+"""
+    aws_cbor_encoder_write_undefined(encoder)
+
+Encode a simple value AWS\\_CBOR\\_TYPE\\_UNDEFINED
+
+# Arguments
+* `encoder`:
+### Prototype
+```c
+void aws_cbor_encoder_write_undefined(struct aws_cbor_encoder *encoder);
+```
+"""
+function aws_cbor_encoder_write_undefined(encoder)
+    ccall((:aws_cbor_encoder_write_undefined, libaws_c_common), Cvoid, (Ptr{aws_cbor_encoder},), encoder)
+end
+
+"""
+    aws_cbor_encoder_write_bool(encoder, value)
+
+Encode a simple value AWS\\_CBOR\\_TYPE\\_BOOL
+
+# Arguments
+* `encoder`:
+### Prototype
+```c
+void aws_cbor_encoder_write_bool(struct aws_cbor_encoder *encoder, bool value);
+```
+"""
+function aws_cbor_encoder_write_bool(encoder, value)
+    ccall((:aws_cbor_encoder_write_bool, libaws_c_common), Cvoid, (Ptr{aws_cbor_encoder}, Bool), encoder, value)
+end
+
+"""
+    aws_cbor_encoder_write_break(encoder)
+
+Encode a simple value AWS\\_CBOR\\_TYPE\\_BREAK
+
+Notes: no error checking, it's user's responsibility to track the break to close the corresponding indef\\_start
+
+### Prototype
+```c
+void aws_cbor_encoder_write_break(struct aws_cbor_encoder *encoder);
+```
+"""
+function aws_cbor_encoder_write_break(encoder)
+    ccall((:aws_cbor_encoder_write_break, libaws_c_common), Cvoid, (Ptr{aws_cbor_encoder},), encoder)
+end
+
+"""
+    aws_cbor_encoder_write_indef_bytes_start(encoder)
+
+Encode a AWS\\_CBOR\\_TYPE\\_INDEF\\_BYTES\\_START
+
+Notes: no error checking, it's user's responsibility to add corresponding data and the break to close the indef\\_start
+
+### Prototype
+```c
+void aws_cbor_encoder_write_indef_bytes_start(struct aws_cbor_encoder *encoder);
+```
+"""
+function aws_cbor_encoder_write_indef_bytes_start(encoder)
+    ccall((:aws_cbor_encoder_write_indef_bytes_start, libaws_c_common), Cvoid, (Ptr{aws_cbor_encoder},), encoder)
+end
+
+"""
+    aws_cbor_encoder_write_indef_text_start(encoder)
+
+Encode a AWS\\_CBOR\\_TYPE\\_INDEF\\_TEXT\\_START
+
+Notes: no error checking, it's user's responsibility to add corresponding data and the break to close the indef\\_start
+
+### Prototype
+```c
+void aws_cbor_encoder_write_indef_text_start(struct aws_cbor_encoder *encoder);
+```
+"""
+function aws_cbor_encoder_write_indef_text_start(encoder)
+    ccall((:aws_cbor_encoder_write_indef_text_start, libaws_c_common), Cvoid, (Ptr{aws_cbor_encoder},), encoder)
+end
+
+"""
+    aws_cbor_encoder_write_indef_array_start(encoder)
+
+Encode a AWS\\_CBOR\\_TYPE\\_INDEF\\_ARRAY\\_START
+
+Notes: no error checking, it's user's responsibility to add corresponding data and the break to close the indef\\_start
+
+### Prototype
+```c
+void aws_cbor_encoder_write_indef_array_start(struct aws_cbor_encoder *encoder);
+```
+"""
+function aws_cbor_encoder_write_indef_array_start(encoder)
+    ccall((:aws_cbor_encoder_write_indef_array_start, libaws_c_common), Cvoid, (Ptr{aws_cbor_encoder},), encoder)
+end
+
+"""
+    aws_cbor_encoder_write_indef_map_start(encoder)
+
+Encode a AWS\\_CBOR\\_TYPE\\_INDEF\\_MAP\\_START
+
+Notes: no error checking, it's user's responsibility to add corresponding data and the break to close the indef\\_start
+
+### Prototype
+```c
+void aws_cbor_encoder_write_indef_map_start(struct aws_cbor_encoder *encoder);
+```
+"""
+function aws_cbor_encoder_write_indef_map_start(encoder)
+    ccall((:aws_cbor_encoder_write_indef_map_start, libaws_c_common), Cvoid, (Ptr{aws_cbor_encoder},), encoder)
+end
+
+"""
+    aws_cbor_decoder_new(allocator, src)
+
+Create a cbor decoder to take src to decode. The typical usage of decoder will be: - If the next element type only accept what expected, `aws\\_cbor\\_decoder\\_pop\\_next\\_*` - If the next element type accept different type, invoke [`aws_cbor_decoder_peek_type`](@ref) first, then based on the type to invoke corresponding `aws\\_cbor\\_decoder\\_pop\\_next\\_*` - If the next element type doesn't have corrsponding value, specifically: AWS\\_CBOR\\_TYPE\\_NULL, AWS\\_CBOR\\_TYPE\\_UNDEFINED, AWS\\_CBOR\\_TYPE\\_INF\\_*\\_START, AWS\\_CBOR\\_TYPE\\_BREAK, call [`aws_cbor_decoder_consume_next_single_element`](@ref) to consume it and continues for further decoding. - To ignore the next data item (the element and the content of it), [`aws_cbor_decoder_consume_next_whole_data_item`](@ref)
+
+Note: it's caller's responsibilty to keep the src outlive the decoder.
+
+# Arguments
+* `allocator`:
+* `src`: The src data to decode from.
+# Returns
+decoder
+### Prototype
+```c
+struct aws_cbor_decoder *aws_cbor_decoder_new(struct aws_allocator *allocator, struct aws_byte_cursor src);
+```
+"""
+function aws_cbor_decoder_new(allocator, src)
+    ccall((:aws_cbor_decoder_new, libaws_c_common), Ptr{aws_cbor_decoder}, (Ptr{aws_allocator}, aws_byte_cursor), allocator, src)
+end
+
+"""
+    aws_cbor_decoder_destroy(decoder)
+
+Documentation not found.
+### Prototype
+```c
+struct aws_cbor_decoder *aws_cbor_decoder_destroy(struct aws_cbor_decoder *decoder);
+```
+"""
+function aws_cbor_decoder_destroy(decoder)
+    ccall((:aws_cbor_decoder_destroy, libaws_c_common), Ptr{aws_cbor_decoder}, (Ptr{aws_cbor_decoder},), decoder)
+end
+
+"""
+    aws_cbor_decoder_get_remaining_length(decoder)
+
+Get the length of the remaining bytes of the source. Once the source was decoded, it will be consumed, and result in decrease of the remaining length of bytes.
+
+# Arguments
+* `decoder`:
+# Returns
+The length of bytes remaining of the decoder source.
+### Prototype
+```c
+size_t aws_cbor_decoder_get_remaining_length(const struct aws_cbor_decoder *decoder);
+```
+"""
+function aws_cbor_decoder_get_remaining_length(decoder)
+    ccall((:aws_cbor_decoder_get_remaining_length, libaws_c_common), Csize_t, (Ptr{aws_cbor_decoder},), decoder)
+end
+
+"""
+    aws_cbor_decoder_peek_type(decoder, out_type)
+
+Decode the next element and store it in the decoder cache if there was no element cached. If there was element cached, just return the type of the cached element.
+
+# Arguments
+* `decoder`:
+* `out_type`:
+# Returns
+[`AWS_OP_SUCCESS`](@ref) if succeed, [`AWS_OP_ERR`](@ref) for any decoding error and corresponding error code will be raised.
+### Prototype
+```c
+int aws_cbor_decoder_peek_type(struct aws_cbor_decoder *decoder, enum aws_cbor_type *out_type);
+```
+"""
+function aws_cbor_decoder_peek_type(decoder, out_type)
+    ccall((:aws_cbor_decoder_peek_type, libaws_c_common), Cint, (Ptr{aws_cbor_decoder}, Ptr{aws_cbor_type}), decoder, out_type)
+end
+
+"""
+    aws_cbor_decoder_consume_next_whole_data_item(decoder)
+
+Consume the next data item, includes all the content within the data item.
+
+As an example for the following cbor, this function will consume all the data as it's only one cbor data item, an indefinite map with 2 key, value pair: 0xbf6346756ef563416d7421ff BF -- Start indefinite-length map 63 -- First key, UTF-8 string length 3 46756e -- "Fun" F5 -- First value, true 63 -- Second key, UTF-8 string length 3 416d74 -- "Amt" 21 -- Second value, -2 FF -- "break"
+
+Notes: this function will not ensure the data item is well-formed.
+
+# Arguments
+* `src`: The src to parse data from
+# Returns
+[`AWS_OP_SUCCESS`](@ref) successfully consumed the next data item, otherwise [`AWS_OP_ERR`](@ref).
+### Prototype
+```c
+int aws_cbor_decoder_consume_next_whole_data_item(struct aws_cbor_decoder *decoder);
+```
+"""
+function aws_cbor_decoder_consume_next_whole_data_item(decoder)
+    ccall((:aws_cbor_decoder_consume_next_whole_data_item, libaws_c_common), Cint, (Ptr{aws_cbor_decoder},), decoder)
+end
+
+"""
+    aws_cbor_decoder_consume_next_single_element(decoder)
+
+Consume the next single element, without the content followed by the element.
+
+As an example for the following cbor, this function will only consume the 0xBF, "Start indefinite-length map", not any content of the map represented. The next element to decode will start from 0x63 0xbf6346756ef563416d7421ff BF -- Start indefinite-length map 63 -- First key, UTF-8 string length 3 46756e -- "Fun" F5 -- First value, true 63 -- Second key, UTF-8 string length 3 416d74 -- "Amt" 21 -- Second value, -2 FF -- "break"
+
+# Arguments
+* `decoder`: The decoder to parse data from
+# Returns
+[`AWS_OP_SUCCESS`](@ref) successfully consumed the next element, otherwise [`AWS_OP_ERR`](@ref).
+### Prototype
+```c
+int aws_cbor_decoder_consume_next_single_element(struct aws_cbor_decoder *decoder);
+```
+"""
+function aws_cbor_decoder_consume_next_single_element(decoder)
+    ccall((:aws_cbor_decoder_consume_next_single_element, libaws_c_common), Cint, (Ptr{aws_cbor_decoder},), decoder)
+end
+
+"""
+    aws_cbor_decoder_pop_next_unsigned_int_val(decoder, out)
+
+Get the next element based on the type. If the next element doesn't match the expected type. Error will be raised. If the next element already been cached, it will consume the cached item when no error was returned. Specifically: AWS\\_CBOR\\_TYPE\\_UINT - [`aws_cbor_decoder_pop_next_unsigned_int_val`](@ref) AWS\\_CBOR\\_TYPE\\_NEGINT - [`aws_cbor_decoder_pop_next_negative_int_val`](@ref), it represents (-1 - *out) AWS\\_CBOR\\_TYPE\\_FLOAT - aws\\_cbor\\_decoder\\_pop\\_next\\_double\\_val AWS\\_CBOR\\_TYPE\\_BYTES - [`aws_cbor_decoder_pop_next_bytes_val`](@ref) AWS\\_CBOR\\_TYPE\\_TEXT - [`aws_cbor_decoder_pop_next_text_val`](@ref)
+
+# Arguments
+* `decoder`:
+* `out`:
+# Returns
+[`AWS_OP_SUCCESS`](@ref) successfully consumed the next element and get the result, otherwise [`AWS_OP_ERR`](@ref).
+### Prototype
+```c
+int aws_cbor_decoder_pop_next_unsigned_int_val(struct aws_cbor_decoder *decoder, uint64_t *out);
+```
+"""
+function aws_cbor_decoder_pop_next_unsigned_int_val(decoder, out)
+    ccall((:aws_cbor_decoder_pop_next_unsigned_int_val, libaws_c_common), Cint, (Ptr{aws_cbor_decoder}, Ptr{UInt64}), decoder, out)
+end
+
+"""
+    aws_cbor_decoder_pop_next_negative_int_val(decoder, out)
+
+Documentation not found.
+### Prototype
+```c
+int aws_cbor_decoder_pop_next_negative_int_val(struct aws_cbor_decoder *decoder, uint64_t *out);
+```
+"""
+function aws_cbor_decoder_pop_next_negative_int_val(decoder, out)
+    ccall((:aws_cbor_decoder_pop_next_negative_int_val, libaws_c_common), Cint, (Ptr{aws_cbor_decoder}, Ptr{UInt64}), decoder, out)
+end
+
+"""
+    aws_cbor_decoder_pop_next_float_val(decoder, out)
+
+Documentation not found.
+### Prototype
+```c
+int aws_cbor_decoder_pop_next_float_val(struct aws_cbor_decoder *decoder, double *out);
+```
+"""
+function aws_cbor_decoder_pop_next_float_val(decoder, out)
+    ccall((:aws_cbor_decoder_pop_next_float_val, libaws_c_common), Cint, (Ptr{aws_cbor_decoder}, Ptr{Cdouble}), decoder, out)
+end
+
+"""
+    aws_cbor_decoder_pop_next_boolean_val(decoder, out)
+
+Documentation not found.
+### Prototype
+```c
+int aws_cbor_decoder_pop_next_boolean_val(struct aws_cbor_decoder *decoder, bool *out);
+```
+"""
+function aws_cbor_decoder_pop_next_boolean_val(decoder, out)
+    ccall((:aws_cbor_decoder_pop_next_boolean_val, libaws_c_common), Cint, (Ptr{aws_cbor_decoder}, Ptr{Bool}), decoder, out)
+end
+
+"""
+    aws_cbor_decoder_pop_next_bytes_val(decoder, out)
+
+Documentation not found.
+### Prototype
+```c
+int aws_cbor_decoder_pop_next_bytes_val(struct aws_cbor_decoder *decoder, struct aws_byte_cursor *out);
+```
+"""
+function aws_cbor_decoder_pop_next_bytes_val(decoder, out)
+    ccall((:aws_cbor_decoder_pop_next_bytes_val, libaws_c_common), Cint, (Ptr{aws_cbor_decoder}, Ptr{aws_byte_cursor}), decoder, out)
+end
+
+"""
+    aws_cbor_decoder_pop_next_text_val(decoder, out)
+
+Documentation not found.
+### Prototype
+```c
+int aws_cbor_decoder_pop_next_text_val(struct aws_cbor_decoder *decoder, struct aws_byte_cursor *out);
+```
+"""
+function aws_cbor_decoder_pop_next_text_val(decoder, out)
+    ccall((:aws_cbor_decoder_pop_next_text_val, libaws_c_common), Cint, (Ptr{aws_cbor_decoder}, Ptr{aws_byte_cursor}), decoder, out)
+end
+
+"""
+    aws_cbor_decoder_pop_next_array_start(decoder, out_size)
+
+Get the next AWS\\_CBOR\\_TYPE\\_ARRAY\\_START element. Only consume the AWS\\_CBOR\\_TYPE\\_ARRAY\\_START element and set the size of array to *out\\_size, not the content of the array. The next *out\\_size cbor data items will be the content of the array for a valid cbor data,
+
+Notes: For indefinite-length, this function will fail with "AWS\\_ERROR\\_CBOR\\_UNEXPECTED\\_TYPE". The designed way to handle indefinite-length is: - Get AWS\\_CBOR\\_TYPE\\_INDEF\\_ARRAY\\_START from \\_peek\\_type - call [`aws_cbor_decoder_consume_next_single_element`](@ref) to pop the indefinite-length start. - Decode the next data item until AWS\\_CBOR\\_TYPE\\_BREAK read.
+
+# Arguments
+* `decoder`:
+* `out_size`: store the size of array if succeed.
+# Returns
+[`AWS_OP_SUCCESS`](@ref) successfully consumed the next element and get the result, otherwise [`AWS_OP_ERR`](@ref).
+### Prototype
+```c
+int aws_cbor_decoder_pop_next_array_start(struct aws_cbor_decoder *decoder, uint64_t *out_size);
+```
+"""
+function aws_cbor_decoder_pop_next_array_start(decoder, out_size)
+    ccall((:aws_cbor_decoder_pop_next_array_start, libaws_c_common), Cint, (Ptr{aws_cbor_decoder}, Ptr{UInt64}), decoder, out_size)
+end
+
+"""
+    aws_cbor_decoder_pop_next_map_start(decoder, out_size)
+
+Get the next AWS\\_CBOR\\_TYPE\\_MAP\\_START element. Only consume the AWS\\_CBOR\\_TYPE\\_MAP\\_START element and set the size of array to *out\\_size, not the content of the map. The next *out\\_size pair of cbor data items as key and value will be the content of the array for a valid cbor data,
+
+Notes: For indefinite-length, this function will fail with "AWS\\_ERROR\\_CBOR\\_UNEXPECTED\\_TYPE". The designed way to handle indefinite-length is: - Get AWS\\_CBOR\\_TYPE\\_INDEF\\_MAP\\_START from \\_peek\\_type - call [`aws_cbor_decoder_consume_next_single_element`](@ref) to pop the indefinite-length start. - Decode the next data item until AWS\\_CBOR\\_TYPE\\_BREAK read.
+
+# Arguments
+* `decoder`:
+* `out_size`: store the size of map if succeed.
+# Returns
+[`AWS_OP_SUCCESS`](@ref) successfully consumed the next element and get the result, otherwise [`AWS_OP_ERR`](@ref).
+### Prototype
+```c
+int aws_cbor_decoder_pop_next_map_start(struct aws_cbor_decoder *decoder, uint64_t *out_size);
+```
+"""
+function aws_cbor_decoder_pop_next_map_start(decoder, out_size)
+    ccall((:aws_cbor_decoder_pop_next_map_start, libaws_c_common), Cint, (Ptr{aws_cbor_decoder}, Ptr{UInt64}), decoder, out_size)
+end
+
+"""
+    aws_cbor_decoder_pop_next_tag_val(decoder, out_tag_val)
+
+Get the next AWS\\_CBOR\\_TYPE\\_TAG element. Only consume the AWS\\_CBOR\\_TYPE\\_TAG element and set the tag value to *out\\_tag\\_val, not the content of the tagged. The next cbor data item will be the content of the tagged value for a valid cbor data.
+
+# Arguments
+* `decoder`:
+* `out_size`: store the size of map if succeed.
+# Returns
+[`AWS_OP_SUCCESS`](@ref) successfully consumed the next element and get the result, otherwise [`AWS_OP_ERR`](@ref).
+### Prototype
+```c
+int aws_cbor_decoder_pop_next_tag_val(struct aws_cbor_decoder *decoder, uint64_t *out_tag_val);
+```
+"""
+function aws_cbor_decoder_pop_next_tag_val(decoder, out_tag_val)
+    ccall((:aws_cbor_decoder_pop_next_tag_val, libaws_c_common), Cint, (Ptr{aws_cbor_decoder}, Ptr{UInt64}), decoder, out_tag_val)
 end
 
 """
@@ -4661,7 +5317,9 @@ Documentation not found.
     AWS_CPU_FEATURE_ARM_CRC = 5
     AWS_CPU_FEATURE_BMI2 = 6
     AWS_CPU_FEATURE_VPCLMULQDQ = 7
-    AWS_CPU_FEATURE_COUNT = 8
+    AWS_CPU_FEATURE_ARM_PMULL = 8
+    AWS_CPU_FEATURE_ARM_CRYPTO = 9
+    AWS_CPU_FEATURE_COUNT = 10
 end
 
 """
@@ -4714,11 +5372,11 @@ function aws_cross_process_lock_release(instance_lock)
 end
 
 """
-    __JL_Ctag_283
+    __JL_Ctag_308
 
 Documentation not found.
 """
-@cenum __JL_Ctag_283::UInt32 begin
+@cenum __JL_Ctag_308::UInt32 begin
     AWS_DATE_TIME_STR_MAX_LEN = 100
     AWS_DATE_TIME_STR_MAX_BASIC_LEN = 20
 end
@@ -5890,6 +6548,8 @@ Documentation not found.
     AWS_ERROR_FILE_OPEN_FAILURE = 57
     AWS_ERROR_FILE_READ_FAILURE = 58
     AWS_ERROR_FILE_WRITE_FAILURE = 59
+    AWS_ERROR_INVALID_CBOR = 60
+    AWS_ERROR_CBOR_UNEXPECTED_TYPE = 61
     AWS_ERROR_END_COMMON_RANGE = 1023
 end
 
@@ -6258,11 +6918,11 @@ function aws_file_get_length(file, length)
 end
 
 """
-    __JL_Ctag_429
+    __JL_Ctag_454
 
 Documentation not found.
 """
-@cenum __JL_Ctag_429::UInt32 begin
+@cenum __JL_Ctag_454::UInt32 begin
     AWS_COMMON_HASH_TABLE_ITER_CONTINUE = 1
     AWS_COMMON_HASH_TABLE_ITER_DELETE = 2
     AWS_COMMON_HASH_TABLE_ITER_ERROR = 4
@@ -6742,6 +7402,64 @@ bool aws_hash_iter_is_valid(const struct aws_hash_iter *iter);
 """
 function aws_hash_iter_is_valid(iter)
     ccall((:aws_hash_iter_is_valid, libaws_c_common), Bool, (Ptr{aws_hash_iter},), iter)
+end
+
+"""
+    aws_hash_uint64_t_by_identity(item)
+
+Helper function to hash keys that are uint64\\_t values.
+
+The function is not a strong hash function in any sense; it merely reflects the uint64 value back. Do not use this function as a hash if you need the properties of a strong hash function.
+
+### Prototype
+```c
+uint64_t aws_hash_uint64_t_by_identity(const void *item);
+```
+"""
+function aws_hash_uint64_t_by_identity(item)
+    ccall((:aws_hash_uint64_t_by_identity, libaws_c_common), UInt64, (Ptr{Cvoid},), item)
+end
+
+"""
+    aws_hash_compare_uint64_t_eq(a, b)
+
+Helper function to compare hash keys that are uint64\\_t values.
+
+### Prototype
+```c
+bool aws_hash_compare_uint64_t_eq(const void *a, const void *b);
+```
+"""
+function aws_hash_compare_uint64_t_eq(a, b)
+    ccall((:aws_hash_compare_uint64_t_eq, libaws_c_common), Bool, (Ptr{Cvoid}, Ptr{Cvoid}), a, b)
+end
+
+"""
+    aws_host_utils_is_ipv4(host)
+
+Determine whether host cursor is IPv4 string.
+
+### Prototype
+```c
+bool aws_host_utils_is_ipv4(struct aws_byte_cursor host);
+```
+"""
+function aws_host_utils_is_ipv4(host)
+    ccall((:aws_host_utils_is_ipv4, libaws_c_common), Bool, (aws_byte_cursor,), host)
+end
+
+"""
+    aws_host_utils_is_ipv6(host, is_uri_encoded)
+
+Determine whether host cursor is IPv6 string. Supports checking for uri encoded strings and scoped literals.
+
+### Prototype
+```c
+bool aws_host_utils_is_ipv6(struct aws_byte_cursor host, bool is_uri_encoded);
+```
+"""
+function aws_host_utils_is_ipv6(host, is_uri_encoded)
+    ccall((:aws_host_utils_is_ipv6, libaws_c_common), Bool, (aws_byte_cursor, Bool), host, is_uri_encoded)
 end
 
 """
@@ -7968,11 +8686,11 @@ Log subject is an enum similar to aws error: each library has its own value-spac
 const aws_log_subject_t = UInt32
 
 """
-    __JL_Ctag_645
+    __JL_Ctag_689
 
 Each library gets space for 2^^10 log subject entries
 """
-@cenum __JL_Ctag_645::UInt32 begin
+@cenum __JL_Ctag_689::UInt32 begin
     AWS_LOG_SUBJECT_STRIDE_BITS = 10
 end
 
@@ -8012,6 +8730,7 @@ Documentation not found.
     AWS_LS_COMMON_BUS = 6
     AWS_LS_COMMON_TEST = 7
     AWS_LS_COMMON_JSON_PARSER = 8
+    AWS_LS_COMMON_CBOR = 9
     AWS_LS_COMMON_LAST = 1023
 end
 
@@ -8298,11 +9017,11 @@ Documentation not found.
 const static_assertion_at_line_62 = NTuple{1, Cchar}
 
 """
-    __JL_Ctag_665
+    __JL_Ctag_709
 
 Documentation not found.
 """
-@cenum __JL_Ctag_665::UInt32 begin
+@cenum __JL_Ctag_709::UInt32 begin
     AWS_CACHE_LINE = 64
 end
 
@@ -8774,165 +9493,6 @@ function aws_run_command(allocator, options, result)
     ccall((:aws_run_command, libaws_c_common), Cint, (Ptr{aws_allocator}, Ptr{aws_run_command_options}, Ptr{aws_run_command_result}), allocator, options, result)
 end
 
-"""
-Standard promise interface. Promise can be waited on by multiple threads, and as long as it is ref-counted correctly, will provide the resultant value/error code to all waiters. All promise API calls are internally thread-safe.
-"""
-mutable struct aws_promise end
-
-"""
-    aws_promise_new(allocator)
-
-Creates a new promise
-
-### Prototype
-```c
-struct aws_promise *aws_promise_new(struct aws_allocator *allocator);
-```
-"""
-function aws_promise_new(allocator)
-    ccall((:aws_promise_new, libaws_c_common), Ptr{aws_promise}, (Ptr{aws_allocator},), allocator)
-end
-
-"""
-    aws_promise_acquire(promise)
-
-Indicate a new reference to a promise. At minimum, each new thread making use of the promise should acquire it.
-
-### Prototype
-```c
-struct aws_promise *aws_promise_acquire(struct aws_promise *promise);
-```
-"""
-function aws_promise_acquire(promise)
-    ccall((:aws_promise_acquire, libaws_c_common), Ptr{aws_promise}, (Ptr{aws_promise},), promise)
-end
-
-"""
-    aws_promise_release(promise)
-
-Releases a reference on the promise. When the refcount hits 0, the promise is cleaned up and freed.
-
-### Prototype
-```c
-void aws_promise_release(struct aws_promise *promise);
-```
-"""
-function aws_promise_release(promise)
-    ccall((:aws_promise_release, libaws_c_common), Cvoid, (Ptr{aws_promise},), promise)
-end
-
-"""
-    aws_promise_wait(promise)
-
-Waits infinitely for the promise to be completed
-
-### Prototype
-```c
-void aws_promise_wait(struct aws_promise *promise);
-```
-"""
-function aws_promise_wait(promise)
-    ccall((:aws_promise_wait, libaws_c_common), Cvoid, (Ptr{aws_promise},), promise)
-end
-
-"""
-    aws_promise_wait_for(promise, nanoseconds)
-
-Waits for the requested time in nanoseconds. Returns true if the promise was completed.
-
-### Prototype
-```c
-bool aws_promise_wait_for(struct aws_promise *promise, size_t nanoseconds);
-```
-"""
-function aws_promise_wait_for(promise, nanoseconds)
-    ccall((:aws_promise_wait_for, libaws_c_common), Bool, (Ptr{aws_promise}, Csize_t), promise, nanoseconds)
-end
-
-"""
-    aws_promise_complete(promise, value, dtor)
-
-Completes the promise and stores the result along with an optional destructor. If the value is not taken via [`aws_promise_take_value`](@ref), it will be destroyed when the promise's reference count reaches zero. NOTE: Promise cannot be completed twice
-
-### Prototype
-```c
-void aws_promise_complete(struct aws_promise *promise, void *value, void (*dtor)(void *));
-```
-"""
-function aws_promise_complete(promise, value, dtor)
-    ccall((:aws_promise_complete, libaws_c_common), Cvoid, (Ptr{aws_promise}, Ptr{Cvoid}, Ptr{Cvoid}), promise, value, dtor)
-end
-
-"""
-    aws_promise_fail(promise, error_code)
-
-Completes the promise and stores the error code NOTE: Promise cannot be completed twice
-
-### Prototype
-```c
-void aws_promise_fail(struct aws_promise *promise, int error_code);
-```
-"""
-function aws_promise_fail(promise, error_code)
-    ccall((:aws_promise_fail, libaws_c_common), Cvoid, (Ptr{aws_promise}, Cint), promise, error_code)
-end
-
-"""
-    aws_promise_is_complete(promise)
-
-Returns whether or not the promise has completed (regardless of success or failure)
-
-### Prototype
-```c
-bool aws_promise_is_complete(struct aws_promise *promise);
-```
-"""
-function aws_promise_is_complete(promise)
-    ccall((:aws_promise_is_complete, libaws_c_common), Bool, (Ptr{aws_promise},), promise)
-end
-
-"""
-    aws_promise_error_code(promise)
-
-Returns the error code recorded if the promise failed, or 0 if it succeeded NOTE: It is fatal to attempt to retrieve the error code before the promise is completed
-
-### Prototype
-```c
-int aws_promise_error_code(struct aws_promise *promise);
-```
-"""
-function aws_promise_error_code(promise)
-    ccall((:aws_promise_error_code, libaws_c_common), Cint, (Ptr{aws_promise},), promise)
-end
-
-"""
-    aws_promise_value(promise)
-
-Returns the value provided to the promise if it succeeded, or NULL if none was provided or the promise failed. Check [`aws_promise_error_code`](@ref) to be sure. NOTE: The ownership of the value is retained by the promise. NOTE: It is fatal to attempt to retrieve the value before the promise is completed
-
-### Prototype
-```c
-void *aws_promise_value(struct aws_promise *promise);
-```
-"""
-function aws_promise_value(promise)
-    ccall((:aws_promise_value, libaws_c_common), Ptr{Cvoid}, (Ptr{aws_promise},), promise)
-end
-
-"""
-    aws_promise_take_value(promise)
-
-Returns the value provided to the promise if it succeeded, or NULL if none was provided or the promise failed. Check [`aws_promise_error_code`](@ref) to be sure. NOTE: The promise relinquishes ownership of the value, the caller is now responsible for freeing any resources associated with the value NOTE: It is fatal to attempt to take the value before the promise is completed
-
-### Prototype
-```c
-void *aws_promise_take_value(struct aws_promise *promise);
-```
-"""
-function aws_promise_take_value(promise)
-    ccall((:aws_promise_take_value, libaws_c_common), Ptr{Cvoid}, (Ptr{aws_promise},), promise)
-end
-
 # typedef void ( aws_simple_completion_callback ) ( void * )
 """
 Documentation not found.
@@ -9279,11 +9839,11 @@ Documentation not found.
 const aws_crt_statistics_category_t = UInt32
 
 """
-    __JL_Ctag_861
+    __JL_Ctag_886
 
 Each library gets space for 2^^8 category entries
 """
-@cenum __JL_Ctag_861::UInt32 begin
+@cenum __JL_Ctag_886::UInt32 begin
     AWS_CRT_STATISTICS_CATEGORY_STRIDE_BITS = 8
 end
 
@@ -10049,28 +10609,28 @@ A scheduled function.
 const aws_task_fn = Cvoid
 
 """
-    __JL_Ctag_1250
+    __JL_Ctag_1266
 
 honor the ABI compat
 """
-struct __JL_Ctag_1250
+struct __JL_Ctag_1266
     data::NTuple{8, UInt8}
 end
 
-function Base.getproperty(x::Ptr{__JL_Ctag_1250}, f::Symbol)
+function Base.getproperty(x::Ptr{__JL_Ctag_1266}, f::Symbol)
     f === :scheduled && return Ptr{Bool}(x + 0)
     f === :reserved && return Ptr{Csize_t}(x + 0)
     return getfield(x, f)
 end
 
-function Base.getproperty(x::__JL_Ctag_1250, f::Symbol)
-    r = Ref{__JL_Ctag_1250}(x)
-    ptr = Base.unsafe_convert(Ptr{__JL_Ctag_1250}, r)
+function Base.getproperty(x::__JL_Ctag_1266, f::Symbol)
+    r = Ref{__JL_Ctag_1266}(x)
+    ptr = Base.unsafe_convert(Ptr{__JL_Ctag_1266}, r)
     fptr = getproperty(ptr, f)
     GC.@preserve r unsafe_load(fptr)
 end
 
-function Base.setproperty!(x::Ptr{__JL_Ctag_1250}, f::Symbol, v)
+function Base.setproperty!(x::Ptr{__JL_Ctag_1266}, f::Symbol, v)
     unsafe_store!(getproperty(x, f), v)
 end
 
@@ -10090,7 +10650,7 @@ function Base.getproperty(x::Ptr{aws_task}, f::Symbol)
     f === :node && return Ptr{aws_linked_list_node}(x + 24)
     f === :priority_queue_node && return Ptr{aws_priority_queue_node}(x + 40)
     f === :type_tag && return Ptr{Ptr{Cchar}}(x + 48)
-    f === :abi_extension && return Ptr{__JL_Ctag_1250}(x + 56)
+    f === :abi_extension && return Ptr{__JL_Ctag_1266}(x + 56)
     return getfield(x, f)
 end
 
@@ -11038,11 +11598,11 @@ struct aws_uuid
 end
 
 """
-    __JL_Ctag_1090
+    __JL_Ctag_1115
 
 36 bytes for the UUID plus one more for the null terminator.
 """
-@cenum __JL_Ctag_1090::UInt32 begin
+@cenum __JL_Ctag_1115::UInt32 begin
     AWS_UUID_STR_LEN = 37
 end
 
@@ -11499,11 +12059,11 @@ function enable_vt_mode()
 end
 
 """
-    __JL_Ctag_1197
+    __JL_Ctag_1222
 
 Documentation not found.
 """
-struct __JL_Ctag_1197
+struct __JL_Ctag_1222
     __lock::Cint
     __futex::Cuint
     __total_seq::Culonglong
@@ -11513,7 +12073,7 @@ struct __JL_Ctag_1197
     __nwaiters::Cuint
     __broadcast_seq::Cuint
 end
-function Base.getproperty(x::Ptr{__JL_Ctag_1197}, f::Symbol)
+function Base.getproperty(x::Ptr{__JL_Ctag_1222}, f::Symbol)
     f === :__lock && return Ptr{Cint}(x + 0)
     f === :__futex && return Ptr{Cuint}(x + 4)
     f === :__total_seq && return Ptr{Culonglong}(x + 8)
@@ -11525,24 +12085,24 @@ function Base.getproperty(x::Ptr{__JL_Ctag_1197}, f::Symbol)
     return getfield(x, f)
 end
 
-function Base.getproperty(x::__JL_Ctag_1197, f::Symbol)
-    r = Ref{__JL_Ctag_1197}(x)
-    ptr = Base.unsafe_convert(Ptr{__JL_Ctag_1197}, r)
+function Base.getproperty(x::__JL_Ctag_1222, f::Symbol)
+    r = Ref{__JL_Ctag_1222}(x)
+    ptr = Base.unsafe_convert(Ptr{__JL_Ctag_1222}, r)
     fptr = getproperty(ptr, f)
     GC.@preserve r unsafe_load(fptr)
 end
 
-function Base.setproperty!(x::Ptr{__JL_Ctag_1197}, f::Symbol, v)
+function Base.setproperty!(x::Ptr{__JL_Ctag_1222}, f::Symbol, v)
     unsafe_store!(getproperty(x, f), v)
 end
 
 
 """
-    __JL_Ctag_1198
+    __JL_Ctag_1223
 
 Documentation not found.
 """
-struct __JL_Ctag_1198
+struct __JL_Ctag_1223
     __lock::Cint
     __nr_readers::Cuint
     __readers_wakeup::Cuint
@@ -11555,7 +12115,7 @@ struct __JL_Ctag_1198
     __pad2::Culong
     __flags::Cuint
 end
-function Base.getproperty(x::Ptr{__JL_Ctag_1198}, f::Symbol)
+function Base.getproperty(x::Ptr{__JL_Ctag_1223}, f::Symbol)
     f === :__lock && return Ptr{Cint}(x + 0)
     f === :__nr_readers && return Ptr{Cuint}(x + 4)
     f === :__readers_wakeup && return Ptr{Cuint}(x + 8)
@@ -11570,14 +12130,14 @@ function Base.getproperty(x::Ptr{__JL_Ctag_1198}, f::Symbol)
     return getfield(x, f)
 end
 
-function Base.getproperty(x::__JL_Ctag_1198, f::Symbol)
-    r = Ref{__JL_Ctag_1198}(x)
-    ptr = Base.unsafe_convert(Ptr{__JL_Ctag_1198}, r)
+function Base.getproperty(x::__JL_Ctag_1223, f::Symbol)
+    r = Ref{__JL_Ctag_1223}(x)
+    ptr = Base.unsafe_convert(Ptr{__JL_Ctag_1223}, r)
     fptr = getproperty(ptr, f)
     GC.@preserve r unsafe_load(fptr)
 end
 
-function Base.setproperty!(x::Ptr{__JL_Ctag_1198}, f::Symbol, v)
+function Base.setproperty!(x::Ptr{__JL_Ctag_1223}, f::Symbol, v)
     unsafe_store!(getproperty(x, f), v)
 end
 
@@ -11598,103 +12158,103 @@ struct __pthread_mutex_s
 end
 
 """
-    __JL_Ctag_1215
+    __JL_Ctag_1300
 
 Documentation not found.
 """
-struct __JL_Ctag_1215
+struct __JL_Ctag_1300
     si_pid::__pid_t
     si_uid::__uid_t
 end
-function Base.getproperty(x::Ptr{__JL_Ctag_1215}, f::Symbol)
+function Base.getproperty(x::Ptr{__JL_Ctag_1300}, f::Symbol)
     f === :si_pid && return Ptr{__pid_t}(x + 0)
     f === :si_uid && return Ptr{__uid_t}(x + 4)
     return getfield(x, f)
 end
 
-function Base.getproperty(x::__JL_Ctag_1215, f::Symbol)
-    r = Ref{__JL_Ctag_1215}(x)
-    ptr = Base.unsafe_convert(Ptr{__JL_Ctag_1215}, r)
+function Base.getproperty(x::__JL_Ctag_1300, f::Symbol)
+    r = Ref{__JL_Ctag_1300}(x)
+    ptr = Base.unsafe_convert(Ptr{__JL_Ctag_1300}, r)
     fptr = getproperty(ptr, f)
     GC.@preserve r unsafe_load(fptr)
 end
 
-function Base.setproperty!(x::Ptr{__JL_Ctag_1215}, f::Symbol, v)
+function Base.setproperty!(x::Ptr{__JL_Ctag_1300}, f::Symbol, v)
     unsafe_store!(getproperty(x, f), v)
 end
 
 
 """
-    __JL_Ctag_1216
+    __JL_Ctag_1301
 
 Documentation not found.
 """
-struct __JL_Ctag_1216
+struct __JL_Ctag_1301
     si_tid::Cint
     si_overrun::Cint
     si_sigval::sigval_t
 end
-function Base.getproperty(x::Ptr{__JL_Ctag_1216}, f::Symbol)
+function Base.getproperty(x::Ptr{__JL_Ctag_1301}, f::Symbol)
     f === :si_tid && return Ptr{Cint}(x + 0)
     f === :si_overrun && return Ptr{Cint}(x + 4)
     f === :si_sigval && return Ptr{sigval_t}(x + 8)
     return getfield(x, f)
 end
 
-function Base.getproperty(x::__JL_Ctag_1216, f::Symbol)
-    r = Ref{__JL_Ctag_1216}(x)
-    ptr = Base.unsafe_convert(Ptr{__JL_Ctag_1216}, r)
+function Base.getproperty(x::__JL_Ctag_1301, f::Symbol)
+    r = Ref{__JL_Ctag_1301}(x)
+    ptr = Base.unsafe_convert(Ptr{__JL_Ctag_1301}, r)
     fptr = getproperty(ptr, f)
     GC.@preserve r unsafe_load(fptr)
 end
 
-function Base.setproperty!(x::Ptr{__JL_Ctag_1216}, f::Symbol, v)
+function Base.setproperty!(x::Ptr{__JL_Ctag_1301}, f::Symbol, v)
     unsafe_store!(getproperty(x, f), v)
 end
 
 
 """
-    __JL_Ctag_1217
+    __JL_Ctag_1302
 
 Documentation not found.
 """
-struct __JL_Ctag_1217
+struct __JL_Ctag_1302
     si_pid::__pid_t
     si_uid::__uid_t
     si_sigval::sigval_t
 end
-function Base.getproperty(x::Ptr{__JL_Ctag_1217}, f::Symbol)
+function Base.getproperty(x::Ptr{__JL_Ctag_1302}, f::Symbol)
     f === :si_pid && return Ptr{__pid_t}(x + 0)
     f === :si_uid && return Ptr{__uid_t}(x + 4)
     f === :si_sigval && return Ptr{sigval_t}(x + 8)
     return getfield(x, f)
 end
 
-function Base.getproperty(x::__JL_Ctag_1217, f::Symbol)
-    r = Ref{__JL_Ctag_1217}(x)
-    ptr = Base.unsafe_convert(Ptr{__JL_Ctag_1217}, r)
+function Base.getproperty(x::__JL_Ctag_1302, f::Symbol)
+    r = Ref{__JL_Ctag_1302}(x)
+    ptr = Base.unsafe_convert(Ptr{__JL_Ctag_1302}, r)
     fptr = getproperty(ptr, f)
     GC.@preserve r unsafe_load(fptr)
 end
 
-function Base.setproperty!(x::Ptr{__JL_Ctag_1217}, f::Symbol, v)
+function Base.setproperty!(x::Ptr{__JL_Ctag_1302}, f::Symbol, v)
     unsafe_store!(getproperty(x, f), v)
 end
 
 
 """
-    __JL_Ctag_1218
+    __JL_Ctag_1303
 
 Documentation not found.
 """
-struct __JL_Ctag_1218
+struct __JL_Ctag_1303
     si_pid::__pid_t
     si_uid::__uid_t
     si_status::Cint
     si_utime::__clock_t
     si_stime::__clock_t
 end
-function Base.getproperty(x::Ptr{__JL_Ctag_1218}, f::Symbol)
+function Base.getproperty(x::Ptr{__JL_Ctag_1303}, f::Symbol)
     f === :si_pid && return Ptr{__pid_t}(x + 0)
     f === :si_uid && return Ptr{__uid_t}(x + 4)
     f === :si_status && return Ptr{Cint}(x + 8)
@@ -11703,97 +12263,97 @@ function Base.getproperty(x::Ptr{__JL_Ctag_1218}, f::Symbol)
     return getfield(x, f)
 end
 
-function Base.getproperty(x::__JL_Ctag_1218, f::Symbol)
-    r = Ref{__JL_Ctag_1218}(x)
-    ptr = Base.unsafe_convert(Ptr{__JL_Ctag_1218}, r)
+function Base.getproperty(x::__JL_Ctag_1303, f::Symbol)
+    r = Ref{__JL_Ctag_1303}(x)
+    ptr = Base.unsafe_convert(Ptr{__JL_Ctag_1303}, r)
     fptr = getproperty(ptr, f)
     GC.@preserve r unsafe_load(fptr)
 end
 
-function Base.setproperty!(x::Ptr{__JL_Ctag_1218}, f::Symbol, v)
+function Base.setproperty!(x::Ptr{__JL_Ctag_1303}, f::Symbol, v)
     unsafe_store!(getproperty(x, f), v)
 end
 
 
 """
-    __JL_Ctag_1219
+    __JL_Ctag_1304
 
 Documentation not found.
 """
-struct __JL_Ctag_1219
+struct __JL_Ctag_1304
     si_addr::Ptr{Cvoid}
     si_addr_lsb::Cshort
 end
-function Base.getproperty(x::Ptr{__JL_Ctag_1219}, f::Symbol)
+function Base.getproperty(x::Ptr{__JL_Ctag_1304}, f::Symbol)
     f === :si_addr && return Ptr{Ptr{Cvoid}}(x + 0)
     f === :si_addr_lsb && return Ptr{Cshort}(x + 8)
     return getfield(x, f)
 end
 
-function Base.getproperty(x::__JL_Ctag_1219, f::Symbol)
-    r = Ref{__JL_Ctag_1219}(x)
-    ptr = Base.unsafe_convert(Ptr{__JL_Ctag_1219}, r)
+function Base.getproperty(x::__JL_Ctag_1304, f::Symbol)
+    r = Ref{__JL_Ctag_1304}(x)
+    ptr = Base.unsafe_convert(Ptr{__JL_Ctag_1304}, r)
     fptr = getproperty(ptr, f)
     GC.@preserve r unsafe_load(fptr)
 end
 
-function Base.setproperty!(x::Ptr{__JL_Ctag_1219}, f::Symbol, v)
+function Base.setproperty!(x::Ptr{__JL_Ctag_1304}, f::Symbol, v)
     unsafe_store!(getproperty(x, f), v)
 end
 
 
 """
-    __JL_Ctag_1220
+    __JL_Ctag_1305
 
 Documentation not found.
 """
-struct __JL_Ctag_1220
+struct __JL_Ctag_1305
     si_band::Clong
     si_fd::Cint
 end
-function Base.getproperty(x::Ptr{__JL_Ctag_1220}, f::Symbol)
+function Base.getproperty(x::Ptr{__JL_Ctag_1305}, f::Symbol)
     f === :si_band && return Ptr{Clong}(x + 0)
     f === :si_fd && return Ptr{Cint}(x + 8)
     return getfield(x, f)
 end
 
-function Base.getproperty(x::__JL_Ctag_1220, f::Symbol)
-    r = Ref{__JL_Ctag_1220}(x)
-    ptr = Base.unsafe_convert(Ptr{__JL_Ctag_1220}, r)
+function Base.getproperty(x::__JL_Ctag_1305, f::Symbol)
+    r = Ref{__JL_Ctag_1305}(x)
+    ptr = Base.unsafe_convert(Ptr{__JL_Ctag_1305}, r)
     fptr = getproperty(ptr, f)
     GC.@preserve r unsafe_load(fptr)
 end
 
-function Base.setproperty!(x::Ptr{__JL_Ctag_1220}, f::Symbol, v)
+function Base.setproperty!(x::Ptr{__JL_Ctag_1305}, f::Symbol, v)
     unsafe_store!(getproperty(x, f), v)
 end
 
 
 """
-    __JL_Ctag_1221
+    __JL_Ctag_1306
 
 Documentation not found.
 """
-struct __JL_Ctag_1221
+struct __JL_Ctag_1306
     _call_addr::Ptr{Cvoid}
     _syscall::Cint
     _arch::Cuint
 end
-function Base.getproperty(x::Ptr{__JL_Ctag_1221}, f::Symbol)
+function Base.getproperty(x::Ptr{__JL_Ctag_1306}, f::Symbol)
     f === :_call_addr && return Ptr{Ptr{Cvoid}}(x + 0)
     f === :_syscall && return Ptr{Cint}(x + 8)
     f === :_arch && return Ptr{Cuint}(x + 12)
     return getfield(x, f)
 end
 
-function Base.getproperty(x::__JL_Ctag_1221, f::Symbol)
-    r = Ref{__JL_Ctag_1221}(x)
-    ptr = Base.unsafe_convert(Ptr{__JL_Ctag_1221}, r)
+function Base.getproperty(x::__JL_Ctag_1306, f::Symbol)
+    r = Ref{__JL_Ctag_1306}(x)
+    ptr = Base.unsafe_convert(Ptr{__JL_Ctag_1306}, r)
     fptr = getproperty(ptr, f)
     GC.@preserve r unsafe_load(fptr)
 end
 
-function Base.setproperty!(x::Ptr{__JL_Ctag_1221}, f::Symbol, v)
+function Base.setproperty!(x::Ptr{__JL_Ctag_1306}, f::Symbol, v)
     unsafe_store!(getproperty(x, f), v)
 end
 
@@ -11802,6 +12362,31 @@ end
 Documentation not found.
 """
 const AWS_OP_SUCCESS = 0
+
+"""
+Documentation not found.
+"""
+const AWS_CBOR_TAG_STANDARD_TIME = 0
+
+"""
+Documentation not found.
+"""
+const AWS_CBOR_TAG_EPOCH_TIME = 1
+
+"""
+Documentation not found.
+"""
+const AWS_CBOR_TAG_UNSIGNED_BIGNUM = 2
+
+"""
+Documentation not found.
+"""
+const AWS_CBOR_TAG_NEGATIVE_BIGNUM = 3
+
+"""
+Documentation not found.
+"""
+const AWS_CBOR_TAG_DECIMAL_FRACTION = 4
 
 """
 Documentation not found.
@@ -11899,7 +12484,7 @@ Documentation not found.
 """
 Documentation not found.
 """
-const AWS_PACKAGE_SLOTS = 16
+const AWS_PACKAGE_SLOTS = 32
 
 """
 Documentation not found.
