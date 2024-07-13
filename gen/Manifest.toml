@@ -1,8 +1,8 @@
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.10.2"
+julia_version = "1.10.4"
 manifest_format = "2.0"
-project_hash = "981bed63f0072e15b9d8cfedf2a309eaddd66050"
+project_hash = "35a24eff95fae19634cc4836c22f45163c5cea2a"
 
 [[deps.ArgTools]]
 uuid = "0dad84c5-d112-42e6-8d28-ef12dabb789f"
@@ -209,9 +209,9 @@ version = "1.2.13+1"
 
 [[deps.aws_c_common_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl"]
-git-tree-sha1 = "586a1aa2fdda172c45587b52f5329fedde14f44c"
+git-tree-sha1 = "68d3a903076819904e9e27d077b59b95fcca44e0"
 uuid = "73048d1d-b8c4-5092-a58d-866c5e8d1e50"
-version = "0.9.14+0"
+version = "0.9.23+0"
 
 [[deps.libLLVM_jll]]
 deps = ["Artifacts", "Libdl"]
