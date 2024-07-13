@@ -5,3 +5,6 @@
 # LibAwsCommon.jl
 
 Julia bindings for the [aws-c-common](https://github.com/awslabs/aws-c-common) library.
+
+
+<img width="881" alt="image" src="https://github.com/user-attachments/assets/ac9cd218-8988-47be-865f-957f69d01182">
