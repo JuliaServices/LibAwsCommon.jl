@@ -43,7 +43,28 @@ for name in names(@__MODULE__; all=true)
     @eval export $name
 end
 
-function init(allocator=aws_default_allocator())
+const DEFAULT_AWS_ALLOCATOR = Ref{Ptr{aws_allocator}}(C_NULL)
+const DEFAULT_AWS_ALLOCATOR_LOCK = ReentrantLock()
+
+function set_default_aws_allocator!(allocator)
+    @lock DEFAULT_AWS_ALLOCATOR_LOCK begin
+        DEFAULT_AWS_ALLOCATOR[] = allocator
+        return
+    end
+end
+
+function default_aws_allocator()
+    @lock DEFAULT_AWS_ALLOCATOR_LOCK begin
+        if DEFAULT_AWS_ALLOCATOR[] == C_NULL
+            set_default_aws_allocator!(aws_default_allocator())
+        end
+        return DEFAULT_AWS_ALLOCATOR[]
+    end
+end
+
+export default_aws_allocator, set_default_aws_allocator!
+
+function init(allocator=default_aws_allocator())
     aws_common_library_init(allocator)
     return
 end
