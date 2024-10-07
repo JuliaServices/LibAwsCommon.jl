@@ -62,6 +62,8 @@ function default_aws_allocator()
     end
 end
 
+mem_trace_allocator(allocator=default_aws_allocator(), mem_trace_level=AWS_MEMTRACE_STACKS, frames_per_stack=8) = aws_mem_tracer_new(allocator, C_NULL, mem_trace_level, frames_per_stack)
+
 export default_aws_allocator, set_default_aws_allocator!
 
 function init(allocator=default_aws_allocator())
