@@ -1,6 +1,7 @@
 module LibAwsCommon
 
-using aws_c_common_jll
+# using aws_c_common_jll
+const libaws_c_common = "/Users/jacob.quinn/aws-crt/lib/libaws-c-common.so"
 
 const IS_LIBC_MUSL = occursin("musl", Base.BUILD_TRIPLET)
 if Sys.isapple() && Sys.ARCH === :aarch64
@@ -56,7 +57,8 @@ end
 function default_aws_allocator()
     @lock DEFAULT_AWS_ALLOCATOR_LOCK begin
         if DEFAULT_AWS_ALLOCATOR[] == C_NULL
-            set_default_aws_allocator!(aws_default_allocator())
+            alloc = mem_trace_allocator(aws_default_allocator(), AWS_MEMTRACE_STACKS)
+            set_default_aws_allocator!(alloc)
         end
         return DEFAULT_AWS_ALLOCATOR[]
     end
