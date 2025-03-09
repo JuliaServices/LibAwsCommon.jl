@@ -4800,7 +4800,7 @@ end
 
 Consume the next data item, includes all the content within the data item.
 
-As an example for the following cbor, this function will consume all the data as it's only one cbor data item, an indefinite map with 2 key, value pair: 0xbf6346756ef563416d7421ff BF -- Start indefinite-length map 63 -- First key, UTF-8 string length 3 46756e -- "Fun" F5 -- First value, true 63 -- Second key, UTF-8 string length 3 416d74 -- "Amt" 21 -- Second value, -2 FF -- "break"
+As an example for the following cbor, this function will consume all the data as it's only one cbor data item, an indefinite map with 2 <key, value> pair: 0xbf6346756ef563416d7421ff BF -- Start indefinite-length map 63 -- First key, UTF-8 string length 3 46756e -- "Fun" F5 -- First value, true 63 -- Second key, UTF-8 string length 3 416d74 -- "Amt" 21 -- Second value, -2 FF -- "break"
 
 Notes: this function will not ensure the data item is well-formed.
 
@@ -4840,7 +4840,7 @@ end
 """
     aws_cbor_decoder_pop_next_unsigned_int_val(decoder, out)
 
-Get the next element based on the type. If the next element doesn't match the expected type. Error will be raised. If the next element already been cached, it will consume the cached item when no error was returned. Specifically: AWS\\_CBOR\\_TYPE\\_UINT - [`aws_cbor_decoder_pop_next_unsigned_int_val`](@ref) AWS\\_CBOR\\_TYPE\\_NEGINT - [`aws_cbor_decoder_pop_next_negative_int_val`](@ref), it represents (-1 - *out) AWS\\_CBOR\\_TYPE\\_FLOAT - aws\\_cbor\\_decoder\\_pop\\_next\\_double\\_val AWS\\_CBOR\\_TYPE\\_BYTES - [`aws_cbor_decoder_pop_next_bytes_val`](@ref) AWS\\_CBOR\\_TYPE\\_TEXT - [`aws_cbor_decoder_pop_next_text_val`](@ref)
+Get the next element based on the type. If the next element doesn't match the expected type. Error will be raised. If the next element already been cached, it will consume the cached item when no error was returned. Specifically: AWS\\_CBOR\\_TYPE\\_UINT - [`aws_cbor_decoder_pop_next_unsigned_int_val`](@ref) AWS\\_CBOR\\_TYPE\\_NEGINT - [`aws_cbor_decoder_pop_next_negative_int_val`](@ref), it represents (-1 - *out) AWS\\_CBOR\\_TYPE\\_FLOAT - [`aws_cbor_decoder_pop_next_float_val`](@ref) AWS\\_CBOR\\_TYPE\\_BYTES - [`aws_cbor_decoder_pop_next_bytes_val`](@ref) AWS\\_CBOR\\_TYPE\\_TEXT - [`aws_cbor_decoder_pop_next_text_val`](@ref)
 
 # Arguments
 * `decoder`:
@@ -5273,7 +5273,7 @@ end
 """
     aws_condition_variable_wait(condition_variable, mutex)
 
-Waits the calling thread on a notification from another thread.
+Waits the calling thread on a notification from another thread. This function must be called with the mutex locked by the calling thread otherwise the behavior is undefined. Spurious wakeups can occur and to avoid this causing any problems use the \\_pred version of this function.
 
 ### Prototype
 ```c
@@ -5287,7 +5287,7 @@ end
 """
     aws_condition_variable_wait_pred(condition_variable, mutex, pred, pred_ctx)
 
-Waits the calling thread on a notification from another thread. If predicate returns false, the wait is reentered, otherwise control returns to the caller.
+Waits the calling thread on a notification from another thread. If predicate returns false, the wait is reentered, otherwise control returns to the caller. This function must be called with the mutex locked by the calling thread otherwise the behavior is undefined.
 
 ### Prototype
 ```c
@@ -5301,7 +5301,7 @@ end
 """
     aws_condition_variable_wait_for(condition_variable, mutex, time_to_wait)
 
-Waits the calling thread on a notification from another thread. Times out after time\\_to\\_wait. time\\_to\\_wait is in nanoseconds.
+Waits the calling thread on a notification from another thread. Times out after time\\_to\\_wait. time\\_to\\_wait is in nanoseconds. This function must be called with the mutex locked by the calling thread otherwise the behavior is undefined. Spurious wakeups can occur and to avoid this causing any problems use the \\_pred version of this function.
 
 ### Prototype
 ```c
@@ -5315,7 +5315,7 @@ end
 """
     aws_condition_variable_wait_for_pred(condition_variable, mutex, time_to_wait, pred, pred_ctx)
 
-Waits the calling thread on a notification from another thread. Times out after time\\_to\\_wait. time\\_to\\_wait is in nanoseconds. If predicate returns false, the wait is reentered, otherwise control returns to the caller.
+Waits the calling thread on a notification from another thread. Times out after time\\_to\\_wait. time\\_to\\_wait is in nanoseconds. If predicate returns false, the wait is reentered, otherwise control returns to the caller. This function must be called with the mutex locked by the calling thread otherwise the behavior is undefined.
 
 ### Prototype
 ```c
@@ -5857,7 +5857,7 @@ end
 """
     aws_hex_encode(to_encode, output)
 
-Base 16 (hex) encodes the contents of to\\_encode and stores the result in output. 0 terminates the result. Assumes the buffer is empty and does not resize on insufficient capacity.
+Base 16 (hex) encodes the contents of to\\_encode and stores the result in output. Assumes the buffer is empty and does not resize on insufficient capacity.
 
 ### Prototype
 ```c
@@ -5871,7 +5871,7 @@ end
 """
     aws_hex_encode_append_dynamic(to_encode, output)
 
-Base 16 (hex) encodes the contents of to\\_encode and appends the result in output. Does not 0-terminate. Grows the destination buffer dynamically if necessary.
+Base 16 (hex) encodes the contents of to\\_encode and appends the result in output. Grows the destination buffer dynamically if necessary.
 
 ### Prototype
 ```c
@@ -6240,9 +6240,37 @@ struct aws_string
 end
 
 """
-    aws_get_environment_value(allocator, variable_name, value_out)
+    aws_get_env(allocator, name)
 
 Get the value of an environment variable. If the variable is not set, the output string will be set to NULL. Not thread-safe
+
+### Prototype
+```c
+struct aws_string *aws_get_env(struct aws_allocator *allocator, const char *name);
+```
+"""
+function aws_get_env(allocator, name)
+    ccall((:aws_get_env, libaws_c_common), Ptr{aws_string}, (Ptr{aws_allocator}, Ptr{Cchar}), allocator, name)
+end
+
+"""
+    aws_get_env_nonempty(allocator, name)
+
+Get the value of an environment variable. If the variable is not set or is empty, the output string will be set to NULL. Not thread-safe
+
+### Prototype
+```c
+struct aws_string *aws_get_env_nonempty(struct aws_allocator *allocator, const char *name);
+```
+"""
+function aws_get_env_nonempty(allocator, name)
+    ccall((:aws_get_env_nonempty, libaws_c_common), Ptr{aws_string}, (Ptr{aws_allocator}, Ptr{Cchar}), allocator, name)
+end
+
+"""
+    aws_get_environment_value(allocator, variable_name, value_out)
+
+*DEPRECATED* Please use the [`aws_get_env`](@ref) or [`aws_get_env_nonempty`](@ref) instead. Get the value of an environment variable. If the variable is not set, the output string will be set to NULL. Not thread-safe
 
 ### Prototype
 ```c
@@ -7495,10 +7523,10 @@ mutable struct aws_json_value end
 
 Creates a new string [`aws_json_value`](@ref) with the given string and returns a pointer to it.
 
-Note: You will need to free the memory for the [`aws_json_value`](@ref) using aws\\_json\\_destroy on the [`aws_json_value`](@ref) or on the object/array containing the [`aws_json_value`](@ref).
+Note: You will need to free the memory for the [`aws_json_value`](@ref) using aws\\_json\\_destroy on the [`aws_json_value`](@ref) or on the object/array containing the [`aws_json_value`](@ref). Note: might be slower than c\\_str version due to internal copy
 
 # Arguments
-* `string`: A byte pointer to the string you want to store in the [`aws_json_value`](@ref)
+* `string`: A byte cursor you want to store in the [`aws_json_value`](@ref)
 * `allocator`: The allocator to use when creating the value
 # Returns
 A new string [`aws_json_value`](@ref)
@@ -7509,6 +7537,27 @@ struct aws_json_value *aws_json_value_new_string(struct aws_allocator *allocator
 """
 function aws_json_value_new_string(allocator, string)
     ccall((:aws_json_value_new_string, libaws_c_common), Ptr{aws_json_value}, (Ptr{aws_allocator}, aws_byte_cursor), allocator, string)
+end
+
+"""
+    aws_json_value_new_string_from_c_str(allocator, string)
+
+Creates a new string [`aws_json_value`](@ref) with the given string and returns a pointer to it.
+
+Note: You will need to free the memory for the [`aws_json_value`](@ref) using aws\\_json\\_destroy on the [`aws_json_value`](@ref) or on the object/array containing the [`aws_json_value`](@ref).
+
+# Arguments
+* `string`: c string pointer you want to store in the [`aws_json_value`](@ref)
+* `allocator`: The allocator to use when creating the value
+# Returns
+A new string [`aws_json_value`](@ref)
+### Prototype
+```c
+struct aws_json_value *aws_json_value_new_string_from_c_str(struct aws_allocator *allocator, const char *string);
+```
+"""
+function aws_json_value_new_string_from_c_str(allocator, string)
+    ccall((:aws_json_value_new_string_from_c_str, libaws_c_common), Ptr{aws_json_value}, (Ptr{aws_allocator}, Ptr{Cchar}), allocator, string)
 end
 
 """
@@ -7675,7 +7724,7 @@ end
 
 Adds a [`aws_json_value`](@ref) to a object [`aws_json_value`](@ref).
 
-Note that the [`aws_json_value`](@ref) will be destroyed when the [`aws_json_value`](@ref) object is destroyed by calling "aws\\_json\\_destroy()"
+Note that the [`aws_json_value`](@ref) will be destroyed when the [`aws_json_value`](@ref) object is destroyed by calling "aws\\_json\\_destroy()" Note: might be slower than c\\_str version due to internal copy
 
 # Arguments
 * `object`: The object [`aws_json_value`](@ref) you want to add a value to.
@@ -7693,9 +7742,31 @@ function aws_json_value_add_to_object(object, key, value)
 end
 
 """
+    aws_json_value_add_to_object_c_str(object, key, value)
+
+Adds a [`aws_json_value`](@ref) to a object [`aws_json_value`](@ref).
+
+Note that the [`aws_json_value`](@ref) will be destroyed when the [`aws_json_value`](@ref) object is destroyed by calling "aws\\_json\\_destroy()"
+
+# Arguments
+* `object`: The object [`aws_json_value`](@ref) you want to add a value to.
+* `key`: The key to add the [`aws_json_value`](@ref) at.
+* `value`: The [`aws_json_value`](@ref) you want to add.
+# Returns
+[`AWS_OP_SUCCESS`](@ref) if adding was successful. Will return AWS\\_OP\\_ERROR if the object passed is invalid or if the passed key is already in use in the object.
+### Prototype
+```c
+int aws_json_value_add_to_object_c_str(struct aws_json_value *object, const char *key, struct aws_json_value *value);
+```
+"""
+function aws_json_value_add_to_object_c_str(object, key, value)
+    ccall((:aws_json_value_add_to_object_c_str, libaws_c_common), Cint, (Ptr{aws_json_value}, Ptr{Cchar}, Ptr{aws_json_value}), object, key, value)
+end
+
+"""
     aws_json_value_get_from_object(object, key)
 
-Returns the [`aws_json_value`](@ref) at the given key.
+Returns the [`aws_json_value`](@ref) at the given key. Note: might be slower than c\\_str version due to internal copy
 
 # Arguments
 * `object`: The object [`aws_json_value`](@ref) you want to get the value from.
@@ -7712,9 +7783,28 @@ function aws_json_value_get_from_object(object, key)
 end
 
 """
+    aws_json_value_get_from_object_c_str(object, key)
+
+Returns the [`aws_json_value`](@ref) at the given key. Note: same as [`aws_json_value_get_from_object`](@ref) but with key as const char *. Prefer this method is you have a key thats already a valid char * as it is likely to be faster.
+
+# Arguments
+* `object`: The object [`aws_json_value`](@ref) you want to get the value from.
+* `key`: The key that the [`aws_json_value`](@ref) is at. Is case sensitive.
+# Returns
+The [`aws_json_value`](@ref) at the given key, otherwise NULL.
+### Prototype
+```c
+struct aws_json_value *aws_json_value_get_from_object_c_str(const struct aws_json_value *object, const char *key);
+```
+"""
+function aws_json_value_get_from_object_c_str(object, key)
+    ccall((:aws_json_value_get_from_object_c_str, libaws_c_common), Ptr{aws_json_value}, (Ptr{aws_json_value}, Ptr{Cchar}), object, key)
+end
+
+"""
     aws_json_value_has_key(object, key)
 
-Checks if there is a [`aws_json_value`](@ref) at the given key.
+Checks if there is a [`aws_json_value`](@ref) at the given key. Note: might be slower than c\\_str version due to internal copy
 
 # Arguments
 * `object`: The value [`aws_json_value`](@ref) you want to check a key in.
@@ -7731,9 +7821,28 @@ function aws_json_value_has_key(object, key)
 end
 
 """
+    aws_json_value_has_key_c_str(object, key)
+
+Checks if there is a [`aws_json_value`](@ref) at the given key. Note: same as [`aws_json_value_has_key`](@ref) but with key as const char *. Prefer this method is you have a key thats already a valid char * as it is likely to be faster.
+
+# Arguments
+* `object`: The value [`aws_json_value`](@ref) you want to check a key in.
+* `key`: The key that you want to check. Is case sensitive.
+# Returns
+True if a [`aws_json_value`](@ref) is found.
+### Prototype
+```c
+bool aws_json_value_has_key_c_str(const struct aws_json_value *object, const char *key);
+```
+"""
+function aws_json_value_has_key_c_str(object, key)
+    ccall((:aws_json_value_has_key_c_str, libaws_c_common), Bool, (Ptr{aws_json_value}, Ptr{Cchar}), object, key)
+end
+
+"""
     aws_json_value_remove_from_object(object, key)
 
-Removes the [`aws_json_value`](@ref) at the given key.
+Removes the [`aws_json_value`](@ref) at the given key. Note: might be slower than c\\_str version due to internal copy
 
 # Arguments
 * `object`: The object [`aws_json_value`](@ref) you want to remove a [`aws_json_value`](@ref) in.
@@ -7747,6 +7856,25 @@ int aws_json_value_remove_from_object(struct aws_json_value *object, struct aws_
 """
 function aws_json_value_remove_from_object(object, key)
     ccall((:aws_json_value_remove_from_object, libaws_c_common), Cint, (Ptr{aws_json_value}, aws_byte_cursor), object, key)
+end
+
+"""
+    aws_json_value_remove_from_object_c_str(object, key)
+
+Removes the [`aws_json_value`](@ref) at the given key. Note: same as [`aws_json_value_remove_from_object`](@ref) but with key as const char *. Prefer this method is you have a key thats already a valid char * as it is likely to be faster.
+
+# Arguments
+* `object`: The object [`aws_json_value`](@ref) you want to remove a [`aws_json_value`](@ref) in.
+* `key`: The key that the [`aws_json_value`](@ref) is at. Is case sensitive.
+# Returns
+[`AWS_OP_SUCCESS`](@ref) if the [`aws_json_value`](@ref) was removed. Will return [`AWS_OP_ERR`](@ref) if the object passed is invalid or if the value at the key cannot be found.
+### Prototype
+```c
+int aws_json_value_remove_from_object_c_str(struct aws_json_value *object, const char *key);
+```
+"""
+function aws_json_value_remove_from_object_c_str(object, key)
+    ccall((:aws_json_value_remove_from_object_c_str, libaws_c_common), Cint, (Ptr{aws_json_value}, Ptr{Cchar}), object, key)
 end
 
 # typedef int ( aws_json_on_member_encountered_const_fn ) ( const struct aws_byte_cursor * key , const struct aws_json_value * value , bool * out_should_continue , void * user_data )
@@ -9534,16 +9662,6 @@ struct aws_ref_count
 end
 
 """
-    aws_shutdown_callback_options
-
-Documentation not found.
-"""
-struct aws_shutdown_callback_options
-    shutdown_callback_fn::Ptr{aws_simple_completion_callback}
-    shutdown_callback_user_data::Ptr{Cvoid}
-end
-
-"""
     aws_ref_count_init(ref_count, object, on_zero_fn)
 
 Initializes a ref-counter structure. After initialization, the ref count will be 1.
@@ -9857,16 +9975,26 @@ function aws_rw_lock_wunlock(lock)
 end
 
 """
+    aws_shutdown_callback_options
+
+Configuration for a callback to invoke when something has been completely cleaned up. Primarily used in async cleanup control flows.
+"""
+struct aws_shutdown_callback_options
+    shutdown_callback_fn::Ptr{aws_simple_completion_callback}
+    shutdown_callback_user_data::Ptr{Cvoid}
+end
+
+"""
 Documentation not found.
 """
 const aws_crt_statistics_category_t = UInt32
 
 """
-    __JL_Ctag_266
+    __JL_Ctag_272
 
 Each library gets space for 2^^8 category entries
 """
-@cenum __JL_Ctag_266::UInt32 begin
+@cenum __JL_Ctag_272::UInt32 begin
     AWS_CRT_STATISTICS_CATEGORY_STRIDE_BITS = 8
 end
 
@@ -10255,7 +10383,7 @@ end
 """
     aws_byte_cursor_from_string(src)
 
-Creates an [`aws_byte_cursor`](@ref) from an existing string.
+Creates an [`aws_byte_cursor`](@ref) from an existing string. If the src is NULL, it returns an empty cursor
 
 ### Prototype
 ```c
@@ -10632,28 +10760,28 @@ A scheduled function.
 const aws_task_fn = Cvoid
 
 """
-    __JL_Ctag_375
+    __JL_Ctag_381
 
 honor the ABI compat
 """
-struct __JL_Ctag_375
+struct __JL_Ctag_381
     data::NTuple{8, UInt8}
 end
 
-function Base.getproperty(x::Ptr{__JL_Ctag_375}, f::Symbol)
+function Base.getproperty(x::Ptr{__JL_Ctag_381}, f::Symbol)
     f === :scheduled && return Ptr{Bool}(x + 0)
     f === :reserved && return Ptr{Csize_t}(x + 0)
     return getfield(x, f)
 end
 
-function Base.getproperty(x::__JL_Ctag_375, f::Symbol)
-    r = Ref{__JL_Ctag_375}(x)
-    ptr = Base.unsafe_convert(Ptr{__JL_Ctag_375}, r)
+function Base.getproperty(x::__JL_Ctag_381, f::Symbol)
+    r = Ref{__JL_Ctag_381}(x)
+    ptr = Base.unsafe_convert(Ptr{__JL_Ctag_381}, r)
     fptr = getproperty(ptr, f)
     GC.@preserve r unsafe_load(fptr)
 end
 
-function Base.setproperty!(x::Ptr{__JL_Ctag_375}, f::Symbol, v)
+function Base.setproperty!(x::Ptr{__JL_Ctag_381}, f::Symbol, v)
     unsafe_store!(getproperty(x, f), v)
 end
 
@@ -10673,7 +10801,7 @@ function Base.getproperty(x::Ptr{aws_task}, f::Symbol)
     f === :node && return Ptr{aws_linked_list_node}(x + 24)
     f === :priority_queue_node && return Ptr{aws_priority_queue_node}(x + 40)
     f === :type_tag && return Ptr{Ptr{Cchar}}(x + 48)
-    f === :abi_extension && return Ptr{__JL_Ctag_375}(x + 56)
+    f === :abi_extension && return Ptr{__JL_Ctag_381}(x + 56)
     return getfield(x, f)
 end
 
@@ -11621,11 +11749,11 @@ struct aws_uuid
 end
 
 """
-    __JL_Ctag_338
+    __JL_Ctag_344
 
 36 bytes for the UUID plus one more for the null terminator.
 """
-@cenum __JL_Ctag_338::UInt32 begin
+@cenum __JL_Ctag_344::UInt32 begin
     AWS_UUID_STR_LEN = 37
 end
 
