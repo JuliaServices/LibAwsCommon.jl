@@ -82,7 +82,7 @@ struct pthread_cond_t
 end
 
 function Base.getproperty(x::Ptr{pthread_cond_t}, f::Symbol)
-    f === :__data && return Ptr{__JL_Ctag_1222}(x + 0)
+    f === :__data && return Ptr{var"struct (unnamed at /home/runner/.julia/artifacts/5db9b46496bfd3b55724b246c46f9fe838cc66ca/aarch64-linux-gnu/sys-root/usr/include/bits/pthreadtypes.h:88:3)"}(x + 0)
     f === :__size && return Ptr{NTuple{48, Cchar}}(x + 0)
     f === :__align && return Ptr{Clong}(x + 0)
     return getfield(x, f)
@@ -114,7 +114,7 @@ struct pthread_rwlock_t
 end
 
 function Base.getproperty(x::Ptr{pthread_rwlock_t}, f::Symbol)
-    f === :__data && return Ptr{__JL_Ctag_1223}(x + 0)
+    f === :__data && return Ptr{var"struct (unnamed at /home/runner/.julia/artifacts/5db9b46496bfd3b55724b246c46f9fe838cc66ca/aarch64-linux-gnu/sys-root/usr/include/bits/pthreadtypes.h:123:3)"}(x + 0)
     f === :__size && return Ptr{NTuple{56, Cchar}}(x + 0)
     f === :__align && return Ptr{Clong}(x + 0)
     return getfield(x, f)
@@ -182,34 +182,34 @@ Documentation not found.
 const sigval_t = sigval
 
 """
-    __JL_Ctag_1299
+    union (unnamed at /home/runner/.julia/artifacts/5db9b46496bfd3b55724b246c46f9fe838cc66ca/aarch64-linux-gnu/sys-root/usr/include/bits/siginfo.h:57:5)
 
 Documentation not found.
 """
-struct __JL_Ctag_1299
+struct var"union (unnamed at /home/runner/.julia/artifacts/5db9b46496bfd3b55724b246c46f9fe838cc66ca/aarch64-linux-gnu/sys-root/usr/include/bits/siginfo.h:57:5)"
     data::NTuple{112, UInt8}
 end
 
-function Base.getproperty(x::Ptr{__JL_Ctag_1299}, f::Symbol)
+function Base.getproperty(x::Ptr{var"union (unnamed at /home/runner/.julia/artifacts/5db9b46496bfd3b55724b246c46f9fe838cc66ca/aarch64-linux-gnu/sys-root/usr/include/bits/siginfo.h:57:5)"}, f::Symbol)
     f === :_pad && return Ptr{NTuple{28, Cint}}(x + 0)
-    f === :_kill && return Ptr{__JL_Ctag_1300}(x + 0)
-    f === :_timer && return Ptr{__JL_Ctag_1301}(x + 0)
-    f === :_rt && return Ptr{__JL_Ctag_1302}(x + 0)
-    f === :_sigchld && return Ptr{__JL_Ctag_1303}(x + 0)
-    f === :_sigfault && return Ptr{__JL_Ctag_1304}(x + 0)
-    f === :_sigpoll && return Ptr{__JL_Ctag_1305}(x + 0)
-    f === :_sigsys && return Ptr{__JL_Ctag_1306}(x + 0)
+    f === :_kill && return Ptr{var"struct (unnamed at /home/runner/.julia/artifacts/5db9b46496bfd3b55724b246c46f9fe838cc66ca/aarch64-linux-gnu/sys-root/usr/include/bits/siginfo.h:62:2)"}(x + 0)
+    f === :_timer && return Ptr{var"struct (unnamed at /home/runner/.julia/artifacts/5db9b46496bfd3b55724b246c46f9fe838cc66ca/aarch64-linux-gnu/sys-root/usr/include/bits/siginfo.h:69:2)"}(x + 0)
+    f === :_rt && return Ptr{var"struct (unnamed at /home/runner/.julia/artifacts/5db9b46496bfd3b55724b246c46f9fe838cc66ca/aarch64-linux-gnu/sys-root/usr/include/bits/siginfo.h:77:2)"}(x + 0)
+    f === :_sigchld && return Ptr{var"struct (unnamed at /home/runner/.julia/artifacts/5db9b46496bfd3b55724b246c46f9fe838cc66ca/aarch64-linux-gnu/sys-root/usr/include/bits/siginfo.h:85:2)"}(x + 0)
+    f === :_sigfault && return Ptr{var"struct (unnamed at /home/runner/.julia/artifacts/5db9b46496bfd3b55724b246c46f9fe838cc66ca/aarch64-linux-gnu/sys-root/usr/include/bits/siginfo.h:95:2)"}(x + 0)
+    f === :_sigpoll && return Ptr{var"struct (unnamed at /home/runner/.julia/artifacts/5db9b46496bfd3b55724b246c46f9fe838cc66ca/aarch64-linux-gnu/sys-root/usr/include/bits/siginfo.h:102:2)"}(x + 0)
+    f === :_sigsys && return Ptr{var"struct (unnamed at /home/runner/.julia/artifacts/5db9b46496bfd3b55724b246c46f9fe838cc66ca/aarch64-linux-gnu/sys-root/usr/include/bits/siginfo.h:109:2)"}(x + 0)
     return getfield(x, f)
 end
 
-function Base.getproperty(x::__JL_Ctag_1299, f::Symbol)
-    r = Ref{__JL_Ctag_1299}(x)
-    ptr = Base.unsafe_convert(Ptr{__JL_Ctag_1299}, r)
+function Base.getproperty(x::var"union (unnamed at /home/runner/.julia/artifacts/5db9b46496bfd3b55724b246c46f9fe838cc66ca/aarch64-linux-gnu/sys-root/usr/include/bits/siginfo.h:57:5)", f::Symbol)
+    r = Ref{var"union (unnamed at /home/runner/.julia/artifacts/5db9b46496bfd3b55724b246c46f9fe838cc66ca/aarch64-linux-gnu/sys-root/usr/include/bits/siginfo.h:57:5)"}(x)
+    ptr = Base.unsafe_convert(Ptr{var"union (unnamed at /home/runner/.julia/artifacts/5db9b46496bfd3b55724b246c46f9fe838cc66ca/aarch64-linux-gnu/sys-root/usr/include/bits/siginfo.h:57:5)"}, r)
     fptr = getproperty(ptr, f)
     GC.@preserve r unsafe_load(fptr)
 end
 
-function Base.setproperty!(x::Ptr{__JL_Ctag_1299}, f::Symbol, v)
+function Base.setproperty!(x::Ptr{var"union (unnamed at /home/runner/.julia/artifacts/5db9b46496bfd3b55724b246c46f9fe838cc66ca/aarch64-linux-gnu/sys-root/usr/include/bits/siginfo.h:57:5)"}, f::Symbol, v)
     unsafe_store!(getproperty(x, f), v)
 end
 
@@ -226,7 +226,7 @@ function Base.getproperty(x::Ptr{siginfo_t}, f::Symbol)
     f === :si_signo && return Ptr{Cint}(x + 0)
     f === :si_errno && return Ptr{Cint}(x + 4)
     f === :si_code && return Ptr{Cint}(x + 8)
-    f === :_sifields && return Ptr{__JL_Ctag_1299}(x + 16)
+    f === :_sifields && return Ptr{var"union (unnamed at /home/runner/.julia/artifacts/5db9b46496bfd3b55724b246c46f9fe838cc66ca/aarch64-linux-gnu/sys-root/usr/include/bits/siginfo.h:57:5)"}(x + 16)
     return getfield(x, f)
 end
 
@@ -1271,11 +1271,11 @@ function aws_max_double(a, b)
 end
 
 """
-    __JL_Ctag_39
+    __JL_Ctag_1
 
 Documentation not found.
 """
-@cenum __JL_Ctag_39::UInt32 begin
+@cenum __JL_Ctag_1::UInt32 begin
     AWS_ARRAY_LIST_DEBUG_FILL = 221
 end
 
@@ -4777,7 +4777,7 @@ end
 
 Consume the next data item, includes all the content within the data item.
 
-As an example for the following cbor, this function will consume all the data as it's only one cbor data item, an indefinite map with 2 key, value pair: 0xbf6346756ef563416d7421ff BF -- Start indefinite-length map 63 -- First key, UTF-8 string length 3 46756e -- "Fun" F5 -- First value, true 63 -- Second key, UTF-8 string length 3 416d74 -- "Amt" 21 -- Second value, -2 FF -- "break"
+As an example for the following cbor, this function will consume all the data as it's only one cbor data item, an indefinite map with 2 <key, value> pair: 0xbf6346756ef563416d7421ff BF -- Start indefinite-length map 63 -- First key, UTF-8 string length 3 46756e -- "Fun" F5 -- First value, true 63 -- Second key, UTF-8 string length 3 416d74 -- "Amt" 21 -- Second value, -2 FF -- "break"
 
 Notes: this function will not ensure the data item is well-formed.
 
@@ -4817,7 +4817,7 @@ end
 """
     aws_cbor_decoder_pop_next_unsigned_int_val(decoder, out)
 
-Get the next element based on the type. If the next element doesn't match the expected type. Error will be raised. If the next element already been cached, it will consume the cached item when no error was returned. Specifically: AWS\\_CBOR\\_TYPE\\_UINT - [`aws_cbor_decoder_pop_next_unsigned_int_val`](@ref) AWS\\_CBOR\\_TYPE\\_NEGINT - [`aws_cbor_decoder_pop_next_negative_int_val`](@ref), it represents (-1 - *out) AWS\\_CBOR\\_TYPE\\_FLOAT - aws\\_cbor\\_decoder\\_pop\\_next\\_double\\_val AWS\\_CBOR\\_TYPE\\_BYTES - [`aws_cbor_decoder_pop_next_bytes_val`](@ref) AWS\\_CBOR\\_TYPE\\_TEXT - [`aws_cbor_decoder_pop_next_text_val`](@ref)
+Get the next element based on the type. If the next element doesn't match the expected type. Error will be raised. If the next element already been cached, it will consume the cached item when no error was returned. Specifically: AWS\\_CBOR\\_TYPE\\_UINT - [`aws_cbor_decoder_pop_next_unsigned_int_val`](@ref) AWS\\_CBOR\\_TYPE\\_NEGINT - [`aws_cbor_decoder_pop_next_negative_int_val`](@ref), it represents (-1 - *out) AWS\\_CBOR\\_TYPE\\_FLOAT - [`aws_cbor_decoder_pop_next_float_val`](@ref) AWS\\_CBOR\\_TYPE\\_BYTES - [`aws_cbor_decoder_pop_next_bytes_val`](@ref) AWS\\_CBOR\\_TYPE\\_TEXT - [`aws_cbor_decoder_pop_next_text_val`](@ref)
 
 # Arguments
 * `decoder`:
@@ -5250,7 +5250,7 @@ end
 """
     aws_condition_variable_wait(condition_variable, mutex)
 
-Waits the calling thread on a notification from another thread.
+Waits the calling thread on a notification from another thread. This function must be called with the mutex locked by the calling thread otherwise the behavior is undefined. Spurious wakeups can occur and to avoid this causing any problems use the \\_pred version of this function.
 
 ### Prototype
 ```c
@@ -5264,7 +5264,7 @@ end
 """
     aws_condition_variable_wait_pred(condition_variable, mutex, pred, pred_ctx)
 
-Waits the calling thread on a notification from another thread. If predicate returns false, the wait is reentered, otherwise control returns to the caller.
+Waits the calling thread on a notification from another thread. If predicate returns false, the wait is reentered, otherwise control returns to the caller. This function must be called with the mutex locked by the calling thread otherwise the behavior is undefined.
 
 ### Prototype
 ```c
@@ -5278,7 +5278,7 @@ end
 """
     aws_condition_variable_wait_for(condition_variable, mutex, time_to_wait)
 
-Waits the calling thread on a notification from another thread. Times out after time\\_to\\_wait. time\\_to\\_wait is in nanoseconds.
+Waits the calling thread on a notification from another thread. Times out after time\\_to\\_wait. time\\_to\\_wait is in nanoseconds. This function must be called with the mutex locked by the calling thread otherwise the behavior is undefined. Spurious wakeups can occur and to avoid this causing any problems use the \\_pred version of this function.
 
 ### Prototype
 ```c
@@ -5292,7 +5292,7 @@ end
 """
     aws_condition_variable_wait_for_pred(condition_variable, mutex, time_to_wait, pred, pred_ctx)
 
-Waits the calling thread on a notification from another thread. Times out after time\\_to\\_wait. time\\_to\\_wait is in nanoseconds. If predicate returns false, the wait is reentered, otherwise control returns to the caller.
+Waits the calling thread on a notification from another thread. Times out after time\\_to\\_wait. time\\_to\\_wait is in nanoseconds. If predicate returns false, the wait is reentered, otherwise control returns to the caller. This function must be called with the mutex locked by the calling thread otherwise the behavior is undefined.
 
 ### Prototype
 ```c
@@ -5372,11 +5372,11 @@ function aws_cross_process_lock_release(instance_lock)
 end
 
 """
-    __JL_Ctag_308
+    __JL_Ctag_36
 
 Documentation not found.
 """
-@cenum __JL_Ctag_308::UInt32 begin
+@cenum __JL_Ctag_36::UInt32 begin
     AWS_DATE_TIME_STR_MAX_LEN = 100
     AWS_DATE_TIME_STR_MAX_BASIC_LEN = 20
 end
@@ -5834,7 +5834,7 @@ end
 """
     aws_hex_encode(to_encode, output)
 
-Base 16 (hex) encodes the contents of to\\_encode and stores the result in output. 0 terminates the result. Assumes the buffer is empty and does not resize on insufficient capacity.
+Base 16 (hex) encodes the contents of to\\_encode and stores the result in output. Assumes the buffer is empty and does not resize on insufficient capacity.
 
 ### Prototype
 ```c
@@ -5848,7 +5848,7 @@ end
 """
     aws_hex_encode_append_dynamic(to_encode, output)
 
-Base 16 (hex) encodes the contents of to\\_encode and appends the result in output. Does not 0-terminate. Grows the destination buffer dynamically if necessary.
+Base 16 (hex) encodes the contents of to\\_encode and appends the result in output. Grows the destination buffer dynamically if necessary.
 
 ### Prototype
 ```c
@@ -6217,9 +6217,37 @@ struct aws_string
 end
 
 """
-    aws_get_environment_value(allocator, variable_name, value_out)
+    aws_get_env(allocator, name)
 
 Get the value of an environment variable. If the variable is not set, the output string will be set to NULL. Not thread-safe
+
+### Prototype
+```c
+struct aws_string *aws_get_env(struct aws_allocator *allocator, const char *name);
+```
+"""
+function aws_get_env(allocator, name)
+    ccall((:aws_get_env, libaws_c_common), Ptr{aws_string}, (Ptr{aws_allocator}, Ptr{Cchar}), allocator, name)
+end
+
+"""
+    aws_get_env_nonempty(allocator, name)
+
+Get the value of an environment variable. If the variable is not set or is empty, the output string will be set to NULL. Not thread-safe
+
+### Prototype
+```c
+struct aws_string *aws_get_env_nonempty(struct aws_allocator *allocator, const char *name);
+```
+"""
+function aws_get_env_nonempty(allocator, name)
+    ccall((:aws_get_env_nonempty, libaws_c_common), Ptr{aws_string}, (Ptr{aws_allocator}, Ptr{Cchar}), allocator, name)
+end
+
+"""
+    aws_get_environment_value(allocator, variable_name, value_out)
+
+*DEPRECATED* Please use the [`aws_get_env`](@ref) or [`aws_get_env_nonempty`](@ref) instead. Get the value of an environment variable. If the variable is not set, the output string will be set to NULL. Not thread-safe
 
 ### Prototype
 ```c
@@ -6918,11 +6946,11 @@ function aws_file_get_length(file, length)
 end
 
 """
-    __JL_Ctag_454
+    __JL_Ctag_49
 
 Documentation not found.
 """
-@cenum __JL_Ctag_454::UInt32 begin
+@cenum __JL_Ctag_49::UInt32 begin
     AWS_COMMON_HASH_TABLE_ITER_CONTINUE = 1
     AWS_COMMON_HASH_TABLE_ITER_DELETE = 2
     AWS_COMMON_HASH_TABLE_ITER_ERROR = 4
@@ -7472,10 +7500,10 @@ mutable struct aws_json_value end
 
 Creates a new string [`aws_json_value`](@ref) with the given string and returns a pointer to it.
 
-Note: You will need to free the memory for the [`aws_json_value`](@ref) using aws\\_json\\_destroy on the [`aws_json_value`](@ref) or on the object/array containing the [`aws_json_value`](@ref).
+Note: You will need to free the memory for the [`aws_json_value`](@ref) using aws\\_json\\_destroy on the [`aws_json_value`](@ref) or on the object/array containing the [`aws_json_value`](@ref). Note: might be slower than c\\_str version due to internal copy
 
 # Arguments
-* `string`: A byte pointer to the string you want to store in the [`aws_json_value`](@ref)
+* `string`: A byte cursor you want to store in the [`aws_json_value`](@ref)
 * `allocator`: The allocator to use when creating the value
 # Returns
 A new string [`aws_json_value`](@ref)
@@ -7486,6 +7514,27 @@ struct aws_json_value *aws_json_value_new_string(struct aws_allocator *allocator
 """
 function aws_json_value_new_string(allocator, string)
     ccall((:aws_json_value_new_string, libaws_c_common), Ptr{aws_json_value}, (Ptr{aws_allocator}, aws_byte_cursor), allocator, string)
+end
+
+"""
+    aws_json_value_new_string_from_c_str(allocator, string)
+
+Creates a new string [`aws_json_value`](@ref) with the given string and returns a pointer to it.
+
+Note: You will need to free the memory for the [`aws_json_value`](@ref) using aws\\_json\\_destroy on the [`aws_json_value`](@ref) or on the object/array containing the [`aws_json_value`](@ref).
+
+# Arguments
+* `string`: c string pointer you want to store in the [`aws_json_value`](@ref)
+* `allocator`: The allocator to use when creating the value
+# Returns
+A new string [`aws_json_value`](@ref)
+### Prototype
+```c
+struct aws_json_value *aws_json_value_new_string_from_c_str(struct aws_allocator *allocator, const char *string);
+```
+"""
+function aws_json_value_new_string_from_c_str(allocator, string)
+    ccall((:aws_json_value_new_string_from_c_str, libaws_c_common), Ptr{aws_json_value}, (Ptr{aws_allocator}, Ptr{Cchar}), allocator, string)
 end
 
 """
@@ -7652,7 +7701,7 @@ end
 
 Adds a [`aws_json_value`](@ref) to a object [`aws_json_value`](@ref).
 
-Note that the [`aws_json_value`](@ref) will be destroyed when the [`aws_json_value`](@ref) object is destroyed by calling "aws\\_json\\_destroy()"
+Note that the [`aws_json_value`](@ref) will be destroyed when the [`aws_json_value`](@ref) object is destroyed by calling "aws\\_json\\_destroy()" Note: might be slower than c\\_str version due to internal copy
 
 # Arguments
 * `object`: The object [`aws_json_value`](@ref) you want to add a value to.
@@ -7670,9 +7719,31 @@ function aws_json_value_add_to_object(object, key, value)
 end
 
 """
+    aws_json_value_add_to_object_c_str(object, key, value)
+
+Adds a [`aws_json_value`](@ref) to a object [`aws_json_value`](@ref).
+
+Note that the [`aws_json_value`](@ref) will be destroyed when the [`aws_json_value`](@ref) object is destroyed by calling "aws\\_json\\_destroy()"
+
+# Arguments
+* `object`: The object [`aws_json_value`](@ref) you want to add a value to.
+* `key`: The key to add the [`aws_json_value`](@ref) at.
+* `value`: The [`aws_json_value`](@ref) you want to add.
+# Returns
+[`AWS_OP_SUCCESS`](@ref) if adding was successful. Will return AWS\\_OP\\_ERROR if the object passed is invalid or if the passed key is already in use in the object.
+### Prototype
+```c
+int aws_json_value_add_to_object_c_str(struct aws_json_value *object, const char *key, struct aws_json_value *value);
+```
+"""
+function aws_json_value_add_to_object_c_str(object, key, value)
+    ccall((:aws_json_value_add_to_object_c_str, libaws_c_common), Cint, (Ptr{aws_json_value}, Ptr{Cchar}, Ptr{aws_json_value}), object, key, value)
+end
+
+"""
     aws_json_value_get_from_object(object, key)
 
-Returns the [`aws_json_value`](@ref) at the given key.
+Returns the [`aws_json_value`](@ref) at the given key. Note: might be slower than c\\_str version due to internal copy
 
 # Arguments
 * `object`: The object [`aws_json_value`](@ref) you want to get the value from.
@@ -7689,9 +7760,28 @@ function aws_json_value_get_from_object(object, key)
 end
 
 """
+    aws_json_value_get_from_object_c_str(object, key)
+
+Returns the [`aws_json_value`](@ref) at the given key. Note: same as [`aws_json_value_get_from_object`](@ref) but with key as const char *. Prefer this method is you have a key thats already a valid char * as it is likely to be faster.
+
+# Arguments
+* `object`: The object [`aws_json_value`](@ref) you want to get the value from.
+* `key`: The key that the [`aws_json_value`](@ref) is at. Is case sensitive.
+# Returns
+The [`aws_json_value`](@ref) at the given key, otherwise NULL.
+### Prototype
+```c
+struct aws_json_value *aws_json_value_get_from_object_c_str(const struct aws_json_value *object, const char *key);
+```
+"""
+function aws_json_value_get_from_object_c_str(object, key)
+    ccall((:aws_json_value_get_from_object_c_str, libaws_c_common), Ptr{aws_json_value}, (Ptr{aws_json_value}, Ptr{Cchar}), object, key)
+end
+
+"""
     aws_json_value_has_key(object, key)
 
-Checks if there is a [`aws_json_value`](@ref) at the given key.
+Checks if there is a [`aws_json_value`](@ref) at the given key. Note: might be slower than c\\_str version due to internal copy
 
 # Arguments
 * `object`: The value [`aws_json_value`](@ref) you want to check a key in.
@@ -7708,9 +7798,28 @@ function aws_json_value_has_key(object, key)
 end
 
 """
+    aws_json_value_has_key_c_str(object, key)
+
+Checks if there is a [`aws_json_value`](@ref) at the given key. Note: same as [`aws_json_value_has_key`](@ref) but with key as const char *. Prefer this method is you have a key thats already a valid char * as it is likely to be faster.
+
+# Arguments
+* `object`: The value [`aws_json_value`](@ref) you want to check a key in.
+* `key`: The key that you want to check. Is case sensitive.
+# Returns
+True if a [`aws_json_value`](@ref) is found.
+### Prototype
+```c
+bool aws_json_value_has_key_c_str(const struct aws_json_value *object, const char *key);
+```
+"""
+function aws_json_value_has_key_c_str(object, key)
+    ccall((:aws_json_value_has_key_c_str, libaws_c_common), Bool, (Ptr{aws_json_value}, Ptr{Cchar}), object, key)
+end
+
+"""
     aws_json_value_remove_from_object(object, key)
 
-Removes the [`aws_json_value`](@ref) at the given key.
+Removes the [`aws_json_value`](@ref) at the given key. Note: might be slower than c\\_str version due to internal copy
 
 # Arguments
 * `object`: The object [`aws_json_value`](@ref) you want to remove a [`aws_json_value`](@ref) in.
@@ -7724,6 +7833,25 @@ int aws_json_value_remove_from_object(struct aws_json_value *object, struct aws_
 """
 function aws_json_value_remove_from_object(object, key)
     ccall((:aws_json_value_remove_from_object, libaws_c_common), Cint, (Ptr{aws_json_value}, aws_byte_cursor), object, key)
+end
+
+"""
+    aws_json_value_remove_from_object_c_str(object, key)
+
+Removes the [`aws_json_value`](@ref) at the given key. Note: same as [`aws_json_value_remove_from_object`](@ref) but with key as const char *. Prefer this method is you have a key thats already a valid char * as it is likely to be faster.
+
+# Arguments
+* `object`: The object [`aws_json_value`](@ref) you want to remove a [`aws_json_value`](@ref) in.
+* `key`: The key that the [`aws_json_value`](@ref) is at. Is case sensitive.
+# Returns
+[`AWS_OP_SUCCESS`](@ref) if the [`aws_json_value`](@ref) was removed. Will return [`AWS_OP_ERR`](@ref) if the object passed is invalid or if the value at the key cannot be found.
+### Prototype
+```c
+int aws_json_value_remove_from_object_c_str(struct aws_json_value *object, const char *key);
+```
+"""
+function aws_json_value_remove_from_object_c_str(object, key)
+    ccall((:aws_json_value_remove_from_object_c_str, libaws_c_common), Cint, (Ptr{aws_json_value}, Ptr{Cchar}), object, key)
 end
 
 # typedef int ( aws_json_on_member_encountered_const_fn ) ( const struct aws_byte_cursor * key , const struct aws_json_value * value , bool * out_should_continue , void * user_data )
@@ -8686,11 +8814,11 @@ Log subject is an enum similar to aws error: each library has its own value-spac
 const aws_log_subject_t = UInt32
 
 """
-    __JL_Ctag_689
+    __JL_Ctag_107
 
 Each library gets space for 2^^10 log subject entries
 """
-@cenum __JL_Ctag_689::UInt32 begin
+@cenum __JL_Ctag_107::UInt32 begin
     AWS_LOG_SUBJECT_STRIDE_BITS = 10
 end
 
@@ -9017,11 +9145,11 @@ Documentation not found.
 const static_assertion_at_line_62 = NTuple{1, Cchar}
 
 """
-    __JL_Ctag_709
+    __JL_Ctag_108
 
 Documentation not found.
 """
-@cenum __JL_Ctag_709::UInt32 begin
+@cenum __JL_Ctag_108::UInt32 begin
     AWS_CACHE_LINE = 64
 end
 
@@ -9511,16 +9639,6 @@ struct aws_ref_count
 end
 
 """
-    aws_shutdown_callback_options
-
-Documentation not found.
-"""
-struct aws_shutdown_callback_options
-    shutdown_callback_fn::Ptr{aws_simple_completion_callback}
-    shutdown_callback_user_data::Ptr{Cvoid}
-end
-
-"""
     aws_ref_count_init(ref_count, object, on_zero_fn)
 
 Initializes a ref-counter structure. After initialization, the ref count will be 1.
@@ -9834,16 +9952,26 @@ function aws_rw_lock_wunlock(lock)
 end
 
 """
+    aws_shutdown_callback_options
+
+Configuration for a callback to invoke when something has been completely cleaned up. Primarily used in async cleanup control flows.
+"""
+struct aws_shutdown_callback_options
+    shutdown_callback_fn::Ptr{aws_simple_completion_callback}
+    shutdown_callback_user_data::Ptr{Cvoid}
+end
+
+"""
 Documentation not found.
 """
 const aws_crt_statistics_category_t = UInt32
 
 """
-    __JL_Ctag_886
+    __JL_Ctag_129
 
 Each library gets space for 2^^8 category entries
 """
-@cenum __JL_Ctag_886::UInt32 begin
+@cenum __JL_Ctag_129::UInt32 begin
     AWS_CRT_STATISTICS_CATEGORY_STRIDE_BITS = 8
 end
 
@@ -10232,7 +10360,7 @@ end
 """
     aws_byte_cursor_from_string(src)
 
-Creates an [`aws_byte_cursor`](@ref) from an existing string.
+Creates an [`aws_byte_cursor`](@ref) from an existing string. If the src is NULL, it returns an empty cursor
 
 ### Prototype
 ```c
@@ -10609,28 +10737,28 @@ A scheduled function.
 const aws_task_fn = Cvoid
 
 """
-    __JL_Ctag_1266
+    union (unnamed at /home/runner/.julia/artifacts/c43d1b14ea89949dc0fbeb710b3daebe7e1f6fc0/include/aws/common/task_scheduler.h:40:5)
 
 honor the ABI compat
 """
-struct __JL_Ctag_1266
+struct var"union (unnamed at /home/runner/.julia/artifacts/c43d1b14ea89949dc0fbeb710b3daebe7e1f6fc0/include/aws/common/task_scheduler.h:40:5)"
     data::NTuple{8, UInt8}
 end
 
-function Base.getproperty(x::Ptr{__JL_Ctag_1266}, f::Symbol)
+function Base.getproperty(x::Ptr{var"union (unnamed at /home/runner/.julia/artifacts/c43d1b14ea89949dc0fbeb710b3daebe7e1f6fc0/include/aws/common/task_scheduler.h:40:5)"}, f::Symbol)
     f === :scheduled && return Ptr{Bool}(x + 0)
     f === :reserved && return Ptr{Csize_t}(x + 0)
     return getfield(x, f)
 end
 
-function Base.getproperty(x::__JL_Ctag_1266, f::Symbol)
-    r = Ref{__JL_Ctag_1266}(x)
-    ptr = Base.unsafe_convert(Ptr{__JL_Ctag_1266}, r)
+function Base.getproperty(x::var"union (unnamed at /home/runner/.julia/artifacts/c43d1b14ea89949dc0fbeb710b3daebe7e1f6fc0/include/aws/common/task_scheduler.h:40:5)", f::Symbol)
+    r = Ref{var"union (unnamed at /home/runner/.julia/artifacts/c43d1b14ea89949dc0fbeb710b3daebe7e1f6fc0/include/aws/common/task_scheduler.h:40:5)"}(x)
+    ptr = Base.unsafe_convert(Ptr{var"union (unnamed at /home/runner/.julia/artifacts/c43d1b14ea89949dc0fbeb710b3daebe7e1f6fc0/include/aws/common/task_scheduler.h:40:5)"}, r)
     fptr = getproperty(ptr, f)
     GC.@preserve r unsafe_load(fptr)
 end
 
-function Base.setproperty!(x::Ptr{__JL_Ctag_1266}, f::Symbol, v)
+function Base.setproperty!(x::Ptr{var"union (unnamed at /home/runner/.julia/artifacts/c43d1b14ea89949dc0fbeb710b3daebe7e1f6fc0/include/aws/common/task_scheduler.h:40:5)"}, f::Symbol, v)
     unsafe_store!(getproperty(x, f), v)
 end
 
@@ -10650,7 +10778,7 @@ function Base.getproperty(x::Ptr{aws_task}, f::Symbol)
     f === :node && return Ptr{aws_linked_list_node}(x + 24)
     f === :priority_queue_node && return Ptr{aws_priority_queue_node}(x + 40)
     f === :type_tag && return Ptr{Ptr{Cchar}}(x + 48)
-    f === :abi_extension && return Ptr{__JL_Ctag_1266}(x + 56)
+    f === :abi_extension && return Ptr{var"union (unnamed at /home/runner/.julia/artifacts/c43d1b14ea89949dc0fbeb710b3daebe7e1f6fc0/include/aws/common/task_scheduler.h:40:5)"}(x + 56)
     return getfield(x, f)
 end
 
@@ -11598,11 +11726,11 @@ struct aws_uuid
 end
 
 """
-    __JL_Ctag_1115
+    __JL_Ctag_166
 
 36 bytes for the UUID plus one more for the null terminator.
 """
-@cenum __JL_Ctag_1115::UInt32 begin
+@cenum __JL_Ctag_166::UInt32 begin
     AWS_UUID_STR_LEN = 37
 end
 
@@ -12059,88 +12187,80 @@ function enable_vt_mode()
 end
 
 """
-    __JL_Ctag_1222
+    var"struct (unnamed at /home/runner/.julia/artifacts/5db9b46496bfd3b55724b246c46f9fe838cc66ca/aarch64-linux-gnu/sys-root/usr/include/bits/siginfo.h:62:2)"
 
 Documentation not found.
 """
-struct __JL_Ctag_1222
-    __lock::Cint
-    __futex::Cuint
-    __total_seq::Culonglong
-    __wakeup_seq::Culonglong
-    __woken_seq::Culonglong
-    __mutex::Ptr{Cvoid}
-    __nwaiters::Cuint
-    __broadcast_seq::Cuint
+struct var"struct (unnamed at /home/runner/.julia/artifacts/5db9b46496bfd3b55724b246c46f9fe838cc66ca/aarch64-linux-gnu/sys-root/usr/include/bits/siginfo.h:62:2)"
+    si_pid::__pid_t
+    si_uid::__uid_t
 end
-function Base.getproperty(x::Ptr{__JL_Ctag_1222}, f::Symbol)
-    f === :__lock && return Ptr{Cint}(x + 0)
-    f === :__futex && return Ptr{Cuint}(x + 4)
-    f === :__total_seq && return Ptr{Culonglong}(x + 8)
-    f === :__wakeup_seq && return Ptr{Culonglong}(x + 16)
-    f === :__woken_seq && return Ptr{Culonglong}(x + 24)
-    f === :__mutex && return Ptr{Ptr{Cvoid}}(x + 32)
-    f === :__nwaiters && return Ptr{Cuint}(x + 40)
-    f === :__broadcast_seq && return Ptr{Cuint}(x + 44)
-    return getfield(x, f)
-end
-
-function Base.getproperty(x::__JL_Ctag_1222, f::Symbol)
-    r = Ref{__JL_Ctag_1222}(x)
-    ptr = Base.unsafe_convert(Ptr{__JL_Ctag_1222}, r)
-    fptr = getproperty(ptr, f)
-    GC.@preserve r unsafe_load(fptr)
-end
-
-function Base.setproperty!(x::Ptr{__JL_Ctag_1222}, f::Symbol, v)
-    unsafe_store!(getproperty(x, f), v)
-end
-
 
 """
-    __JL_Ctag_1223
+    var"struct (unnamed at /home/runner/.julia/artifacts/5db9b46496bfd3b55724b246c46f9fe838cc66ca/aarch64-linux-gnu/sys-root/usr/include/bits/siginfo.h:69:2)"
 
 Documentation not found.
 """
-struct __JL_Ctag_1223
-    __lock::Cint
-    __nr_readers::Cuint
-    __readers_wakeup::Cuint
-    __writer_wakeup::Cuint
-    __nr_readers_queued::Cuint
-    __nr_writers_queued::Cuint
-    __writer::Cint
-    __shared::Cint
-    __pad1::Culong
-    __pad2::Culong
-    __flags::Cuint
-end
-function Base.getproperty(x::Ptr{__JL_Ctag_1223}, f::Symbol)
-    f === :__lock && return Ptr{Cint}(x + 0)
-    f === :__nr_readers && return Ptr{Cuint}(x + 4)
-    f === :__readers_wakeup && return Ptr{Cuint}(x + 8)
-    f === :__writer_wakeup && return Ptr{Cuint}(x + 12)
-    f === :__nr_readers_queued && return Ptr{Cuint}(x + 16)
-    f === :__nr_writers_queued && return Ptr{Cuint}(x + 20)
-    f === :__writer && return Ptr{Cint}(x + 24)
-    f === :__shared && return Ptr{Cint}(x + 28)
-    f === :__pad1 && return Ptr{Culong}(x + 32)
-    f === :__pad2 && return Ptr{Culong}(x + 40)
-    f === :__flags && return Ptr{Cuint}(x + 48)
-    return getfield(x, f)
+struct var"struct (unnamed at /home/runner/.julia/artifacts/5db9b46496bfd3b55724b246c46f9fe838cc66ca/aarch64-linux-gnu/sys-root/usr/include/bits/siginfo.h:69:2)"
+    si_tid::Cint
+    si_overrun::Cint
+    si_sigval::sigval_t
 end
 
-function Base.getproperty(x::__JL_Ctag_1223, f::Symbol)
-    r = Ref{__JL_Ctag_1223}(x)
-    ptr = Base.unsafe_convert(Ptr{__JL_Ctag_1223}, r)
-    fptr = getproperty(ptr, f)
-    GC.@preserve r unsafe_load(fptr)
+"""
+    var"struct (unnamed at /home/runner/.julia/artifacts/5db9b46496bfd3b55724b246c46f9fe838cc66ca/aarch64-linux-gnu/sys-root/usr/include/bits/siginfo.h:77:2)"
+
+Documentation not found.
+"""
+struct var"struct (unnamed at /home/runner/.julia/artifacts/5db9b46496bfd3b55724b246c46f9fe838cc66ca/aarch64-linux-gnu/sys-root/usr/include/bits/siginfo.h:77:2)"
+    si_pid::__pid_t
+    si_uid::__uid_t
+    si_sigval::sigval_t
 end
 
-function Base.setproperty!(x::Ptr{__JL_Ctag_1223}, f::Symbol, v)
-    unsafe_store!(getproperty(x, f), v)
+"""
+    var"struct (unnamed at /home/runner/.julia/artifacts/5db9b46496bfd3b55724b246c46f9fe838cc66ca/aarch64-linux-gnu/sys-root/usr/include/bits/siginfo.h:85:2)"
+
+Documentation not found.
+"""
+struct var"struct (unnamed at /home/runner/.julia/artifacts/5db9b46496bfd3b55724b246c46f9fe838cc66ca/aarch64-linux-gnu/sys-root/usr/include/bits/siginfo.h:85:2)"
+    si_pid::__pid_t
+    si_uid::__uid_t
+    si_status::Cint
+    si_utime::__clock_t
+    si_stime::__clock_t
 end
 
+"""
+    var"struct (unnamed at /home/runner/.julia/artifacts/5db9b46496bfd3b55724b246c46f9fe838cc66ca/aarch64-linux-gnu/sys-root/usr/include/bits/siginfo.h:95:2)"
+
+Documentation not found.
+"""
+struct var"struct (unnamed at /home/runner/.julia/artifacts/5db9b46496bfd3b55724b246c46f9fe838cc66ca/aarch64-linux-gnu/sys-root/usr/include/bits/siginfo.h:95:2)"
+    si_addr::Ptr{Cvoid}
+    si_addr_lsb::Cshort
+end
+
+"""
+    var"struct (unnamed at /home/runner/.julia/artifacts/5db9b46496bfd3b55724b246c46f9fe838cc66ca/aarch64-linux-gnu/sys-root/usr/include/bits/siginfo.h:102:2)"
+
+Documentation not found.
+"""
+struct var"struct (unnamed at /home/runner/.julia/artifacts/5db9b46496bfd3b55724b246c46f9fe838cc66ca/aarch64-linux-gnu/sys-root/usr/include/bits/siginfo.h:102:2)"
+    si_band::Clong
+    si_fd::Cint
+end
+
+"""
+    var"struct (unnamed at /home/runner/.julia/artifacts/5db9b46496bfd3b55724b246c46f9fe838cc66ca/aarch64-linux-gnu/sys-root/usr/include/bits/siginfo.h:109:2)"
+
+Documentation not found.
+"""
+struct var"struct (unnamed at /home/runner/.julia/artifacts/5db9b46496bfd3b55724b246c46f9fe838cc66ca/aarch64-linux-gnu/sys-root/usr/include/bits/siginfo.h:109:2)"
+    _call_addr::Ptr{Cvoid}
+    _syscall::Cint
+    _arch::Cuint
+end
 
 """
     __pthread_mutex_s
@@ -12158,205 +12278,39 @@ struct __pthread_mutex_s
 end
 
 """
-    __JL_Ctag_1300
+    var"struct (unnamed at /home/runner/.julia/artifacts/5db9b46496bfd3b55724b246c46f9fe838cc66ca/aarch64-linux-gnu/sys-root/usr/include/bits/pthreadtypes.h:88:3)"
 
 Documentation not found.
 """
-struct __JL_Ctag_1300
-    si_pid::__pid_t
-    si_uid::__uid_t
+struct var"struct (unnamed at /home/runner/.julia/artifacts/5db9b46496bfd3b55724b246c46f9fe838cc66ca/aarch64-linux-gnu/sys-root/usr/include/bits/pthreadtypes.h:88:3)"
+    __lock::Cint
+    __futex::Cuint
+    __total_seq::Culonglong
+    __wakeup_seq::Culonglong
+    __woken_seq::Culonglong
+    __mutex::Ptr{Cvoid}
+    __nwaiters::Cuint
+    __broadcast_seq::Cuint
 end
-function Base.getproperty(x::Ptr{__JL_Ctag_1300}, f::Symbol)
-    f === :si_pid && return Ptr{__pid_t}(x + 0)
-    f === :si_uid && return Ptr{__uid_t}(x + 4)
-    return getfield(x, f)
-end
-
-function Base.getproperty(x::__JL_Ctag_1300, f::Symbol)
-    r = Ref{__JL_Ctag_1300}(x)
-    ptr = Base.unsafe_convert(Ptr{__JL_Ctag_1300}, r)
-    fptr = getproperty(ptr, f)
-    GC.@preserve r unsafe_load(fptr)
-end
-
-function Base.setproperty!(x::Ptr{__JL_Ctag_1300}, f::Symbol, v)
-    unsafe_store!(getproperty(x, f), v)
-end
-
 
 """
-    __JL_Ctag_1301
+    var"struct (unnamed at /home/runner/.julia/artifacts/5db9b46496bfd3b55724b246c46f9fe838cc66ca/aarch64-linux-gnu/sys-root/usr/include/bits/pthreadtypes.h:123:3)"
 
 Documentation not found.
 """
-struct __JL_Ctag_1301
-    si_tid::Cint
-    si_overrun::Cint
-    si_sigval::sigval_t
+struct var"struct (unnamed at /home/runner/.julia/artifacts/5db9b46496bfd3b55724b246c46f9fe838cc66ca/aarch64-linux-gnu/sys-root/usr/include/bits/pthreadtypes.h:123:3)"
+    __lock::Cint
+    __nr_readers::Cuint
+    __readers_wakeup::Cuint
+    __writer_wakeup::Cuint
+    __nr_readers_queued::Cuint
+    __nr_writers_queued::Cuint
+    __writer::Cint
+    __shared::Cint
+    __pad1::Culong
+    __pad2::Culong
+    __flags::Cuint
 end
-function Base.getproperty(x::Ptr{__JL_Ctag_1301}, f::Symbol)
-    f === :si_tid && return Ptr{Cint}(x + 0)
-    f === :si_overrun && return Ptr{Cint}(x + 4)
-    f === :si_sigval && return Ptr{sigval_t}(x + 8)
-    return getfield(x, f)
-end
-
-function Base.getproperty(x::__JL_Ctag_1301, f::Symbol)
-    r = Ref{__JL_Ctag_1301}(x)
-    ptr = Base.unsafe_convert(Ptr{__JL_Ctag_1301}, r)
-    fptr = getproperty(ptr, f)
-    GC.@preserve r unsafe_load(fptr)
-end
-
-function Base.setproperty!(x::Ptr{__JL_Ctag_1301}, f::Symbol, v)
-    unsafe_store!(getproperty(x, f), v)
-end
-
-
-"""
-    __JL_Ctag_1302
-
-Documentation not found.
-"""
-struct __JL_Ctag_1302
-    si_pid::__pid_t
-    si_uid::__uid_t
-    si_sigval::sigval_t
-end
-function Base.getproperty(x::Ptr{__JL_Ctag_1302}, f::Symbol)
-    f === :si_pid && return Ptr{__pid_t}(x + 0)
-    f === :si_uid && return Ptr{__uid_t}(x + 4)
-    f === :si_sigval && return Ptr{sigval_t}(x + 8)
-    return getfield(x, f)
-end
-
-function Base.getproperty(x::__JL_Ctag_1302, f::Symbol)
-    r = Ref{__JL_Ctag_1302}(x)
-    ptr = Base.unsafe_convert(Ptr{__JL_Ctag_1302}, r)
-    fptr = getproperty(ptr, f)
-    GC.@preserve r unsafe_load(fptr)
-end
-
-function Base.setproperty!(x::Ptr{__JL_Ctag_1302}, f::Symbol, v)
-    unsafe_store!(getproperty(x, f), v)
-end
-
-
-"""
-    __JL_Ctag_1303
-
-Documentation not found.
-"""
-struct __JL_Ctag_1303
-    si_pid::__pid_t
-    si_uid::__uid_t
-    si_status::Cint
-    si_utime::__clock_t
-    si_stime::__clock_t
-end
-function Base.getproperty(x::Ptr{__JL_Ctag_1303}, f::Symbol)
-    f === :si_pid && return Ptr{__pid_t}(x + 0)
-    f === :si_uid && return Ptr{__uid_t}(x + 4)
-    f === :si_status && return Ptr{Cint}(x + 8)
-    f === :si_utime && return Ptr{__clock_t}(x + 16)
-    f === :si_stime && return Ptr{__clock_t}(x + 24)
-    return getfield(x, f)
-end
-
-function Base.getproperty(x::__JL_Ctag_1303, f::Symbol)
-    r = Ref{__JL_Ctag_1303}(x)
-    ptr = Base.unsafe_convert(Ptr{__JL_Ctag_1303}, r)
-    fptr = getproperty(ptr, f)
-    GC.@preserve r unsafe_load(fptr)
-end
-
-function Base.setproperty!(x::Ptr{__JL_Ctag_1303}, f::Symbol, v)
-    unsafe_store!(getproperty(x, f), v)
-end
-
-
-"""
-    __JL_Ctag_1304
-
-Documentation not found.
-"""
-struct __JL_Ctag_1304
-    si_addr::Ptr{Cvoid}
-    si_addr_lsb::Cshort
-end
-function Base.getproperty(x::Ptr{__JL_Ctag_1304}, f::Symbol)
-    f === :si_addr && return Ptr{Ptr{Cvoid}}(x + 0)
-    f === :si_addr_lsb && return Ptr{Cshort}(x + 8)
-    return getfield(x, f)
-end
-
-function Base.getproperty(x::__JL_Ctag_1304, f::Symbol)
-    r = Ref{__JL_Ctag_1304}(x)
-    ptr = Base.unsafe_convert(Ptr{__JL_Ctag_1304}, r)
-    fptr = getproperty(ptr, f)
-    GC.@preserve r unsafe_load(fptr)
-end
-
-function Base.setproperty!(x::Ptr{__JL_Ctag_1304}, f::Symbol, v)
-    unsafe_store!(getproperty(x, f), v)
-end
-
-
-"""
-    __JL_Ctag_1305
-
-Documentation not found.
-"""
-struct __JL_Ctag_1305
-    si_band::Clong
-    si_fd::Cint
-end
-function Base.getproperty(x::Ptr{__JL_Ctag_1305}, f::Symbol)
-    f === :si_band && return Ptr{Clong}(x + 0)
-    f === :si_fd && return Ptr{Cint}(x + 8)
-    return getfield(x, f)
-end
-
-function Base.getproperty(x::__JL_Ctag_1305, f::Symbol)
-    r = Ref{__JL_Ctag_1305}(x)
-    ptr = Base.unsafe_convert(Ptr{__JL_Ctag_1305}, r)
-    fptr = getproperty(ptr, f)
-    GC.@preserve r unsafe_load(fptr)
-end
-
-function Base.setproperty!(x::Ptr{__JL_Ctag_1305}, f::Symbol, v)
-    unsafe_store!(getproperty(x, f), v)
-end
-
-
-"""
-    __JL_Ctag_1306
-
-Documentation not found.
-"""
-struct __JL_Ctag_1306
-    _call_addr::Ptr{Cvoid}
-    _syscall::Cint
-    _arch::Cuint
-end
-function Base.getproperty(x::Ptr{__JL_Ctag_1306}, f::Symbol)
-    f === :_call_addr && return Ptr{Ptr{Cvoid}}(x + 0)
-    f === :_syscall && return Ptr{Cint}(x + 8)
-    f === :_arch && return Ptr{Cuint}(x + 12)
-    return getfield(x, f)
-end
-
-function Base.getproperty(x::__JL_Ctag_1306, f::Symbol)
-    r = Ref{__JL_Ctag_1306}(x)
-    ptr = Base.unsafe_convert(Ptr{__JL_Ctag_1306}, r)
-    fptr = getproperty(ptr, f)
-    GC.@preserve r unsafe_load(fptr)
-end
-
-function Base.setproperty!(x::Ptr{__JL_Ctag_1306}, f::Symbol, v)
-    unsafe_store!(getproperty(x, f), v)
-end
-
 
 """
 Documentation not found.
