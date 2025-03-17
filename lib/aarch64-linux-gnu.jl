@@ -82,7 +82,7 @@ struct pthread_cond_t
 end
 
 function Base.getproperty(x::Ptr{pthread_cond_t}, f::Symbol)
-    f === :__data && return Ptr{var"struct (unnamed at /home/runner/.julia/artifacts/5db9b46496bfd3b55724b246c46f9fe838cc66ca/aarch64-linux-gnu/sys-root/usr/include/bits/pthreadtypes.h:88:3)"}(x + 0)
+    f === :__data && return Ptr{__JL_Ctag_1241}(x + 0)
     f === :__size && return Ptr{NTuple{48, Cchar}}(x + 0)
     f === :__align && return Ptr{Clong}(x + 0)
     return getfield(x, f)
@@ -114,7 +114,7 @@ struct pthread_rwlock_t
 end
 
 function Base.getproperty(x::Ptr{pthread_rwlock_t}, f::Symbol)
-    f === :__data && return Ptr{var"struct (unnamed at /home/runner/.julia/artifacts/5db9b46496bfd3b55724b246c46f9fe838cc66ca/aarch64-linux-gnu/sys-root/usr/include/bits/pthreadtypes.h:123:3)"}(x + 0)
+    f === :__data && return Ptr{__JL_Ctag_1242}(x + 0)
     f === :__size && return Ptr{NTuple{56, Cchar}}(x + 0)
     f === :__align && return Ptr{Clong}(x + 0)
     return getfield(x, f)
@@ -182,34 +182,34 @@ Documentation not found.
 const sigval_t = sigval
 
 """
-    union (unnamed at /home/runner/.julia/artifacts/5db9b46496bfd3b55724b246c46f9fe838cc66ca/aarch64-linux-gnu/sys-root/usr/include/bits/siginfo.h:57:5)
+    __JL_Ctag_1248
 
 Documentation not found.
 """
-struct var"union (unnamed at /home/runner/.julia/artifacts/5db9b46496bfd3b55724b246c46f9fe838cc66ca/aarch64-linux-gnu/sys-root/usr/include/bits/siginfo.h:57:5)"
+struct __JL_Ctag_1248
     data::NTuple{112, UInt8}
 end
 
-function Base.getproperty(x::Ptr{var"union (unnamed at /home/runner/.julia/artifacts/5db9b46496bfd3b55724b246c46f9fe838cc66ca/aarch64-linux-gnu/sys-root/usr/include/bits/siginfo.h:57:5)"}, f::Symbol)
+function Base.getproperty(x::Ptr{__JL_Ctag_1248}, f::Symbol)
     f === :_pad && return Ptr{NTuple{28, Cint}}(x + 0)
-    f === :_kill && return Ptr{var"struct (unnamed at /home/runner/.julia/artifacts/5db9b46496bfd3b55724b246c46f9fe838cc66ca/aarch64-linux-gnu/sys-root/usr/include/bits/siginfo.h:62:2)"}(x + 0)
-    f === :_timer && return Ptr{var"struct (unnamed at /home/runner/.julia/artifacts/5db9b46496bfd3b55724b246c46f9fe838cc66ca/aarch64-linux-gnu/sys-root/usr/include/bits/siginfo.h:69:2)"}(x + 0)
-    f === :_rt && return Ptr{var"struct (unnamed at /home/runner/.julia/artifacts/5db9b46496bfd3b55724b246c46f9fe838cc66ca/aarch64-linux-gnu/sys-root/usr/include/bits/siginfo.h:77:2)"}(x + 0)
-    f === :_sigchld && return Ptr{var"struct (unnamed at /home/runner/.julia/artifacts/5db9b46496bfd3b55724b246c46f9fe838cc66ca/aarch64-linux-gnu/sys-root/usr/include/bits/siginfo.h:85:2)"}(x + 0)
-    f === :_sigfault && return Ptr{var"struct (unnamed at /home/runner/.julia/artifacts/5db9b46496bfd3b55724b246c46f9fe838cc66ca/aarch64-linux-gnu/sys-root/usr/include/bits/siginfo.h:95:2)"}(x + 0)
-    f === :_sigpoll && return Ptr{var"struct (unnamed at /home/runner/.julia/artifacts/5db9b46496bfd3b55724b246c46f9fe838cc66ca/aarch64-linux-gnu/sys-root/usr/include/bits/siginfo.h:102:2)"}(x + 0)
-    f === :_sigsys && return Ptr{var"struct (unnamed at /home/runner/.julia/artifacts/5db9b46496bfd3b55724b246c46f9fe838cc66ca/aarch64-linux-gnu/sys-root/usr/include/bits/siginfo.h:109:2)"}(x + 0)
+    f === :_kill && return Ptr{__JL_Ctag_1249}(x + 0)
+    f === :_timer && return Ptr{__JL_Ctag_1250}(x + 0)
+    f === :_rt && return Ptr{__JL_Ctag_1251}(x + 0)
+    f === :_sigchld && return Ptr{__JL_Ctag_1252}(x + 0)
+    f === :_sigfault && return Ptr{__JL_Ctag_1253}(x + 0)
+    f === :_sigpoll && return Ptr{__JL_Ctag_1254}(x + 0)
+    f === :_sigsys && return Ptr{__JL_Ctag_1255}(x + 0)
     return getfield(x, f)
 end
 
-function Base.getproperty(x::var"union (unnamed at /home/runner/.julia/artifacts/5db9b46496bfd3b55724b246c46f9fe838cc66ca/aarch64-linux-gnu/sys-root/usr/include/bits/siginfo.h:57:5)", f::Symbol)
-    r = Ref{var"union (unnamed at /home/runner/.julia/artifacts/5db9b46496bfd3b55724b246c46f9fe838cc66ca/aarch64-linux-gnu/sys-root/usr/include/bits/siginfo.h:57:5)"}(x)
-    ptr = Base.unsafe_convert(Ptr{var"union (unnamed at /home/runner/.julia/artifacts/5db9b46496bfd3b55724b246c46f9fe838cc66ca/aarch64-linux-gnu/sys-root/usr/include/bits/siginfo.h:57:5)"}, r)
+function Base.getproperty(x::__JL_Ctag_1248, f::Symbol)
+    r = Ref{__JL_Ctag_1248}(x)
+    ptr = Base.unsafe_convert(Ptr{__JL_Ctag_1248}, r)
     fptr = getproperty(ptr, f)
     GC.@preserve r unsafe_load(fptr)
 end
 
-function Base.setproperty!(x::Ptr{var"union (unnamed at /home/runner/.julia/artifacts/5db9b46496bfd3b55724b246c46f9fe838cc66ca/aarch64-linux-gnu/sys-root/usr/include/bits/siginfo.h:57:5)"}, f::Symbol, v)
+function Base.setproperty!(x::Ptr{__JL_Ctag_1248}, f::Symbol, v)
     unsafe_store!(getproperty(x, f), v)
 end
 
@@ -226,7 +226,7 @@ function Base.getproperty(x::Ptr{siginfo_t}, f::Symbol)
     f === :si_signo && return Ptr{Cint}(x + 0)
     f === :si_errno && return Ptr{Cint}(x + 4)
     f === :si_code && return Ptr{Cint}(x + 8)
-    f === :_sifields && return Ptr{var"union (unnamed at /home/runner/.julia/artifacts/5db9b46496bfd3b55724b246c46f9fe838cc66ca/aarch64-linux-gnu/sys-root/usr/include/bits/siginfo.h:57:5)"}(x + 16)
+    f === :_sifields && return Ptr{__JL_Ctag_1248}(x + 16)
     return getfield(x, f)
 end
 
@@ -1271,11 +1271,11 @@ function aws_max_double(a, b)
 end
 
 """
-    __JL_Ctag_1
+    __JL_Ctag_39
 
 Documentation not found.
 """
-@cenum __JL_Ctag_1::UInt32 begin
+@cenum __JL_Ctag_39::UInt32 begin
     AWS_ARRAY_LIST_DEBUG_FILL = 221
 end
 
@@ -5372,11 +5372,11 @@ function aws_cross_process_lock_release(instance_lock)
 end
 
 """
-    __JL_Ctag_36
+    __JL_Ctag_308
 
 Documentation not found.
 """
-@cenum __JL_Ctag_36::UInt32 begin
+@cenum __JL_Ctag_308::UInt32 begin
     AWS_DATE_TIME_STR_MAX_LEN = 100
     AWS_DATE_TIME_STR_MAX_BASIC_LEN = 20
 end
@@ -6946,11 +6946,11 @@ function aws_file_get_length(file, length)
 end
 
 """
-    __JL_Ctag_49
+    __JL_Ctag_454
 
 Documentation not found.
 """
-@cenum __JL_Ctag_49::UInt32 begin
+@cenum __JL_Ctag_454::UInt32 begin
     AWS_COMMON_HASH_TABLE_ITER_CONTINUE = 1
     AWS_COMMON_HASH_TABLE_ITER_DELETE = 2
     AWS_COMMON_HASH_TABLE_ITER_ERROR = 4
@@ -8814,11 +8814,11 @@ Log subject is an enum similar to aws error: each library has its own value-spac
 const aws_log_subject_t = UInt32
 
 """
-    __JL_Ctag_107
+    __JL_Ctag_689
 
 Each library gets space for 2^^10 log subject entries
 """
-@cenum __JL_Ctag_107::UInt32 begin
+@cenum __JL_Ctag_689::UInt32 begin
     AWS_LOG_SUBJECT_STRIDE_BITS = 10
 end
 
@@ -9145,11 +9145,11 @@ Documentation not found.
 const static_assertion_at_line_62 = NTuple{1, Cchar}
 
 """
-    __JL_Ctag_108
+    __JL_Ctag_709
 
 Documentation not found.
 """
-@cenum __JL_Ctag_108::UInt32 begin
+@cenum __JL_Ctag_709::UInt32 begin
     AWS_CACHE_LINE = 64
 end
 
@@ -9967,11 +9967,11 @@ Documentation not found.
 const aws_crt_statistics_category_t = UInt32
 
 """
-    __JL_Ctag_129
+    __JL_Ctag_905
 
 Each library gets space for 2^^8 category entries
 """
-@cenum __JL_Ctag_129::UInt32 begin
+@cenum __JL_Ctag_905::UInt32 begin
     AWS_CRT_STATISTICS_CATEGORY_STRIDE_BITS = 8
 end
 
@@ -10737,28 +10737,28 @@ A scheduled function.
 const aws_task_fn = Cvoid
 
 """
-    union (unnamed at /home/runner/.julia/artifacts/c43d1b14ea89949dc0fbeb710b3daebe7e1f6fc0/include/aws/common/task_scheduler.h:40:5)
+    __JL_Ctag_1296
 
 honor the ABI compat
 """
-struct var"union (unnamed at /home/runner/.julia/artifacts/c43d1b14ea89949dc0fbeb710b3daebe7e1f6fc0/include/aws/common/task_scheduler.h:40:5)"
+struct __JL_Ctag_1296
     data::NTuple{8, UInt8}
 end
 
-function Base.getproperty(x::Ptr{var"union (unnamed at /home/runner/.julia/artifacts/c43d1b14ea89949dc0fbeb710b3daebe7e1f6fc0/include/aws/common/task_scheduler.h:40:5)"}, f::Symbol)
+function Base.getproperty(x::Ptr{__JL_Ctag_1296}, f::Symbol)
     f === :scheduled && return Ptr{Bool}(x + 0)
     f === :reserved && return Ptr{Csize_t}(x + 0)
     return getfield(x, f)
 end
 
-function Base.getproperty(x::var"union (unnamed at /home/runner/.julia/artifacts/c43d1b14ea89949dc0fbeb710b3daebe7e1f6fc0/include/aws/common/task_scheduler.h:40:5)", f::Symbol)
-    r = Ref{var"union (unnamed at /home/runner/.julia/artifacts/c43d1b14ea89949dc0fbeb710b3daebe7e1f6fc0/include/aws/common/task_scheduler.h:40:5)"}(x)
-    ptr = Base.unsafe_convert(Ptr{var"union (unnamed at /home/runner/.julia/artifacts/c43d1b14ea89949dc0fbeb710b3daebe7e1f6fc0/include/aws/common/task_scheduler.h:40:5)"}, r)
+function Base.getproperty(x::__JL_Ctag_1296, f::Symbol)
+    r = Ref{__JL_Ctag_1296}(x)
+    ptr = Base.unsafe_convert(Ptr{__JL_Ctag_1296}, r)
     fptr = getproperty(ptr, f)
     GC.@preserve r unsafe_load(fptr)
 end
 
-function Base.setproperty!(x::Ptr{var"union (unnamed at /home/runner/.julia/artifacts/c43d1b14ea89949dc0fbeb710b3daebe7e1f6fc0/include/aws/common/task_scheduler.h:40:5)"}, f::Symbol, v)
+function Base.setproperty!(x::Ptr{__JL_Ctag_1296}, f::Symbol, v)
     unsafe_store!(getproperty(x, f), v)
 end
 
@@ -10778,7 +10778,7 @@ function Base.getproperty(x::Ptr{aws_task}, f::Symbol)
     f === :node && return Ptr{aws_linked_list_node}(x + 24)
     f === :priority_queue_node && return Ptr{aws_priority_queue_node}(x + 40)
     f === :type_tag && return Ptr{Ptr{Cchar}}(x + 48)
-    f === :abi_extension && return Ptr{var"union (unnamed at /home/runner/.julia/artifacts/c43d1b14ea89949dc0fbeb710b3daebe7e1f6fc0/include/aws/common/task_scheduler.h:40:5)"}(x + 56)
+    f === :abi_extension && return Ptr{__JL_Ctag_1296}(x + 56)
     return getfield(x, f)
 end
 
@@ -11726,11 +11726,11 @@ struct aws_uuid
 end
 
 """
-    __JL_Ctag_166
+    __JL_Ctag_1134
 
 36 bytes for the UUID plus one more for the null terminator.
 """
-@cenum __JL_Ctag_166::UInt32 begin
+@cenum __JL_Ctag_1134::UInt32 begin
     AWS_UUID_STR_LEN = 37
 end
 
@@ -12187,80 +12187,88 @@ function enable_vt_mode()
 end
 
 """
-    var"struct (unnamed at /home/runner/.julia/artifacts/5db9b46496bfd3b55724b246c46f9fe838cc66ca/aarch64-linux-gnu/sys-root/usr/include/bits/siginfo.h:62:2)"
+    __JL_Ctag_1241
 
 Documentation not found.
 """
-struct var"struct (unnamed at /home/runner/.julia/artifacts/5db9b46496bfd3b55724b246c46f9fe838cc66ca/aarch64-linux-gnu/sys-root/usr/include/bits/siginfo.h:62:2)"
-    si_pid::__pid_t
-    si_uid::__uid_t
+struct __JL_Ctag_1241
+    __lock::Cint
+    __futex::Cuint
+    __total_seq::Culonglong
+    __wakeup_seq::Culonglong
+    __woken_seq::Culonglong
+    __mutex::Ptr{Cvoid}
+    __nwaiters::Cuint
+    __broadcast_seq::Cuint
+end
+function Base.getproperty(x::Ptr{__JL_Ctag_1241}, f::Symbol)
+    f === :__lock && return Ptr{Cint}(x + 0)
+    f === :__futex && return Ptr{Cuint}(x + 4)
+    f === :__total_seq && return Ptr{Culonglong}(x + 8)
+    f === :__wakeup_seq && return Ptr{Culonglong}(x + 16)
+    f === :__woken_seq && return Ptr{Culonglong}(x + 24)
+    f === :__mutex && return Ptr{Ptr{Cvoid}}(x + 32)
+    f === :__nwaiters && return Ptr{Cuint}(x + 40)
+    f === :__broadcast_seq && return Ptr{Cuint}(x + 44)
+    return getfield(x, f)
 end
 
+function Base.getproperty(x::__JL_Ctag_1241, f::Symbol)
+    r = Ref{__JL_Ctag_1241}(x)
+    ptr = Base.unsafe_convert(Ptr{__JL_Ctag_1241}, r)
+    fptr = getproperty(ptr, f)
+    GC.@preserve r unsafe_load(fptr)
+end
+
+function Base.setproperty!(x::Ptr{__JL_Ctag_1241}, f::Symbol, v)
+    unsafe_store!(getproperty(x, f), v)
+end
+
+
 """
-    var"struct (unnamed at /home/runner/.julia/artifacts/5db9b46496bfd3b55724b246c46f9fe838cc66ca/aarch64-linux-gnu/sys-root/usr/include/bits/siginfo.h:69:2)"
+    __JL_Ctag_1242
 
 Documentation not found.
 """
-struct var"struct (unnamed at /home/runner/.julia/artifacts/5db9b46496bfd3b55724b246c46f9fe838cc66ca/aarch64-linux-gnu/sys-root/usr/include/bits/siginfo.h:69:2)"
-    si_tid::Cint
-    si_overrun::Cint
-    si_sigval::sigval_t
+struct __JL_Ctag_1242
+    __lock::Cint
+    __nr_readers::Cuint
+    __readers_wakeup::Cuint
+    __writer_wakeup::Cuint
+    __nr_readers_queued::Cuint
+    __nr_writers_queued::Cuint
+    __writer::Cint
+    __shared::Cint
+    __pad1::Culong
+    __pad2::Culong
+    __flags::Cuint
+end
+function Base.getproperty(x::Ptr{__JL_Ctag_1242}, f::Symbol)
+    f === :__lock && return Ptr{Cint}(x + 0)
+    f === :__nr_readers && return Ptr{Cuint}(x + 4)
+    f === :__readers_wakeup && return Ptr{Cuint}(x + 8)
+    f === :__writer_wakeup && return Ptr{Cuint}(x + 12)
+    f === :__nr_readers_queued && return Ptr{Cuint}(x + 16)
+    f === :__nr_writers_queued && return Ptr{Cuint}(x + 20)
+    f === :__writer && return Ptr{Cint}(x + 24)
+    f === :__shared && return Ptr{Cint}(x + 28)
+    f === :__pad1 && return Ptr{Culong}(x + 32)
+    f === :__pad2 && return Ptr{Culong}(x + 40)
+    f === :__flags && return Ptr{Cuint}(x + 48)
+    return getfield(x, f)
 end
 
-"""
-    var"struct (unnamed at /home/runner/.julia/artifacts/5db9b46496bfd3b55724b246c46f9fe838cc66ca/aarch64-linux-gnu/sys-root/usr/include/bits/siginfo.h:77:2)"
-
-Documentation not found.
-"""
-struct var"struct (unnamed at /home/runner/.julia/artifacts/5db9b46496bfd3b55724b246c46f9fe838cc66ca/aarch64-linux-gnu/sys-root/usr/include/bits/siginfo.h:77:2)"
-    si_pid::__pid_t
-    si_uid::__uid_t
-    si_sigval::sigval_t
+function Base.getproperty(x::__JL_Ctag_1242, f::Symbol)
+    r = Ref{__JL_Ctag_1242}(x)
+    ptr = Base.unsafe_convert(Ptr{__JL_Ctag_1242}, r)
+    fptr = getproperty(ptr, f)
+    GC.@preserve r unsafe_load(fptr)
 end
 
-"""
-    var"struct (unnamed at /home/runner/.julia/artifacts/5db9b46496bfd3b55724b246c46f9fe838cc66ca/aarch64-linux-gnu/sys-root/usr/include/bits/siginfo.h:85:2)"
-
-Documentation not found.
-"""
-struct var"struct (unnamed at /home/runner/.julia/artifacts/5db9b46496bfd3b55724b246c46f9fe838cc66ca/aarch64-linux-gnu/sys-root/usr/include/bits/siginfo.h:85:2)"
-    si_pid::__pid_t
-    si_uid::__uid_t
-    si_status::Cint
-    si_utime::__clock_t
-    si_stime::__clock_t
+function Base.setproperty!(x::Ptr{__JL_Ctag_1242}, f::Symbol, v)
+    unsafe_store!(getproperty(x, f), v)
 end
 
-"""
-    var"struct (unnamed at /home/runner/.julia/artifacts/5db9b46496bfd3b55724b246c46f9fe838cc66ca/aarch64-linux-gnu/sys-root/usr/include/bits/siginfo.h:95:2)"
-
-Documentation not found.
-"""
-struct var"struct (unnamed at /home/runner/.julia/artifacts/5db9b46496bfd3b55724b246c46f9fe838cc66ca/aarch64-linux-gnu/sys-root/usr/include/bits/siginfo.h:95:2)"
-    si_addr::Ptr{Cvoid}
-    si_addr_lsb::Cshort
-end
-
-"""
-    var"struct (unnamed at /home/runner/.julia/artifacts/5db9b46496bfd3b55724b246c46f9fe838cc66ca/aarch64-linux-gnu/sys-root/usr/include/bits/siginfo.h:102:2)"
-
-Documentation not found.
-"""
-struct var"struct (unnamed at /home/runner/.julia/artifacts/5db9b46496bfd3b55724b246c46f9fe838cc66ca/aarch64-linux-gnu/sys-root/usr/include/bits/siginfo.h:102:2)"
-    si_band::Clong
-    si_fd::Cint
-end
-
-"""
-    var"struct (unnamed at /home/runner/.julia/artifacts/5db9b46496bfd3b55724b246c46f9fe838cc66ca/aarch64-linux-gnu/sys-root/usr/include/bits/siginfo.h:109:2)"
-
-Documentation not found.
-"""
-struct var"struct (unnamed at /home/runner/.julia/artifacts/5db9b46496bfd3b55724b246c46f9fe838cc66ca/aarch64-linux-gnu/sys-root/usr/include/bits/siginfo.h:109:2)"
-    _call_addr::Ptr{Cvoid}
-    _syscall::Cint
-    _arch::Cuint
-end
 
 """
     __pthread_mutex_s
@@ -12278,39 +12286,205 @@ struct __pthread_mutex_s
 end
 
 """
-    var"struct (unnamed at /home/runner/.julia/artifacts/5db9b46496bfd3b55724b246c46f9fe838cc66ca/aarch64-linux-gnu/sys-root/usr/include/bits/pthreadtypes.h:88:3)"
+    __JL_Ctag_1249
 
 Documentation not found.
 """
-struct var"struct (unnamed at /home/runner/.julia/artifacts/5db9b46496bfd3b55724b246c46f9fe838cc66ca/aarch64-linux-gnu/sys-root/usr/include/bits/pthreadtypes.h:88:3)"
-    __lock::Cint
-    __futex::Cuint
-    __total_seq::Culonglong
-    __wakeup_seq::Culonglong
-    __woken_seq::Culonglong
-    __mutex::Ptr{Cvoid}
-    __nwaiters::Cuint
-    __broadcast_seq::Cuint
+struct __JL_Ctag_1249
+    si_pid::__pid_t
+    si_uid::__uid_t
+end
+function Base.getproperty(x::Ptr{__JL_Ctag_1249}, f::Symbol)
+    f === :si_pid && return Ptr{__pid_t}(x + 0)
+    f === :si_uid && return Ptr{__uid_t}(x + 4)
+    return getfield(x, f)
 end
 
+function Base.getproperty(x::__JL_Ctag_1249, f::Symbol)
+    r = Ref{__JL_Ctag_1249}(x)
+    ptr = Base.unsafe_convert(Ptr{__JL_Ctag_1249}, r)
+    fptr = getproperty(ptr, f)
+    GC.@preserve r unsafe_load(fptr)
+end
+
+function Base.setproperty!(x::Ptr{__JL_Ctag_1249}, f::Symbol, v)
+    unsafe_store!(getproperty(x, f), v)
+end
+
+
 """
-    var"struct (unnamed at /home/runner/.julia/artifacts/5db9b46496bfd3b55724b246c46f9fe838cc66ca/aarch64-linux-gnu/sys-root/usr/include/bits/pthreadtypes.h:123:3)"
+    __JL_Ctag_1250
 
 Documentation not found.
 """
-struct var"struct (unnamed at /home/runner/.julia/artifacts/5db9b46496bfd3b55724b246c46f9fe838cc66ca/aarch64-linux-gnu/sys-root/usr/include/bits/pthreadtypes.h:123:3)"
-    __lock::Cint
-    __nr_readers::Cuint
-    __readers_wakeup::Cuint
-    __writer_wakeup::Cuint
-    __nr_readers_queued::Cuint
-    __nr_writers_queued::Cuint
-    __writer::Cint
-    __shared::Cint
-    __pad1::Culong
-    __pad2::Culong
-    __flags::Cuint
+struct __JL_Ctag_1250
+    si_tid::Cint
+    si_overrun::Cint
+    si_sigval::sigval_t
 end
+function Base.getproperty(x::Ptr{__JL_Ctag_1250}, f::Symbol)
+    f === :si_tid && return Ptr{Cint}(x + 0)
+    f === :si_overrun && return Ptr{Cint}(x + 4)
+    f === :si_sigval && return Ptr{sigval_t}(x + 8)
+    return getfield(x, f)
+end
+
+function Base.getproperty(x::__JL_Ctag_1250, f::Symbol)
+    r = Ref{__JL_Ctag_1250}(x)
+    ptr = Base.unsafe_convert(Ptr{__JL_Ctag_1250}, r)
+    fptr = getproperty(ptr, f)
+    GC.@preserve r unsafe_load(fptr)
+end
+
+function Base.setproperty!(x::Ptr{__JL_Ctag_1250}, f::Symbol, v)
+    unsafe_store!(getproperty(x, f), v)
+end
+
+
+"""
+    __JL_Ctag_1251
+
+Documentation not found.
+"""
+struct __JL_Ctag_1251
+    si_pid::__pid_t
+    si_uid::__uid_t
+    si_sigval::sigval_t
+end
+function Base.getproperty(x::Ptr{__JL_Ctag_1251}, f::Symbol)
+    f === :si_pid && return Ptr{__pid_t}(x + 0)
+    f === :si_uid && return Ptr{__uid_t}(x + 4)
+    f === :si_sigval && return Ptr{sigval_t}(x + 8)
+    return getfield(x, f)
+end
+
+function Base.getproperty(x::__JL_Ctag_1251, f::Symbol)
+    r = Ref{__JL_Ctag_1251}(x)
+    ptr = Base.unsafe_convert(Ptr{__JL_Ctag_1251}, r)
+    fptr = getproperty(ptr, f)
+    GC.@preserve r unsafe_load(fptr)
+end
+
+function Base.setproperty!(x::Ptr{__JL_Ctag_1251}, f::Symbol, v)
+    unsafe_store!(getproperty(x, f), v)
+end
+
+
+"""
+    __JL_Ctag_1252
+
+Documentation not found.
+"""
+struct __JL_Ctag_1252
+    si_pid::__pid_t
+    si_uid::__uid_t
+    si_status::Cint
+    si_utime::__clock_t
+    si_stime::__clock_t
+end
+function Base.getproperty(x::Ptr{__JL_Ctag_1252}, f::Symbol)
+    f === :si_pid && return Ptr{__pid_t}(x + 0)
+    f === :si_uid && return Ptr{__uid_t}(x + 4)
+    f === :si_status && return Ptr{Cint}(x + 8)
+    f === :si_utime && return Ptr{__clock_t}(x + 16)
+    f === :si_stime && return Ptr{__clock_t}(x + 24)
+    return getfield(x, f)
+end
+
+function Base.getproperty(x::__JL_Ctag_1252, f::Symbol)
+    r = Ref{__JL_Ctag_1252}(x)
+    ptr = Base.unsafe_convert(Ptr{__JL_Ctag_1252}, r)
+    fptr = getproperty(ptr, f)
+    GC.@preserve r unsafe_load(fptr)
+end
+
+function Base.setproperty!(x::Ptr{__JL_Ctag_1252}, f::Symbol, v)
+    unsafe_store!(getproperty(x, f), v)
+end
+
+
+"""
+    __JL_Ctag_1253
+
+Documentation not found.
+"""
+struct __JL_Ctag_1253
+    si_addr::Ptr{Cvoid}
+    si_addr_lsb::Cshort
+end
+function Base.getproperty(x::Ptr{__JL_Ctag_1253}, f::Symbol)
+    f === :si_addr && return Ptr{Ptr{Cvoid}}(x + 0)
+    f === :si_addr_lsb && return Ptr{Cshort}(x + 8)
+    return getfield(x, f)
+end
+
+function Base.getproperty(x::__JL_Ctag_1253, f::Symbol)
+    r = Ref{__JL_Ctag_1253}(x)
+    ptr = Base.unsafe_convert(Ptr{__JL_Ctag_1253}, r)
+    fptr = getproperty(ptr, f)
+    GC.@preserve r unsafe_load(fptr)
+end
+
+function Base.setproperty!(x::Ptr{__JL_Ctag_1253}, f::Symbol, v)
+    unsafe_store!(getproperty(x, f), v)
+end
+
+
+"""
+    __JL_Ctag_1254
+
+Documentation not found.
+"""
+struct __JL_Ctag_1254
+    si_band::Clong
+    si_fd::Cint
+end
+function Base.getproperty(x::Ptr{__JL_Ctag_1254}, f::Symbol)
+    f === :si_band && return Ptr{Clong}(x + 0)
+    f === :si_fd && return Ptr{Cint}(x + 8)
+    return getfield(x, f)
+end
+
+function Base.getproperty(x::__JL_Ctag_1254, f::Symbol)
+    r = Ref{__JL_Ctag_1254}(x)
+    ptr = Base.unsafe_convert(Ptr{__JL_Ctag_1254}, r)
+    fptr = getproperty(ptr, f)
+    GC.@preserve r unsafe_load(fptr)
+end
+
+function Base.setproperty!(x::Ptr{__JL_Ctag_1254}, f::Symbol, v)
+    unsafe_store!(getproperty(x, f), v)
+end
+
+
+"""
+    __JL_Ctag_1255
+
+Documentation not found.
+"""
+struct __JL_Ctag_1255
+    _call_addr::Ptr{Cvoid}
+    _syscall::Cint
+    _arch::Cuint
+end
+function Base.getproperty(x::Ptr{__JL_Ctag_1255}, f::Symbol)
+    f === :_call_addr && return Ptr{Ptr{Cvoid}}(x + 0)
+    f === :_syscall && return Ptr{Cint}(x + 8)
+    f === :_arch && return Ptr{Cuint}(x + 12)
+    return getfield(x, f)
+end
+
+function Base.getproperty(x::__JL_Ctag_1255, f::Symbol)
+    r = Ref{__JL_Ctag_1255}(x)
+    ptr = Base.unsafe_convert(Ptr{__JL_Ctag_1255}, r)
+    fptr = getproperty(ptr, f)
+    GC.@preserve r unsafe_load(fptr)
+end
+
+function Base.setproperty!(x::Ptr{__JL_Ctag_1255}, f::Symbol, v)
+    unsafe_store!(getproperty(x, f), v)
+end
+
 
 """
 Documentation not found.

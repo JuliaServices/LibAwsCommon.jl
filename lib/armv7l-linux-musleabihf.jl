@@ -6,29 +6,29 @@ Documentation not found.
 const time_t = Clong
 
 """
-    union (unnamed at /home/runner/.julia/artifacts/452cde0499419e984225c72bc1d2c37ee97a2259/arm-linux-musleabihf/sys-root/usr/include/bits/alltypes.h:58:18)
+    __JL_Ctag_331
 
 Documentation not found.
 """
-struct var"union (unnamed at /home/runner/.julia/artifacts/452cde0499419e984225c72bc1d2c37ee97a2259/arm-linux-musleabihf/sys-root/usr/include/bits/alltypes.h:58:18)"
+struct __JL_Ctag_331
     data::NTuple{24, UInt8}
 end
 
-function Base.getproperty(x::Ptr{var"union (unnamed at /home/runner/.julia/artifacts/452cde0499419e984225c72bc1d2c37ee97a2259/arm-linux-musleabihf/sys-root/usr/include/bits/alltypes.h:58:18)"}, f::Symbol)
+function Base.getproperty(x::Ptr{__JL_Ctag_331}, f::Symbol)
     f === :__i && return Ptr{NTuple{6, Cint}}(x + 0)
     f === :__vi && return Ptr{NTuple{6, Cint}}(x + 0)
     f === :__p && return Ptr{NTuple{6, Ptr{Cvoid}}}(x + 0)
     return getfield(x, f)
 end
 
-function Base.getproperty(x::var"union (unnamed at /home/runner/.julia/artifacts/452cde0499419e984225c72bc1d2c37ee97a2259/arm-linux-musleabihf/sys-root/usr/include/bits/alltypes.h:58:18)", f::Symbol)
-    r = Ref{var"union (unnamed at /home/runner/.julia/artifacts/452cde0499419e984225c72bc1d2c37ee97a2259/arm-linux-musleabihf/sys-root/usr/include/bits/alltypes.h:58:18)"}(x)
-    ptr = Base.unsafe_convert(Ptr{var"union (unnamed at /home/runner/.julia/artifacts/452cde0499419e984225c72bc1d2c37ee97a2259/arm-linux-musleabihf/sys-root/usr/include/bits/alltypes.h:58:18)"}, r)
+function Base.getproperty(x::__JL_Ctag_331, f::Symbol)
+    r = Ref{__JL_Ctag_331}(x)
+    ptr = Base.unsafe_convert(Ptr{__JL_Ctag_331}, r)
     fptr = getproperty(ptr, f)
     GC.@preserve r unsafe_load(fptr)
 end
 
-function Base.setproperty!(x::Ptr{var"union (unnamed at /home/runner/.julia/artifacts/452cde0499419e984225c72bc1d2c37ee97a2259/arm-linux-musleabihf/sys-root/usr/include/bits/alltypes.h:58:18)"}, f::Symbol, v)
+function Base.setproperty!(x::Ptr{__JL_Ctag_331}, f::Symbol, v)
     unsafe_store!(getproperty(x, f), v)
 end
 
@@ -42,7 +42,7 @@ struct pthread_mutex_t
 end
 
 function Base.getproperty(x::Ptr{pthread_mutex_t}, f::Symbol)
-    f === :__u && return Ptr{var"union (unnamed at /home/runner/.julia/artifacts/452cde0499419e984225c72bc1d2c37ee97a2259/arm-linux-musleabihf/sys-root/usr/include/bits/alltypes.h:58:18)"}(x + 0)
+    f === :__u && return Ptr{__JL_Ctag_331}(x + 0)
     return getfield(x, f)
 end
 
@@ -58,29 +58,29 @@ function Base.setproperty!(x::Ptr{pthread_mutex_t}, f::Symbol, v)
 end
 
 """
-    union (unnamed at /home/runner/.julia/artifacts/452cde0499419e984225c72bc1d2c37ee97a2259/arm-linux-musleabihf/sys-root/usr/include/bits/alltypes.h:68:18)
+    __JL_Ctag_343
 
 Documentation not found.
 """
-struct var"union (unnamed at /home/runner/.julia/artifacts/452cde0499419e984225c72bc1d2c37ee97a2259/arm-linux-musleabihf/sys-root/usr/include/bits/alltypes.h:68:18)"
+struct __JL_Ctag_343
     data::NTuple{48, UInt8}
 end
 
-function Base.getproperty(x::Ptr{var"union (unnamed at /home/runner/.julia/artifacts/452cde0499419e984225c72bc1d2c37ee97a2259/arm-linux-musleabihf/sys-root/usr/include/bits/alltypes.h:68:18)"}, f::Symbol)
+function Base.getproperty(x::Ptr{__JL_Ctag_343}, f::Symbol)
     f === :__i && return Ptr{NTuple{12, Cint}}(x + 0)
     f === :__vi && return Ptr{NTuple{12, Cint}}(x + 0)
     f === :__p && return Ptr{NTuple{12, Ptr{Cvoid}}}(x + 0)
     return getfield(x, f)
 end
 
-function Base.getproperty(x::var"union (unnamed at /home/runner/.julia/artifacts/452cde0499419e984225c72bc1d2c37ee97a2259/arm-linux-musleabihf/sys-root/usr/include/bits/alltypes.h:68:18)", f::Symbol)
-    r = Ref{var"union (unnamed at /home/runner/.julia/artifacts/452cde0499419e984225c72bc1d2c37ee97a2259/arm-linux-musleabihf/sys-root/usr/include/bits/alltypes.h:68:18)"}(x)
-    ptr = Base.unsafe_convert(Ptr{var"union (unnamed at /home/runner/.julia/artifacts/452cde0499419e984225c72bc1d2c37ee97a2259/arm-linux-musleabihf/sys-root/usr/include/bits/alltypes.h:68:18)"}, r)
+function Base.getproperty(x::__JL_Ctag_343, f::Symbol)
+    r = Ref{__JL_Ctag_343}(x)
+    ptr = Base.unsafe_convert(Ptr{__JL_Ctag_343}, r)
     fptr = getproperty(ptr, f)
     GC.@preserve r unsafe_load(fptr)
 end
 
-function Base.setproperty!(x::Ptr{var"union (unnamed at /home/runner/.julia/artifacts/452cde0499419e984225c72bc1d2c37ee97a2259/arm-linux-musleabihf/sys-root/usr/include/bits/alltypes.h:68:18)"}, f::Symbol, v)
+function Base.setproperty!(x::Ptr{__JL_Ctag_343}, f::Symbol, v)
     unsafe_store!(getproperty(x, f), v)
 end
 
@@ -94,7 +94,7 @@ struct pthread_cond_t
 end
 
 function Base.getproperty(x::Ptr{pthread_cond_t}, f::Symbol)
-    f === :__u && return Ptr{var"union (unnamed at /home/runner/.julia/artifacts/452cde0499419e984225c72bc1d2c37ee97a2259/arm-linux-musleabihf/sys-root/usr/include/bits/alltypes.h:68:18)"}(x + 0)
+    f === :__u && return Ptr{__JL_Ctag_343}(x + 0)
     return getfield(x, f)
 end
 
@@ -110,29 +110,29 @@ function Base.setproperty!(x::Ptr{pthread_cond_t}, f::Symbol, v)
 end
 
 """
-    union (unnamed at /home/runner/.julia/artifacts/452cde0499419e984225c72bc1d2c37ee97a2259/arm-linux-musleabihf/sys-root/usr/include/bits/alltypes.h:78:18)
+    __JL_Ctag_332
 
 Documentation not found.
 """
-struct var"union (unnamed at /home/runner/.julia/artifacts/452cde0499419e984225c72bc1d2c37ee97a2259/arm-linux-musleabihf/sys-root/usr/include/bits/alltypes.h:78:18)"
+struct __JL_Ctag_332
     data::NTuple{32, UInt8}
 end
 
-function Base.getproperty(x::Ptr{var"union (unnamed at /home/runner/.julia/artifacts/452cde0499419e984225c72bc1d2c37ee97a2259/arm-linux-musleabihf/sys-root/usr/include/bits/alltypes.h:78:18)"}, f::Symbol)
+function Base.getproperty(x::Ptr{__JL_Ctag_332}, f::Symbol)
     f === :__i && return Ptr{NTuple{8, Cint}}(x + 0)
     f === :__vi && return Ptr{NTuple{8, Cint}}(x + 0)
     f === :__p && return Ptr{NTuple{8, Ptr{Cvoid}}}(x + 0)
     return getfield(x, f)
 end
 
-function Base.getproperty(x::var"union (unnamed at /home/runner/.julia/artifacts/452cde0499419e984225c72bc1d2c37ee97a2259/arm-linux-musleabihf/sys-root/usr/include/bits/alltypes.h:78:18)", f::Symbol)
-    r = Ref{var"union (unnamed at /home/runner/.julia/artifacts/452cde0499419e984225c72bc1d2c37ee97a2259/arm-linux-musleabihf/sys-root/usr/include/bits/alltypes.h:78:18)"}(x)
-    ptr = Base.unsafe_convert(Ptr{var"union (unnamed at /home/runner/.julia/artifacts/452cde0499419e984225c72bc1d2c37ee97a2259/arm-linux-musleabihf/sys-root/usr/include/bits/alltypes.h:78:18)"}, r)
+function Base.getproperty(x::__JL_Ctag_332, f::Symbol)
+    r = Ref{__JL_Ctag_332}(x)
+    ptr = Base.unsafe_convert(Ptr{__JL_Ctag_332}, r)
     fptr = getproperty(ptr, f)
     GC.@preserve r unsafe_load(fptr)
 end
 
-function Base.setproperty!(x::Ptr{var"union (unnamed at /home/runner/.julia/artifacts/452cde0499419e984225c72bc1d2c37ee97a2259/arm-linux-musleabihf/sys-root/usr/include/bits/alltypes.h:78:18)"}, f::Symbol, v)
+function Base.setproperty!(x::Ptr{__JL_Ctag_332}, f::Symbol, v)
     unsafe_store!(getproperty(x, f), v)
 end
 
@@ -146,7 +146,7 @@ struct pthread_rwlock_t
 end
 
 function Base.getproperty(x::Ptr{pthread_rwlock_t}, f::Symbol)
-    f === :__u && return Ptr{var"union (unnamed at /home/runner/.julia/artifacts/452cde0499419e984225c72bc1d2c37ee97a2259/arm-linux-musleabihf/sys-root/usr/include/bits/alltypes.h:78:18)"}(x + 0)
+    f === :__u && return Ptr{__JL_Ctag_332}(x + 0)
     return getfield(x, f)
 end
 
@@ -1225,11 +1225,11 @@ function aws_max_double(a, b)
 end
 
 """
-    __JL_Ctag_1
+    __JL_Ctag_9
 
 Documentation not found.
 """
-@cenum __JL_Ctag_1::UInt32 begin
+@cenum __JL_Ctag_9::UInt32 begin
     AWS_ARRAY_LIST_DEBUG_FILL = 221
 end
 
@@ -5326,11 +5326,11 @@ function aws_cross_process_lock_release(instance_lock)
 end
 
 """
-    __JL_Ctag_2
+    __JL_Ctag_71
 
 Documentation not found.
 """
-@cenum __JL_Ctag_2::UInt32 begin
+@cenum __JL_Ctag_71::UInt32 begin
     AWS_DATE_TIME_STR_MAX_LEN = 100
     AWS_DATE_TIME_STR_MAX_BASIC_LEN = 20
 end
@@ -6900,11 +6900,11 @@ function aws_file_get_length(file, length)
 end
 
 """
-    __JL_Ctag_3
+    __JL_Ctag_102
 
 Documentation not found.
 """
-@cenum __JL_Ctag_3::UInt32 begin
+@cenum __JL_Ctag_102::UInt32 begin
     AWS_COMMON_HASH_TABLE_ITER_CONTINUE = 1
     AWS_COMMON_HASH_TABLE_ITER_DELETE = 2
     AWS_COMMON_HASH_TABLE_ITER_ERROR = 4
@@ -8768,11 +8768,11 @@ Log subject is an enum similar to aws error: each library has its own value-spac
 const aws_log_subject_t = UInt32
 
 """
-    __JL_Ctag_4
+    __JL_Ctag_170
 
 Each library gets space for 2^^10 log subject entries
 """
-@cenum __JL_Ctag_4::UInt32 begin
+@cenum __JL_Ctag_170::UInt32 begin
     AWS_LOG_SUBJECT_STRIDE_BITS = 10
 end
 
@@ -9099,11 +9099,11 @@ Documentation not found.
 const static_assertion_at_line_62 = NTuple{1, Cchar}
 
 """
-    __JL_Ctag_5
+    __JL_Ctag_175
 
 Documentation not found.
 """
-@cenum __JL_Ctag_5::UInt32 begin
+@cenum __JL_Ctag_175::UInt32 begin
     AWS_CACHE_LINE = 64
 end
 
@@ -9921,11 +9921,11 @@ Documentation not found.
 const aws_crt_statistics_category_t = UInt32
 
 """
-    __JL_Ctag_6
+    __JL_Ctag_230
 
 Each library gets space for 2^^8 category entries
 """
-@cenum __JL_Ctag_6::UInt32 begin
+@cenum __JL_Ctag_230::UInt32 begin
     AWS_CRT_STATISTICS_CATEGORY_STRIDE_BITS = 8
 end
 
@@ -10691,28 +10691,28 @@ A scheduled function.
 const aws_task_fn = Cvoid
 
 """
-    union (unnamed at /home/runner/.julia/artifacts/b91a6bfd63485ba689a109ec4b3c21be0b7c2b9c/include/aws/common/task_scheduler.h:40:5)
+    __JL_Ctag_329
 
 honor the ABI compat
 """
-struct var"union (unnamed at /home/runner/.julia/artifacts/b91a6bfd63485ba689a109ec4b3c21be0b7c2b9c/include/aws/common/task_scheduler.h:40:5)"
+struct __JL_Ctag_329
     data::NTuple{4, UInt8}
 end
 
-function Base.getproperty(x::Ptr{var"union (unnamed at /home/runner/.julia/artifacts/b91a6bfd63485ba689a109ec4b3c21be0b7c2b9c/include/aws/common/task_scheduler.h:40:5)"}, f::Symbol)
+function Base.getproperty(x::Ptr{__JL_Ctag_329}, f::Symbol)
     f === :scheduled && return Ptr{Bool}(x + 0)
     f === :reserved && return Ptr{Csize_t}(x + 0)
     return getfield(x, f)
 end
 
-function Base.getproperty(x::var"union (unnamed at /home/runner/.julia/artifacts/b91a6bfd63485ba689a109ec4b3c21be0b7c2b9c/include/aws/common/task_scheduler.h:40:5)", f::Symbol)
-    r = Ref{var"union (unnamed at /home/runner/.julia/artifacts/b91a6bfd63485ba689a109ec4b3c21be0b7c2b9c/include/aws/common/task_scheduler.h:40:5)"}(x)
-    ptr = Base.unsafe_convert(Ptr{var"union (unnamed at /home/runner/.julia/artifacts/b91a6bfd63485ba689a109ec4b3c21be0b7c2b9c/include/aws/common/task_scheduler.h:40:5)"}, r)
+function Base.getproperty(x::__JL_Ctag_329, f::Symbol)
+    r = Ref{__JL_Ctag_329}(x)
+    ptr = Base.unsafe_convert(Ptr{__JL_Ctag_329}, r)
     fptr = getproperty(ptr, f)
     GC.@preserve r unsafe_load(fptr)
 end
 
-function Base.setproperty!(x::Ptr{var"union (unnamed at /home/runner/.julia/artifacts/b91a6bfd63485ba689a109ec4b3c21be0b7c2b9c/include/aws/common/task_scheduler.h:40:5)"}, f::Symbol, v)
+function Base.setproperty!(x::Ptr{__JL_Ctag_329}, f::Symbol, v)
     unsafe_store!(getproperty(x, f), v)
 end
 
@@ -10732,7 +10732,7 @@ function Base.getproperty(x::Ptr{aws_task}, f::Symbol)
     f === :node && return Ptr{aws_linked_list_node}(x + 16)
     f === :priority_queue_node && return Ptr{aws_priority_queue_node}(x + 24)
     f === :type_tag && return Ptr{Ptr{Cchar}}(x + 28)
-    f === :abi_extension && return Ptr{var"union (unnamed at /home/runner/.julia/artifacts/b91a6bfd63485ba689a109ec4b3c21be0b7c2b9c/include/aws/common/task_scheduler.h:40:5)"}(x + 32)
+    f === :abi_extension && return Ptr{__JL_Ctag_329}(x + 32)
     return getfield(x, f)
 end
 
@@ -11680,11 +11680,11 @@ struct aws_uuid
 end
 
 """
-    __JL_Ctag_7
+    __JL_Ctag_284
 
 36 bytes for the UUID plus one more for the null terminator.
 """
-@cenum __JL_Ctag_7::UInt32 begin
+@cenum __JL_Ctag_284::UInt32 begin
     AWS_UUID_STR_LEN = 37
 end
 

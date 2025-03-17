@@ -1294,11 +1294,11 @@ function aws_max_double(a, b)
 end
 
 """
-    __JL_Ctag_1
+    __JL_Ctag_13
 
 Documentation not found.
 """
-@cenum __JL_Ctag_1::UInt32 begin
+@cenum __JL_Ctag_13::UInt32 begin
     AWS_ARRAY_LIST_DEBUG_FILL = 221
 end
 
@@ -5395,11 +5395,11 @@ function aws_cross_process_lock_release(instance_lock)
 end
 
 """
-    __JL_Ctag_3
+    __JL_Ctag_90
 
 Documentation not found.
 """
-@cenum __JL_Ctag_3::UInt32 begin
+@cenum __JL_Ctag_90::UInt32 begin
     AWS_DATE_TIME_STR_MAX_LEN = 100
     AWS_DATE_TIME_STR_MAX_BASIC_LEN = 20
 end
@@ -6969,11 +6969,11 @@ function aws_file_get_length(file, length)
 end
 
 """
-    __JL_Ctag_4
+    __JL_Ctag_133
 
 Documentation not found.
 """
-@cenum __JL_Ctag_4::UInt32 begin
+@cenum __JL_Ctag_133::UInt32 begin
     AWS_COMMON_HASH_TABLE_ITER_CONTINUE = 1
     AWS_COMMON_HASH_TABLE_ITER_DELETE = 2
     AWS_COMMON_HASH_TABLE_ITER_ERROR = 4
@@ -8837,11 +8837,11 @@ Log subject is an enum similar to aws error: each library has its own value-spac
 const aws_log_subject_t = UInt32
 
 """
-    __JL_Ctag_8
+    __JL_Ctag_206
 
 Each library gets space for 2^^10 log subject entries
 """
-@cenum __JL_Ctag_8::UInt32 begin
+@cenum __JL_Ctag_206::UInt32 begin
     AWS_LOG_SUBJECT_STRIDE_BITS = 10
 end
 
@@ -9168,11 +9168,11 @@ Documentation not found.
 const static_assertion_at_line_62 = NTuple{1, Cchar}
 
 """
-    __JL_Ctag_9
+    __JL_Ctag_213
 
 Documentation not found.
 """
-@cenum __JL_Ctag_9::UInt32 begin
+@cenum __JL_Ctag_213::UInt32 begin
     AWS_CACHE_LINE = 64
 end
 
@@ -9990,11 +9990,11 @@ Documentation not found.
 const aws_crt_statistics_category_t = UInt32
 
 """
-    __JL_Ctag_12
+    __JL_Ctag_272
 
 Each library gets space for 2^^8 category entries
 """
-@cenum __JL_Ctag_12::UInt32 begin
+@cenum __JL_Ctag_272::UInt32 begin
     AWS_CRT_STATISTICS_CATEGORY_STRIDE_BITS = 8
 end
 
@@ -10760,28 +10760,28 @@ A scheduled function.
 const aws_task_fn = Cvoid
 
 """
-    union (unnamed at /home/runner/.julia/artifacts/f0ceef6c683b6b7af5fd02481accb32f8bac0486/include/aws/common/task_scheduler.h:40:5)
+    __JL_Ctag_381
 
 honor the ABI compat
 """
-struct var"union (unnamed at /home/runner/.julia/artifacts/f0ceef6c683b6b7af5fd02481accb32f8bac0486/include/aws/common/task_scheduler.h:40:5)"
+struct __JL_Ctag_381
     data::NTuple{8, UInt8}
 end
 
-function Base.getproperty(x::Ptr{var"union (unnamed at /home/runner/.julia/artifacts/f0ceef6c683b6b7af5fd02481accb32f8bac0486/include/aws/common/task_scheduler.h:40:5)"}, f::Symbol)
+function Base.getproperty(x::Ptr{__JL_Ctag_381}, f::Symbol)
     f === :scheduled && return Ptr{Bool}(x + 0)
     f === :reserved && return Ptr{Csize_t}(x + 0)
     return getfield(x, f)
 end
 
-function Base.getproperty(x::var"union (unnamed at /home/runner/.julia/artifacts/f0ceef6c683b6b7af5fd02481accb32f8bac0486/include/aws/common/task_scheduler.h:40:5)", f::Symbol)
-    r = Ref{var"union (unnamed at /home/runner/.julia/artifacts/f0ceef6c683b6b7af5fd02481accb32f8bac0486/include/aws/common/task_scheduler.h:40:5)"}(x)
-    ptr = Base.unsafe_convert(Ptr{var"union (unnamed at /home/runner/.julia/artifacts/f0ceef6c683b6b7af5fd02481accb32f8bac0486/include/aws/common/task_scheduler.h:40:5)"}, r)
+function Base.getproperty(x::__JL_Ctag_381, f::Symbol)
+    r = Ref{__JL_Ctag_381}(x)
+    ptr = Base.unsafe_convert(Ptr{__JL_Ctag_381}, r)
     fptr = getproperty(ptr, f)
     GC.@preserve r unsafe_load(fptr)
 end
 
-function Base.setproperty!(x::Ptr{var"union (unnamed at /home/runner/.julia/artifacts/f0ceef6c683b6b7af5fd02481accb32f8bac0486/include/aws/common/task_scheduler.h:40:5)"}, f::Symbol, v)
+function Base.setproperty!(x::Ptr{__JL_Ctag_381}, f::Symbol, v)
     unsafe_store!(getproperty(x, f), v)
 end
 
@@ -10801,7 +10801,7 @@ function Base.getproperty(x::Ptr{aws_task}, f::Symbol)
     f === :node && return Ptr{aws_linked_list_node}(x + 24)
     f === :priority_queue_node && return Ptr{aws_priority_queue_node}(x + 40)
     f === :type_tag && return Ptr{Ptr{Cchar}}(x + 48)
-    f === :abi_extension && return Ptr{var"union (unnamed at /home/runner/.julia/artifacts/f0ceef6c683b6b7af5fd02481accb32f8bac0486/include/aws/common/task_scheduler.h:40:5)"}(x + 56)
+    f === :abi_extension && return Ptr{__JL_Ctag_381}(x + 56)
     return getfield(x, f)
 end
 
@@ -11749,11 +11749,11 @@ struct aws_uuid
 end
 
 """
-    __JL_Ctag_14
+    __JL_Ctag_344
 
 36 bytes for the UUID plus one more for the null terminator.
 """
-@cenum __JL_Ctag_14::UInt32 begin
+@cenum __JL_Ctag_344::UInt32 begin
     AWS_UUID_STR_LEN = 37
 end
 
