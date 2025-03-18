@@ -103,4 +103,4 @@ jobs:
               - ${{ env.bindings_changed == 'true' && '✅ Updated bindings' || '⚠️ No bindings changes detected' }}
 
           reviewers: quinnj, Octogonapus
-          token: ${{ secrets.ORG_PATH }}
+          token: ${{ secrets.ORG_PAT }}
