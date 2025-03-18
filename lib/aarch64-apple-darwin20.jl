@@ -10760,28 +10760,28 @@ A scheduled function.
 const aws_task_fn = Cvoid
 
 """
-    union (unnamed at /home/runner/.julia/artifacts/f0ceef6c683b6b7af5fd02481accb32f8bac0486/include/aws/common/task_scheduler.h:40:5)
+    union (unnamed at /home/runner/.julia/artifacts/e58ab35c3247064ca9323d98663abe87c0a409c9/include/aws/common/task_scheduler.h:40:5)
 
 honor the ABI compat
 """
-struct var"union (unnamed at /home/runner/.julia/artifacts/f0ceef6c683b6b7af5fd02481accb32f8bac0486/include/aws/common/task_scheduler.h:40:5)"
+struct var"union (unnamed at /home/runner/.julia/artifacts/e58ab35c3247064ca9323d98663abe87c0a409c9/include/aws/common/task_scheduler.h:40:5)"
     data::NTuple{8, UInt8}
 end
 
-function Base.getproperty(x::Ptr{var"union (unnamed at /home/runner/.julia/artifacts/f0ceef6c683b6b7af5fd02481accb32f8bac0486/include/aws/common/task_scheduler.h:40:5)"}, f::Symbol)
+function Base.getproperty(x::Ptr{var"union (unnamed at /home/runner/.julia/artifacts/e58ab35c3247064ca9323d98663abe87c0a409c9/include/aws/common/task_scheduler.h:40:5)"}, f::Symbol)
     f === :scheduled && return Ptr{Bool}(x + 0)
     f === :reserved && return Ptr{Csize_t}(x + 0)
     return getfield(x, f)
 end
 
-function Base.getproperty(x::var"union (unnamed at /home/runner/.julia/artifacts/f0ceef6c683b6b7af5fd02481accb32f8bac0486/include/aws/common/task_scheduler.h:40:5)", f::Symbol)
-    r = Ref{var"union (unnamed at /home/runner/.julia/artifacts/f0ceef6c683b6b7af5fd02481accb32f8bac0486/include/aws/common/task_scheduler.h:40:5)"}(x)
-    ptr = Base.unsafe_convert(Ptr{var"union (unnamed at /home/runner/.julia/artifacts/f0ceef6c683b6b7af5fd02481accb32f8bac0486/include/aws/common/task_scheduler.h:40:5)"}, r)
+function Base.getproperty(x::var"union (unnamed at /home/runner/.julia/artifacts/e58ab35c3247064ca9323d98663abe87c0a409c9/include/aws/common/task_scheduler.h:40:5)", f::Symbol)
+    r = Ref{var"union (unnamed at /home/runner/.julia/artifacts/e58ab35c3247064ca9323d98663abe87c0a409c9/include/aws/common/task_scheduler.h:40:5)"}(x)
+    ptr = Base.unsafe_convert(Ptr{var"union (unnamed at /home/runner/.julia/artifacts/e58ab35c3247064ca9323d98663abe87c0a409c9/include/aws/common/task_scheduler.h:40:5)"}, r)
     fptr = getproperty(ptr, f)
     GC.@preserve r unsafe_load(fptr)
 end
 
-function Base.setproperty!(x::Ptr{var"union (unnamed at /home/runner/.julia/artifacts/f0ceef6c683b6b7af5fd02481accb32f8bac0486/include/aws/common/task_scheduler.h:40:5)"}, f::Symbol, v)
+function Base.setproperty!(x::Ptr{var"union (unnamed at /home/runner/.julia/artifacts/e58ab35c3247064ca9323d98663abe87c0a409c9/include/aws/common/task_scheduler.h:40:5)"}, f::Symbol, v)
     unsafe_store!(getproperty(x, f), v)
 end
 
@@ -10801,7 +10801,7 @@ function Base.getproperty(x::Ptr{aws_task}, f::Symbol)
     f === :node && return Ptr{aws_linked_list_node}(x + 24)
     f === :priority_queue_node && return Ptr{aws_priority_queue_node}(x + 40)
     f === :type_tag && return Ptr{Ptr{Cchar}}(x + 48)
-    f === :abi_extension && return Ptr{var"union (unnamed at /home/runner/.julia/artifacts/f0ceef6c683b6b7af5fd02481accb32f8bac0486/include/aws/common/task_scheduler.h:40:5)"}(x + 56)
+    f === :abi_extension && return Ptr{var"union (unnamed at /home/runner/.julia/artifacts/e58ab35c3247064ca9323d98663abe87c0a409c9/include/aws/common/task_scheduler.h:40:5)"}(x + 56)
     return getfield(x, f)
 end
 
