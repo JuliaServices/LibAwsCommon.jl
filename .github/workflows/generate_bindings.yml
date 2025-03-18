@@ -97,6 +97,7 @@ jobs:
         if: env.bindings_changed == 'true'
         uses: peter-evans/create-pull-request@v6
         with:
+          path: ${{ env.LIBAWS_PATH }}
           branch: update-${{ env.JLL_NAME }}-${{ env.JLL_VERSION }}
           commit-message: "Update ${{ env.JLL_NAME }} to version ${{ env.JLL_VERSION }}"
           title: "Update ${{ env.JLL_NAME }} to version ${{ env.JLL_VERSION }}"
