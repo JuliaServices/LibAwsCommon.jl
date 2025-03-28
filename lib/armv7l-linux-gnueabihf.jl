@@ -546,118 +546,6 @@ function aws_is_mem_zeroed(buf, bufsize)
 end
 
 """
-    aws_mul_u64_saturating(a, b)
-
-Multiplies a * b. If the result overflows, returns 2^64 - 1.
-
-### Prototype
-```c
-AWS_STATIC_IMPL uint64_t aws_mul_u64_saturating(uint64_t a, uint64_t b);
-```
-"""
-function aws_mul_u64_saturating(a, b)
-    ccall((:aws_mul_u64_saturating, libaws_c_common), UInt64, (UInt64, UInt64), a, b)
-end
-
-"""
-    aws_mul_u64_checked(a, b, r)
-
-If a * b overflows, returns [`AWS_OP_ERR`](@ref); otherwise multiplies a * b, returns the result in *r, and returns [`AWS_OP_SUCCESS`](@ref).
-
-### Prototype
-```c
-AWS_STATIC_IMPL int aws_mul_u64_checked(uint64_t a, uint64_t b, uint64_t *r);
-```
-"""
-function aws_mul_u64_checked(a, b, r)
-    ccall((:aws_mul_u64_checked, libaws_c_common), Cint, (UInt64, UInt64, Ptr{UInt64}), a, b, r)
-end
-
-"""
-    aws_mul_u32_saturating(a, b)
-
-Multiplies a * b. If the result overflows, returns 2^32 - 1.
-
-### Prototype
-```c
-AWS_STATIC_IMPL uint32_t aws_mul_u32_saturating(uint32_t a, uint32_t b);
-```
-"""
-function aws_mul_u32_saturating(a, b)
-    ccall((:aws_mul_u32_saturating, libaws_c_common), UInt32, (UInt32, UInt32), a, b)
-end
-
-"""
-    aws_mul_u32_checked(a, b, r)
-
-If a * b overflows, returns [`AWS_OP_ERR`](@ref); otherwise multiplies a * b, returns the result in *r, and returns [`AWS_OP_SUCCESS`](@ref).
-
-### Prototype
-```c
-AWS_STATIC_IMPL int aws_mul_u32_checked(uint32_t a, uint32_t b, uint32_t *r);
-```
-"""
-function aws_mul_u32_checked(a, b, r)
-    ccall((:aws_mul_u32_checked, libaws_c_common), Cint, (UInt32, UInt32, Ptr{UInt32}), a, b, r)
-end
-
-"""
-    aws_add_u64_saturating(a, b)
-
-Adds a + b. If the result overflows returns 2^64 - 1.
-
-### Prototype
-```c
-AWS_STATIC_IMPL uint64_t aws_add_u64_saturating(uint64_t a, uint64_t b);
-```
-"""
-function aws_add_u64_saturating(a, b)
-    ccall((:aws_add_u64_saturating, libaws_c_common), UInt64, (UInt64, UInt64), a, b)
-end
-
-"""
-    aws_add_u64_checked(a, b, r)
-
-If a + b overflows, returns [`AWS_OP_ERR`](@ref); otherwise adds a + b, returns the result in *r, and returns [`AWS_OP_SUCCESS`](@ref).
-
-### Prototype
-```c
-AWS_STATIC_IMPL int aws_add_u64_checked(uint64_t a, uint64_t b, uint64_t *r);
-```
-"""
-function aws_add_u64_checked(a, b, r)
-    ccall((:aws_add_u64_checked, libaws_c_common), Cint, (UInt64, UInt64, Ptr{UInt64}), a, b, r)
-end
-
-"""
-    aws_add_u32_saturating(a, b)
-
-Adds a + b. If the result overflows returns 2^32 - 1.
-
-### Prototype
-```c
-AWS_STATIC_IMPL uint32_t aws_add_u32_saturating(uint32_t a, uint32_t b);
-```
-"""
-function aws_add_u32_saturating(a, b)
-    ccall((:aws_add_u32_saturating, libaws_c_common), UInt32, (UInt32, UInt32), a, b)
-end
-
-"""
-    aws_add_u32_checked(a, b, r)
-
-If a + b overflows, returns [`AWS_OP_ERR`](@ref); otherwise adds a + b, returns the result in *r, and returns [`AWS_OP_SUCCESS`](@ref).
-
-### Prototype
-```c
-AWS_STATIC_IMPL int aws_add_u32_checked(uint32_t a, uint32_t b, uint32_t *r);
-```
-"""
-function aws_add_u32_checked(a, b, r)
-    ccall((:aws_add_u32_checked, libaws_c_common), Cint, (UInt32, UInt32, Ptr{UInt32}), a, b, r)
-end
-
-"""
     aws_clz_u32(n)
 
 Search from the MSB to LSB, looking for a 1
@@ -787,6 +675,118 @@ AWS_STATIC_IMPL size_t aws_ctz_size(size_t n);
 """
 function aws_ctz_size(n)
     ccall((:aws_ctz_size, libaws_c_common), Csize_t, (Csize_t,), n)
+end
+
+"""
+    aws_mul_u64_saturating(a, b)
+
+Multiplies a * b. If the result overflows, returns 2^64 - 1.
+
+### Prototype
+```c
+AWS_STATIC_IMPL uint64_t aws_mul_u64_saturating(uint64_t a, uint64_t b);
+```
+"""
+function aws_mul_u64_saturating(a, b)
+    ccall((:aws_mul_u64_saturating, libaws_c_common), UInt64, (UInt64, UInt64), a, b)
+end
+
+"""
+    aws_mul_u64_checked(a, b, r)
+
+If a * b overflows, returns [`AWS_OP_ERR`](@ref); otherwise multiplies a * b, returns the result in *r, and returns [`AWS_OP_SUCCESS`](@ref).
+
+### Prototype
+```c
+AWS_STATIC_IMPL int aws_mul_u64_checked(uint64_t a, uint64_t b, uint64_t *r);
+```
+"""
+function aws_mul_u64_checked(a, b, r)
+    ccall((:aws_mul_u64_checked, libaws_c_common), Cint, (UInt64, UInt64, Ptr{UInt64}), a, b, r)
+end
+
+"""
+    aws_mul_u32_saturating(a, b)
+
+Multiplies a * b. If the result overflows, returns 2^32 - 1.
+
+### Prototype
+```c
+AWS_STATIC_IMPL uint32_t aws_mul_u32_saturating(uint32_t a, uint32_t b);
+```
+"""
+function aws_mul_u32_saturating(a, b)
+    ccall((:aws_mul_u32_saturating, libaws_c_common), UInt32, (UInt32, UInt32), a, b)
+end
+
+"""
+    aws_mul_u32_checked(a, b, r)
+
+If a * b overflows, returns [`AWS_OP_ERR`](@ref); otherwise multiplies a * b, returns the result in *r, and returns [`AWS_OP_SUCCESS`](@ref).
+
+### Prototype
+```c
+AWS_STATIC_IMPL int aws_mul_u32_checked(uint32_t a, uint32_t b, uint32_t *r);
+```
+"""
+function aws_mul_u32_checked(a, b, r)
+    ccall((:aws_mul_u32_checked, libaws_c_common), Cint, (UInt32, UInt32, Ptr{UInt32}), a, b, r)
+end
+
+"""
+    aws_add_u64_checked(a, b, r)
+
+If a + b overflows, returns [`AWS_OP_ERR`](@ref); otherwise adds a + b, returns the result in *r, and returns [`AWS_OP_SUCCESS`](@ref).
+
+### Prototype
+```c
+AWS_STATIC_IMPL int aws_add_u64_checked(uint64_t a, uint64_t b, uint64_t *r);
+```
+"""
+function aws_add_u64_checked(a, b, r)
+    ccall((:aws_add_u64_checked, libaws_c_common), Cint, (UInt64, UInt64, Ptr{UInt64}), a, b, r)
+end
+
+"""
+    aws_add_u64_saturating(a, b)
+
+Adds a + b. If the result overflows, returns 2^64 - 1.
+
+### Prototype
+```c
+AWS_STATIC_IMPL uint64_t aws_add_u64_saturating(uint64_t a, uint64_t b);
+```
+"""
+function aws_add_u64_saturating(a, b)
+    ccall((:aws_add_u64_saturating, libaws_c_common), UInt64, (UInt64, UInt64), a, b)
+end
+
+"""
+    aws_add_u32_checked(a, b, r)
+
+If a + b overflows, returns [`AWS_OP_ERR`](@ref); otherwise adds a + b, returns the result in *r, and returns [`AWS_OP_SUCCESS`](@ref).
+
+### Prototype
+```c
+AWS_STATIC_IMPL int aws_add_u32_checked(uint32_t a, uint32_t b, uint32_t *r);
+```
+"""
+function aws_add_u32_checked(a, b, r)
+    ccall((:aws_add_u32_checked, libaws_c_common), Cint, (UInt32, UInt32, Ptr{UInt32}), a, b, r)
+end
+
+"""
+    aws_add_u32_saturating(a, b)
+
+Adds a + b. If the result overflows, returns 2^32 - 1.
+
+### Prototype
+```c
+AWS_STATIC_IMPL uint32_t aws_add_u32_saturating(uint32_t a, uint32_t b);
+```
+"""
+function aws_add_u32_saturating(a, b)
+    ccall((:aws_add_u32_saturating, libaws_c_common), UInt32, (UInt32, UInt32), a, b)
 end
 
 """
@@ -10736,28 +10736,28 @@ A scheduled function.
 const aws_task_fn = Cvoid
 
 """
-    union (unnamed at /home/runner/.julia/artifacts/0c2e79a79b496c6d4569e62c7b1abd7a62a9c4f8/include/aws/common/task_scheduler.h:40:5)
+    union (unnamed at /home/runner/.julia/artifacts/ee9751df3b1888733d1c6b93c4c3cd8e3fb5c543/include/aws/common/task_scheduler.h:40:5)
 
 honor the ABI compat
 """
-struct var"union (unnamed at /home/runner/.julia/artifacts/0c2e79a79b496c6d4569e62c7b1abd7a62a9c4f8/include/aws/common/task_scheduler.h:40:5)"
+struct var"union (unnamed at /home/runner/.julia/artifacts/ee9751df3b1888733d1c6b93c4c3cd8e3fb5c543/include/aws/common/task_scheduler.h:40:5)"
     data::NTuple{4, UInt8}
 end
 
-function Base.getproperty(x::Ptr{var"union (unnamed at /home/runner/.julia/artifacts/0c2e79a79b496c6d4569e62c7b1abd7a62a9c4f8/include/aws/common/task_scheduler.h:40:5)"}, f::Symbol)
+function Base.getproperty(x::Ptr{var"union (unnamed at /home/runner/.julia/artifacts/ee9751df3b1888733d1c6b93c4c3cd8e3fb5c543/include/aws/common/task_scheduler.h:40:5)"}, f::Symbol)
     f === :scheduled && return Ptr{Bool}(x + 0)
     f === :reserved && return Ptr{Csize_t}(x + 0)
     return getfield(x, f)
 end
 
-function Base.getproperty(x::var"union (unnamed at /home/runner/.julia/artifacts/0c2e79a79b496c6d4569e62c7b1abd7a62a9c4f8/include/aws/common/task_scheduler.h:40:5)", f::Symbol)
-    r = Ref{var"union (unnamed at /home/runner/.julia/artifacts/0c2e79a79b496c6d4569e62c7b1abd7a62a9c4f8/include/aws/common/task_scheduler.h:40:5)"}(x)
-    ptr = Base.unsafe_convert(Ptr{var"union (unnamed at /home/runner/.julia/artifacts/0c2e79a79b496c6d4569e62c7b1abd7a62a9c4f8/include/aws/common/task_scheduler.h:40:5)"}, r)
+function Base.getproperty(x::var"union (unnamed at /home/runner/.julia/artifacts/ee9751df3b1888733d1c6b93c4c3cd8e3fb5c543/include/aws/common/task_scheduler.h:40:5)", f::Symbol)
+    r = Ref{var"union (unnamed at /home/runner/.julia/artifacts/ee9751df3b1888733d1c6b93c4c3cd8e3fb5c543/include/aws/common/task_scheduler.h:40:5)"}(x)
+    ptr = Base.unsafe_convert(Ptr{var"union (unnamed at /home/runner/.julia/artifacts/ee9751df3b1888733d1c6b93c4c3cd8e3fb5c543/include/aws/common/task_scheduler.h:40:5)"}, r)
     fptr = getproperty(ptr, f)
     GC.@preserve r unsafe_load(fptr)
 end
 
-function Base.setproperty!(x::Ptr{var"union (unnamed at /home/runner/.julia/artifacts/0c2e79a79b496c6d4569e62c7b1abd7a62a9c4f8/include/aws/common/task_scheduler.h:40:5)"}, f::Symbol, v)
+function Base.setproperty!(x::Ptr{var"union (unnamed at /home/runner/.julia/artifacts/ee9751df3b1888733d1c6b93c4c3cd8e3fb5c543/include/aws/common/task_scheduler.h:40:5)"}, f::Symbol, v)
     unsafe_store!(getproperty(x, f), v)
 end
 
@@ -10777,7 +10777,7 @@ function Base.getproperty(x::Ptr{aws_task}, f::Symbol)
     f === :node && return Ptr{aws_linked_list_node}(x + 16)
     f === :priority_queue_node && return Ptr{aws_priority_queue_node}(x + 24)
     f === :type_tag && return Ptr{Ptr{Cchar}}(x + 28)
-    f === :abi_extension && return Ptr{var"union (unnamed at /home/runner/.julia/artifacts/0c2e79a79b496c6d4569e62c7b1abd7a62a9c4f8/include/aws/common/task_scheduler.h:40:5)"}(x + 32)
+    f === :abi_extension && return Ptr{var"union (unnamed at /home/runner/.julia/artifacts/ee9751df3b1888733d1c6b93c4c3cd8e3fb5c543/include/aws/common/task_scheduler.h:40:5)"}(x + 32)
     return getfield(x, f)
 end
 
