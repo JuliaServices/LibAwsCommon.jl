@@ -4754,6 +4754,23 @@ function aws_cbor_decoder_get_remaining_length(decoder)
 end
 
 """
+    aws_cbor_decoder_reset_src(decoder, src)
+
+Reset the decoder source to a new src. The previous src will be discarded regardless of the unconsumed bytes. The decoder will clear its cache if any.
+
+# Arguments
+* `decoder`:
+* `src`: The src data to decode from..
+### Prototype
+```c
+void aws_cbor_decoder_reset_src(struct aws_cbor_decoder *decoder, struct aws_byte_cursor src);
+```
+"""
+function aws_cbor_decoder_reset_src(decoder, src)
+    ccall((:aws_cbor_decoder_reset_src, libaws_c_common), Cvoid, (Ptr{aws_cbor_decoder}, aws_byte_cursor), decoder, src)
+end
+
+"""
     aws_cbor_decoder_peek_type(decoder, out_type)
 
 Decode the next element and store it in the decoder cache if there was no element cached. If there was element cached, just return the type of the cached element.
@@ -4943,11 +4960,11 @@ end
 """
     aws_cbor_decoder_pop_next_tag_val(decoder, out_tag_val)
 
-Get the next AWS\\_CBOR\\_TYPE\\_TAG element. Only consume the AWS\\_CBOR\\_TYPE\\_TAG element and set the tag value to *out\\_tag\\_val, not the content of the tagged. The next cbor data item will be the content of the tagged value for a valid cbor data.
+Get the next AWS\\_CBOR\\_TYPE\\_TAG element. Only consume the AWS\\_CBOR\\_TYPE\\_TAG element and set the tag ID value to *out\\_tag\\_val, not the content of the tagged. The next cbor data item will be the content of the tagged value for a valid cbor data.
 
 # Arguments
 * `decoder`:
-* `out_size`: store the size of map if succeed.
+* `out_tag_val`: store the value of tag ID.
 # Returns
 [`AWS_OP_SUCCESS`](@ref) successfully consumed the next element and get the result, otherwise [`AWS_OP_ERR`](@ref).
 ### Prototype
@@ -10737,28 +10754,28 @@ A scheduled function.
 const aws_task_fn = Cvoid
 
 """
-    union (unnamed at /home/runner/.julia/artifacts/edb4e56076b9d98deb4e67406375139c7582bca4/include/aws/common/task_scheduler.h:40:5)
+    union (unnamed at /home/runner/.julia/artifacts/38395a253c26ecafa48629dd5ecacb71b1fe43ec/include/aws/common/task_scheduler.h:40:5)
 
 honor the ABI compat
 """
-struct var"union (unnamed at /home/runner/.julia/artifacts/edb4e56076b9d98deb4e67406375139c7582bca4/include/aws/common/task_scheduler.h:40:5)"
+struct var"union (unnamed at /home/runner/.julia/artifacts/38395a253c26ecafa48629dd5ecacb71b1fe43ec/include/aws/common/task_scheduler.h:40:5)"
     data::NTuple{8, UInt8}
 end
 
-function Base.getproperty(x::Ptr{var"union (unnamed at /home/runner/.julia/artifacts/edb4e56076b9d98deb4e67406375139c7582bca4/include/aws/common/task_scheduler.h:40:5)"}, f::Symbol)
+function Base.getproperty(x::Ptr{var"union (unnamed at /home/runner/.julia/artifacts/38395a253c26ecafa48629dd5ecacb71b1fe43ec/include/aws/common/task_scheduler.h:40:5)"}, f::Symbol)
     f === :scheduled && return Ptr{Bool}(x + 0)
     f === :reserved && return Ptr{Csize_t}(x + 0)
     return getfield(x, f)
 end
 
-function Base.getproperty(x::var"union (unnamed at /home/runner/.julia/artifacts/edb4e56076b9d98deb4e67406375139c7582bca4/include/aws/common/task_scheduler.h:40:5)", f::Symbol)
-    r = Ref{var"union (unnamed at /home/runner/.julia/artifacts/edb4e56076b9d98deb4e67406375139c7582bca4/include/aws/common/task_scheduler.h:40:5)"}(x)
-    ptr = Base.unsafe_convert(Ptr{var"union (unnamed at /home/runner/.julia/artifacts/edb4e56076b9d98deb4e67406375139c7582bca4/include/aws/common/task_scheduler.h:40:5)"}, r)
+function Base.getproperty(x::var"union (unnamed at /home/runner/.julia/artifacts/38395a253c26ecafa48629dd5ecacb71b1fe43ec/include/aws/common/task_scheduler.h:40:5)", f::Symbol)
+    r = Ref{var"union (unnamed at /home/runner/.julia/artifacts/38395a253c26ecafa48629dd5ecacb71b1fe43ec/include/aws/common/task_scheduler.h:40:5)"}(x)
+    ptr = Base.unsafe_convert(Ptr{var"union (unnamed at /home/runner/.julia/artifacts/38395a253c26ecafa48629dd5ecacb71b1fe43ec/include/aws/common/task_scheduler.h:40:5)"}, r)
     fptr = getproperty(ptr, f)
     GC.@preserve r unsafe_load(fptr)
 end
 
-function Base.setproperty!(x::Ptr{var"union (unnamed at /home/runner/.julia/artifacts/edb4e56076b9d98deb4e67406375139c7582bca4/include/aws/common/task_scheduler.h:40:5)"}, f::Symbol, v)
+function Base.setproperty!(x::Ptr{var"union (unnamed at /home/runner/.julia/artifacts/38395a253c26ecafa48629dd5ecacb71b1fe43ec/include/aws/common/task_scheduler.h:40:5)"}, f::Symbol, v)
     unsafe_store!(getproperty(x, f), v)
 end
 
@@ -10778,7 +10795,7 @@ function Base.getproperty(x::Ptr{aws_task}, f::Symbol)
     f === :node && return Ptr{aws_linked_list_node}(x + 24)
     f === :priority_queue_node && return Ptr{aws_priority_queue_node}(x + 40)
     f === :type_tag && return Ptr{Ptr{Cchar}}(x + 48)
-    f === :abi_extension && return Ptr{var"union (unnamed at /home/runner/.julia/artifacts/edb4e56076b9d98deb4e67406375139c7582bca4/include/aws/common/task_scheduler.h:40:5)"}(x + 56)
+    f === :abi_extension && return Ptr{var"union (unnamed at /home/runner/.julia/artifacts/38395a253c26ecafa48629dd5ecacb71b1fe43ec/include/aws/common/task_scheduler.h:40:5)"}(x + 56)
     return getfield(x, f)
 end
 
