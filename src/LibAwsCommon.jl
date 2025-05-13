@@ -71,4 +71,105 @@ function init(allocator=default_aws_allocator())
     return
 end
 
+# utilities for interacting with AWS library APIs
+
+# like a Ref, but for a field of a struct
+# many AWS APIs take a pointer to an aws struct, so this makes it convenient to to pass
+# a field of a wrapper struct to a library function
+struct FieldRef{T, S}
+    x::T
+    field::Symbol
+
+    function FieldRef(x::T, field::Symbol) where {T}
+        @assert isconcretetype(T) && ismutabletype(T) "only fields of mutable types are supported with FieldRef"
+        S = fieldtype(T, field)
+        @assert isconcretetype(S) && !ismutabletype(S) "field type must be concrete and immutable for FieldRef"
+        return new{T, S}(x, field)
+    end
+end
+
+function Base.unsafe_convert(P::Union{Type{Ptr{S}},Type{Ptr{Cvoid}}}, x::FieldRef{T, S}) where {T, S}
+    return P(pointer_from_objref(x.x) + fieldoffset(T, Base.fieldindex(T, x.field)))
+end
+
+Base.pointer(x::FieldRef{S, T}) where {S, T} = Base.unsafe_convert(Ptr{T}, x)
+
+# wraps a pointer to a struct and allows get/set on fields w/o unsafe_loading the entire struct
+struct StructRef{T}
+    ptr::Ptr{T}
+
+    function StructRef(ptr::Ptr{T}) where {T}
+        @assert isconcretetype(T) "only concrete struct types are supported with StructRef"
+        return new{T}(ptr)
+    end
+end
+
+function Base.getproperty(x::StructRef{T}, k::Symbol) where {T}
+    S = fieldtype(T, k)
+    @assert isconcretetype(S) && !ismutabletype(S) "field type must be concrete and immutable for StructRef"
+    return unsafe_load(Ptr{S}(Ptr{UInt8}(getfield(x, :ptr)) + fieldoffset(T, Base.fieldindex(T, k))))
+end
+
+function Base.setproperty!(x::StructRef{T}, k::Symbol, v) where {T}
+    S = fieldtype(T, k)
+    @assert isconcretetype(S) && !ismutabletype(S) "field type must be concrete and immutable for StructRef"
+    unsafe_store!(Ptr{S}(Ptr{UInt8}(getfield(x, :ptr)) + fieldoffset(T, Base.fieldindex(T, k))), convert(S, v))
+    return v
+end
+
+# simple threadsafe Future impl appropriate for use with the common callback patterns in AWS libs
+mutable struct Future{T}
+    const notify::Threads.Condition
+    @atomic set::Int8 # if 0, result is undefined, 1 means result is T, 2 means result is an exception
+    result::Union{Exception, T} # undefined initially
+    Future{T}() where {T} = new{T}(Threads.Condition(), 0)
+end
+
+Base.pointer(f::Future) = pointer_from_objref(f)
+Future(ptr::Ptr) = unsafe_pointer_to_objref(ptr)::Future
+Future{T}(ptr::Ptr) where {T} = unsafe_pointer_to_objref(ptr)::Future{T}
+
+function Base.wait(f::Future{T}) where {T}
+    set = @atomic f.set
+    set == 1 && return f.result::T
+    set == 2 && throw(f.result::Exception)
+    lock(f.notify) # acquire barrier
+    try
+        set = f.set
+        set == 1 && return f.result::T
+        set == 2 && throw(f.result::Exception)
+        wait(f.notify)
+    finally
+        unlock(f.notify) # release barrier
+    end
+    if f.set == 1
+        return f.result::T
+    else
+        @assert isdefined(f, :result)
+        throw(f.result::Exception)
+    end
+end
+
+capture(e::Exception) = CapturedException(e, Base.backtrace())
+
+function Base.notify(f::Future{T}, x::Union{Exception, T}) where {T}
+    lock(f.notify) # acquire barrier
+    try
+        if f.set == Int8(0)
+            if x isa Exception
+                set = Int8(2)
+                f.result = x
+            else
+                set = Int8(1)
+                f.result = x
+            end
+            @atomic :release f.set = set
+            notify(f.notify)
+        end
+    finally
+        unlock(f.notify)
+    end
+    nothing
+end
+
 end
