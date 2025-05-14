@@ -125,6 +125,7 @@ mutable struct Future{T}
     Future{T}() where {T} = new{T}(Threads.Condition(), 0)
 end
 
+Future() = Future{Nothing}() # default future type
 Base.pointer(f::Future) = pointer_from_objref(f)
 Future(ptr::Ptr) = unsafe_pointer_to_objref(ptr)::Future
 Future{T}(ptr::Ptr) where {T} = unsafe_pointer_to_objref(ptr)::Future{T}
@@ -152,6 +153,7 @@ end
 
 capture(e::Exception) = CapturedException(e, Base.backtrace())
 
+Base.notify(f::Future{Nothing}) = notify(f, nothing)
 function Base.notify(f::Future{T}, x::Union{Exception, T}) where {T}
     lock(f.notify) # acquire barrier
     try
