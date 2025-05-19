@@ -154,7 +154,7 @@ end
 capture(e::Exception) = CapturedException(e, Base.backtrace())
 
 Base.notify(f::Future{Nothing}) = notify(f, nothing)
-function Base.notify(f::Future{T}, x::Union{Exception, T}) where {T}
+function Base.notify(f::Future{T}, x) where {T}
     lock(f.notify) # acquire barrier
     try
         if f.set == Int8(0)
@@ -163,7 +163,7 @@ function Base.notify(f::Future{T}, x::Union{Exception, T}) where {T}
                 f.result = x
             else
                 set = Int8(1)
-                f.result = x
+                f.result = convert(T, x)
             end
             @atomic :release f.set = set
             notify(f.notify)
