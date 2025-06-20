@@ -72,6 +72,8 @@ function init(allocator=default_aws_allocator())
 end
 
 # utilities for interacting with AWS library APIs
+concrete_or_concreteunion(T) =
+    isconcretetype(T) || (T isa Union && concrete_or_concreteunion(T.a) && concrete_or_concreteunion(T.b))
 
 # like a Ref, but for a field of a struct
 # many AWS APIs take a pointer to an aws struct, so this makes it convenient to to pass
@@ -83,7 +85,7 @@ struct FieldRef{T, S}
     function FieldRef(x::T, field::Symbol) where {T}
         @assert isconcretetype(T) && ismutabletype(T) "only fields of mutable types are supported with FieldRef"
         S = fieldtype(T, field)
-        @assert isconcretetype(S) && !ismutabletype(S) "field type must be concrete and immutable for FieldRef"
+        @assert concrete_or_concreteunion(S) && !ismutabletype(S) "field type must be concrete and immutable for FieldRef"
         return new{T, S}(x, field)
     end
 end
