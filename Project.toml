@@ -10,6 +10,7 @@ aws_c_common_jll = "73048d1d-b8c4-5092-a58d-866c5e8d1e50"
 Aqua = "0.7,0.8"
 CEnum = "0.5"
 aws_c_common_jll = "=0.12.3"
+Test = "1.11"
 julia = "1.6"
 
 [extras]
