@@ -10753,28 +10753,28 @@ A scheduled function.
 const aws_task_fn = Cvoid
 
 """
-    union (unnamed at /home/runner/.julia/artifacts/cc28580483e84656cc3c8a64dd8e7d13b9263a15/include/aws/common/task_scheduler.h:40:5)
+    union (unnamed at /home/runner/.julia/artifacts/020d2c4fb5105f30cefec4129b0bd4c49a9e6f45/include/aws/common/task_scheduler.h:40:5)
 
 honor the ABI compat
 """
-struct var"union (unnamed at /home/runner/.julia/artifacts/cc28580483e84656cc3c8a64dd8e7d13b9263a15/include/aws/common/task_scheduler.h:40:5)"
+struct var"union (unnamed at /home/runner/.julia/artifacts/020d2c4fb5105f30cefec4129b0bd4c49a9e6f45/include/aws/common/task_scheduler.h:40:5)"
     data::NTuple{4, UInt8}
 end
 
-function Base.getproperty(x::Ptr{var"union (unnamed at /home/runner/.julia/artifacts/cc28580483e84656cc3c8a64dd8e7d13b9263a15/include/aws/common/task_scheduler.h:40:5)"}, f::Symbol)
+function Base.getproperty(x::Ptr{var"union (unnamed at /home/runner/.julia/artifacts/020d2c4fb5105f30cefec4129b0bd4c49a9e6f45/include/aws/common/task_scheduler.h:40:5)"}, f::Symbol)
     f === :scheduled && return Ptr{Bool}(x + 0)
     f === :reserved && return Ptr{Csize_t}(x + 0)
     return getfield(x, f)
 end
 
-function Base.getproperty(x::var"union (unnamed at /home/runner/.julia/artifacts/cc28580483e84656cc3c8a64dd8e7d13b9263a15/include/aws/common/task_scheduler.h:40:5)", f::Symbol)
-    r = Ref{var"union (unnamed at /home/runner/.julia/artifacts/cc28580483e84656cc3c8a64dd8e7d13b9263a15/include/aws/common/task_scheduler.h:40:5)"}(x)
-    ptr = Base.unsafe_convert(Ptr{var"union (unnamed at /home/runner/.julia/artifacts/cc28580483e84656cc3c8a64dd8e7d13b9263a15/include/aws/common/task_scheduler.h:40:5)"}, r)
+function Base.getproperty(x::var"union (unnamed at /home/runner/.julia/artifacts/020d2c4fb5105f30cefec4129b0bd4c49a9e6f45/include/aws/common/task_scheduler.h:40:5)", f::Symbol)
+    r = Ref{var"union (unnamed at /home/runner/.julia/artifacts/020d2c4fb5105f30cefec4129b0bd4c49a9e6f45/include/aws/common/task_scheduler.h:40:5)"}(x)
+    ptr = Base.unsafe_convert(Ptr{var"union (unnamed at /home/runner/.julia/artifacts/020d2c4fb5105f30cefec4129b0bd4c49a9e6f45/include/aws/common/task_scheduler.h:40:5)"}, r)
     fptr = getproperty(ptr, f)
     GC.@preserve r unsafe_load(fptr)
 end
 
-function Base.setproperty!(x::Ptr{var"union (unnamed at /home/runner/.julia/artifacts/cc28580483e84656cc3c8a64dd8e7d13b9263a15/include/aws/common/task_scheduler.h:40:5)"}, f::Symbol, v)
+function Base.setproperty!(x::Ptr{var"union (unnamed at /home/runner/.julia/artifacts/020d2c4fb5105f30cefec4129b0bd4c49a9e6f45/include/aws/common/task_scheduler.h:40:5)"}, f::Symbol, v)
     unsafe_store!(getproperty(x, f), v)
 end
 
@@ -10794,7 +10794,7 @@ function Base.getproperty(x::Ptr{aws_task}, f::Symbol)
     f === :node && return Ptr{aws_linked_list_node}(x + 16)
     f === :priority_queue_node && return Ptr{aws_priority_queue_node}(x + 24)
     f === :type_tag && return Ptr{Ptr{Cchar}}(x + 28)
-    f === :abi_extension && return Ptr{var"union (unnamed at /home/runner/.julia/artifacts/cc28580483e84656cc3c8a64dd8e7d13b9263a15/include/aws/common/task_scheduler.h:40:5)"}(x + 32)
+    f === :abi_extension && return Ptr{var"union (unnamed at /home/runner/.julia/artifacts/020d2c4fb5105f30cefec4129b0bd4c49a9e6f45/include/aws/common/task_scheduler.h:40:5)"}(x + 32)
     return getfield(x, f)
 end
 
@@ -11751,6 +11751,15 @@ end
 end
 
 """
+    __JL_Ctag_167
+
+32 bytes for the UUID (no dashes) plus one more for the null terminator.
+"""
+@cenum __JL_Ctag_167::UInt32 begin
+    AWS_UUID_STR_COMPACT_LEN = 33
+end
+
+"""
     aws_uuid_init(uuid)
 
 Documentation not found.
@@ -11787,6 +11796,19 @@ int aws_uuid_to_str(const struct aws_uuid *uuid, struct aws_byte_buf *output);
 """
 function aws_uuid_to_str(uuid, output)
     ccall((:aws_uuid_to_str, libaws_c_common), Cint, (Ptr{aws_uuid}, Ptr{aws_byte_buf}), uuid, output)
+end
+
+"""
+    aws_uuid_to_str_compact(uuid, output)
+
+Documentation not found.
+### Prototype
+```c
+int aws_uuid_to_str_compact(const struct aws_uuid *uuid, struct aws_byte_buf *output);
+```
+"""
+function aws_uuid_to_str_compact(uuid, output)
+    ccall((:aws_uuid_to_str_compact, libaws_c_common), Cint, (Ptr{aws_uuid}, Ptr{aws_byte_buf}), uuid, output)
 end
 
 """
