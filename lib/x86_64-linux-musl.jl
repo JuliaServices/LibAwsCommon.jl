@@ -473,6 +473,34 @@ function aws_small_block_allocator_page_size_available(sba_allocator)
 end
 
 """
+    aws_explicit_aligned_allocator_new(alignment)
+
+Create an aligned allocator with an explicit alignment. Always align the allocated buffer with the passed-in alignment value.
+
+### Prototype
+```c
+struct aws_allocator *aws_explicit_aligned_allocator_new(size_t alignment);
+```
+"""
+function aws_explicit_aligned_allocator_new(alignment)
+    ccall((:aws_explicit_aligned_allocator_new, libaws_c_common), Ptr{aws_allocator}, (Csize_t,), alignment)
+end
+
+"""
+    aws_explicit_aligned_allocator_destroy(aligned_alloc)
+
+Destroys a customized aligned allocator instance and frees its memory.
+
+### Prototype
+```c
+void aws_explicit_aligned_allocator_destroy(struct aws_allocator *aligned_alloc);
+```
+"""
+function aws_explicit_aligned_allocator_destroy(aligned_alloc)
+    ccall((:aws_explicit_aligned_allocator_destroy, libaws_c_common), Cvoid, (Ptr{aws_allocator},), aligned_alloc)
+end
+
+"""
     aws_raise_error(err)
 
 Raises `err` to the installed callbacks, and sets the thread's error.
@@ -6917,6 +6945,64 @@ function aws_file_get_length(file, length)
 end
 
 """
+    aws_file_path_read_from_offset_direct_io(file_path, offset, max_read_length, output_buf, out_actual_read)
+
+Read from the file using the file path with DIRECT I/O, starting at offset to fill the output\\_buf or to the max\\_read\\_length. Using direct IO to bypass the OS cache. Helpful when the disk I/O outperform the kernel cache. If O\\_DIRECT is not supported, returns AWS\\_ERROR\\_UNSUPPORTED\\_OPERATION. Notes: - ONLY supports linux for now and raise AWS\\_ERROR\\_UNSUPPORTED\\_OPERATION on all other platforms (eg: FreeBSD). - check the NOTES for O\\_DIRECT in https://man7.org/linux/man-pages/man2/openat.2.html - The offset, length and output\\_buf->buffer all need to be aligned with the page size. Otherwise, AWS\\_ERROR\\_INVALID\\_ARGUMENT will be raised.
+
+Returns [`AWS_OP_SUCCESS`](@ref), or [`AWS_OP_ERR`](@ref) (after an error has been raised).
+
+# Arguments
+* `file_path`: The file path to read from.
+* `offset`: The offset in the file to start reading from.
+* `max_read_length`: The maximum number of bytes to read.
+* `output_buf`: The buffer read to.
+* `out_actual_read`: The actual number of bytes read.
+### Prototype
+```c
+int aws_file_path_read_from_offset_direct_io( const struct aws_string *file_path, uint64_t offset, size_t max_read_length, struct aws_byte_buf *output_buf, size_t *out_actual_read);
+```
+"""
+function aws_file_path_read_from_offset_direct_io(file_path, offset, max_read_length, output_buf, out_actual_read)
+    ccall((:aws_file_path_read_from_offset_direct_io, libaws_c_common), Cint, (Ptr{aws_string}, UInt64, Csize_t, Ptr{aws_byte_buf}, Ptr{Csize_t}), file_path, offset, max_read_length, output_buf, out_actual_read)
+end
+
+"""
+    aws_file_path_read_from_offset(file_path, offset, max_read_length, output_buf, out_actual_read)
+
+Read from the file using the file path, starting at offset to fill the output\\_buf or to the max\\_read\\_length.
+
+Returns [`AWS_OP_SUCCESS`](@ref), or [`AWS_OP_ERR`](@ref) (after an error has been raised).
+
+# Arguments
+* `file_path`: The file path to read from.
+* `offset`: The offset in the file to start reading from.
+* `max_read_length`: The maximum number of bytes to read.
+* `output_buf`: The buffer read to.
+* `out_actual_read`: The actual number of bytes read.
+### Prototype
+```c
+int aws_file_path_read_from_offset( const struct aws_string *file_path, uint64_t offset, size_t max_read_length, struct aws_byte_buf *output_buf, size_t *out_actual_read);
+```
+"""
+function aws_file_path_read_from_offset(file_path, offset, max_read_length, output_buf, out_actual_read)
+    ccall((:aws_file_path_read_from_offset, libaws_c_common), Cint, (Ptr{aws_string}, UInt64, Csize_t, Ptr{aws_byte_buf}, Ptr{Csize_t}), file_path, offset, max_read_length, output_buf, out_actual_read)
+end
+
+"""
+    aws_file_path_read_from_offset_direct_io_with_chunk_size(file_path, offset, max_read_length, max_chunk_size, output_buf, out_actual_read)
+
+The function serve the same purpose as [`aws_file_path_read_from_offset_direct_io`](@ref). Please use [`aws_file_path_read_from_offset_direct_io`](@ref) directly.
+
+### Prototype
+```c
+int aws_file_path_read_from_offset_direct_io_with_chunk_size( const struct aws_string *file_path, uint64_t offset, size_t max_read_length, size_t max_chunk_size, struct aws_byte_buf *output_buf, size_t *out_actual_read);
+```
+"""
+function aws_file_path_read_from_offset_direct_io_with_chunk_size(file_path, offset, max_read_length, max_chunk_size, output_buf, out_actual_read)
+    ccall((:aws_file_path_read_from_offset_direct_io_with_chunk_size, libaws_c_common), Cint, (Ptr{aws_string}, UInt64, Csize_t, Csize_t, Ptr{aws_byte_buf}, Ptr{Csize_t}), file_path, offset, max_read_length, max_chunk_size, output_buf, out_actual_read)
+end
+
+"""
     __JL_Ctag_3
 
 Documentation not found.
@@ -10527,6 +10613,20 @@ function aws_system_info_processor_count()
 end
 
 """
+    aws_system_info_page_size()
+
+Returns the system page size in bytes.
+
+### Prototype
+```c
+size_t aws_system_info_page_size(void);
+```
+"""
+function aws_system_info_page_size()
+    ccall((:aws_system_info_page_size, libaws_c_common), Csize_t, ())
+end
+
+"""
     aws_get_cpu_group_count()
 
 Returns the logical processor groupings on the system (such as multiple numa nodes).
@@ -10708,28 +10808,28 @@ A scheduled function.
 const aws_task_fn = Cvoid
 
 """
-    union (unnamed at /home/runner/.julia/artifacts/c28be5d35eed3f28c0bc09e61c01f53ee059f128/include/aws/common/task_scheduler.h:40:5)
+    union (unnamed at /home/runner/.julia/artifacts/c397ee551c97c2b9f3c22b3455775eab83f802f9/include/aws/common/task_scheduler.h:40:5)
 
 honor the ABI compat
 """
-struct var"union (unnamed at /home/runner/.julia/artifacts/c28be5d35eed3f28c0bc09e61c01f53ee059f128/include/aws/common/task_scheduler.h:40:5)"
+struct var"union (unnamed at /home/runner/.julia/artifacts/c397ee551c97c2b9f3c22b3455775eab83f802f9/include/aws/common/task_scheduler.h:40:5)"
     data::NTuple{8, UInt8}
 end
 
-function Base.getproperty(x::Ptr{var"union (unnamed at /home/runner/.julia/artifacts/c28be5d35eed3f28c0bc09e61c01f53ee059f128/include/aws/common/task_scheduler.h:40:5)"}, f::Symbol)
+function Base.getproperty(x::Ptr{var"union (unnamed at /home/runner/.julia/artifacts/c397ee551c97c2b9f3c22b3455775eab83f802f9/include/aws/common/task_scheduler.h:40:5)"}, f::Symbol)
     f === :scheduled && return Ptr{Bool}(x + 0)
     f === :reserved && return Ptr{Csize_t}(x + 0)
     return getfield(x, f)
 end
 
-function Base.getproperty(x::var"union (unnamed at /home/runner/.julia/artifacts/c28be5d35eed3f28c0bc09e61c01f53ee059f128/include/aws/common/task_scheduler.h:40:5)", f::Symbol)
-    r = Ref{var"union (unnamed at /home/runner/.julia/artifacts/c28be5d35eed3f28c0bc09e61c01f53ee059f128/include/aws/common/task_scheduler.h:40:5)"}(x)
-    ptr = Base.unsafe_convert(Ptr{var"union (unnamed at /home/runner/.julia/artifacts/c28be5d35eed3f28c0bc09e61c01f53ee059f128/include/aws/common/task_scheduler.h:40:5)"}, r)
+function Base.getproperty(x::var"union (unnamed at /home/runner/.julia/artifacts/c397ee551c97c2b9f3c22b3455775eab83f802f9/include/aws/common/task_scheduler.h:40:5)", f::Symbol)
+    r = Ref{var"union (unnamed at /home/runner/.julia/artifacts/c397ee551c97c2b9f3c22b3455775eab83f802f9/include/aws/common/task_scheduler.h:40:5)"}(x)
+    ptr = Base.unsafe_convert(Ptr{var"union (unnamed at /home/runner/.julia/artifacts/c397ee551c97c2b9f3c22b3455775eab83f802f9/include/aws/common/task_scheduler.h:40:5)"}, r)
     fptr = getproperty(ptr, f)
     GC.@preserve r unsafe_load(fptr)
 end
 
-function Base.setproperty!(x::Ptr{var"union (unnamed at /home/runner/.julia/artifacts/c28be5d35eed3f28c0bc09e61c01f53ee059f128/include/aws/common/task_scheduler.h:40:5)"}, f::Symbol, v)
+function Base.setproperty!(x::Ptr{var"union (unnamed at /home/runner/.julia/artifacts/c397ee551c97c2b9f3c22b3455775eab83f802f9/include/aws/common/task_scheduler.h:40:5)"}, f::Symbol, v)
     unsafe_store!(getproperty(x, f), v)
 end
 
@@ -10749,7 +10849,7 @@ function Base.getproperty(x::Ptr{aws_task}, f::Symbol)
     f === :node && return Ptr{aws_linked_list_node}(x + 24)
     f === :priority_queue_node && return Ptr{aws_priority_queue_node}(x + 40)
     f === :type_tag && return Ptr{Ptr{Cchar}}(x + 48)
-    f === :abi_extension && return Ptr{var"union (unnamed at /home/runner/.julia/artifacts/c28be5d35eed3f28c0bc09e61c01f53ee059f128/include/aws/common/task_scheduler.h:40:5)"}(x + 56)
+    f === :abi_extension && return Ptr{var"union (unnamed at /home/runner/.julia/artifacts/c397ee551c97c2b9f3c22b3455775eab83f802f9/include/aws/common/task_scheduler.h:40:5)"}(x + 56)
     return getfield(x, f)
 end
 
