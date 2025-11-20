@@ -1,4 +1,4 @@
-using CEnum
+using CEnum: CEnum, @cenum
 
 """
 Documentation not found.
@@ -138,6 +138,14 @@ function Base.setproperty!(x::Ptr{sigval}, f::Symbol, v)
     unsafe_store!(getproperty(x, f), v)
 end
 
+function Base.propertynames(x::sigval, private::Bool = false)
+    (:sival_int, :sival_ptr, if private
+            fieldnames(typeof(x))
+        else
+            ()
+        end...)
+end
+
 """
     __siginfo
 
@@ -170,6 +178,14 @@ end
 
 function Base.setproperty!(x::Ptr{__siginfo}, f::Symbol, v)
     unsafe_store!(getproperty(x, f), v)
+end
+
+function Base.propertynames(x::__siginfo, private::Bool = false)
+    (:si_signo, :si_errno, :si_code, :si_pid, :si_uid, :si_status, :si_addr, :si_value, :si_band, :__pad, if private
+            fieldnames(typeof(x))
+        else
+            ()
+        end...)
 end
 
 """
@@ -5970,6 +5986,20 @@ function aws_base64_compute_encoded_len(to_encode_len, encoded_len)
 end
 
 """
+    aws_base64_url_compute_encoded_len(to_encode_len, encoded_len)
+
+Computes the length necessary to store the output of [`aws_base64_url_encode`](@ref) call. returns -1 on failure, and 0 on success. encoded\\_length will be set on success.
+
+### Prototype
+```c
+int aws_base64_url_compute_encoded_len(size_t to_encode_len, size_t *encoded_len);
+```
+"""
+function aws_base64_url_compute_encoded_len(to_encode_len, encoded_len)
+    ccall((:aws_base64_url_compute_encoded_len, libaws_c_common), Cint, (Csize_t, Ptr{Csize_t}), to_encode_len, encoded_len)
+end
+
+"""
     aws_base64_encode(to_encode, output)
 
 Base 64 encodes the contents of to\\_encode and stores the result in output.
@@ -5984,9 +6014,23 @@ function aws_base64_encode(to_encode, output)
 end
 
 """
+    aws_base64_url_encode(to_encode, output)
+
+Base 64 URL encodes the contents of to\\_encode and stores the result in output.
+
+### Prototype
+```c
+int aws_base64_url_encode( const struct aws_byte_cursor *AWS_RESTRICT to_encode, struct aws_byte_buf *AWS_RESTRICT output);
+```
+"""
+function aws_base64_url_encode(to_encode, output)
+    ccall((:aws_base64_url_encode, libaws_c_common), Cint, (Ptr{aws_byte_cursor}, Ptr{aws_byte_buf}), to_encode, output)
+end
+
+"""
     aws_base64_compute_decoded_len(to_decode, decoded_len)
 
-Computes the length necessary to store the output of [`aws_base64_decode`](@ref) call. returns -1 on failure, and 0 on success. decoded\\_len will be set on success.
+Computes the length necessary to store the output of [`aws_base64_decode`](@ref) call. Note: works on both regular and url base64. returns -1 on failure, and 0 on success. decoded\\_len will be set on success.
 
 ### Prototype
 ```c
@@ -6000,7 +6044,7 @@ end
 """
     aws_base64_decode(to_decode, output)
 
-Base 64 decodes the contents of to\\_decode and stores the result in output.
+Base 64 decodes the contents of to\\_decode and stores the result in output. Note: works on both regular and url base64.
 
 ### Prototype
 ```c
@@ -8903,6 +8947,14 @@ function Base.setproperty!(x::Ptr{aws_logger_vtable}, f::Symbol, v)
     unsafe_store!(getproperty(x, f), v)
 end
 
+function Base.propertynames(x::aws_logger_vtable, private::Bool = false)
+    (:log, :get_log_level, :clean_up, :set_log_level, if private
+            fieldnames(typeof(x))
+        else
+            ()
+        end...)
+end
+
 """
     aws_logger
 
@@ -10528,12 +10580,16 @@ end
 """
     aws_platform_os
 
-Documentation not found.
+Platform OS enumeration and their corresponding string representations.
+
+String mappings: - AWS\\_PLATFORM\\_OS\\_WINDOWS → "Windows" (Microsoft Windows family) - AWS\\_PLATFORM\\_OS\\_MAC → "macOS" (Apple desktop/laptop) - AWS\\_PLATFORM\\_OS\\_IOS → "iOS" (Apple mobile platforms, covers iOS, watchOS, tvOS, and other non-macOS Apple platforms) - AWS\\_PLATFORM\\_OS\\_ANDROID → "Android" (Google Android) - AWS\\_PLATFORM\\_OS\\_UNIX → "Unix" (Linux, BSD, other Unix-like)
 """
 @cenum aws_platform_os::UInt32 begin
     AWS_PLATFORM_OS_WINDOWS = 0
     AWS_PLATFORM_OS_MAC = 1
-    AWS_PLATFORM_OS_UNIX = 2
+    AWS_PLATFORM_OS_IOS = 2
+    AWS_PLATFORM_OS_ANDROID = 3
+    AWS_PLATFORM_OS_UNIX = 4
 end
 
 """
@@ -10665,6 +10721,20 @@ enum aws_platform_os aws_get_platform_build_os(void);
 """
 function aws_get_platform_build_os()
     ccall((:aws_get_platform_build_os, libaws_c_common), aws_platform_os, ())
+end
+
+"""
+    aws_get_platform_build_os_string()
+
+Returns the OS this was built under as a string
+
+### Prototype
+```c
+struct aws_byte_cursor aws_get_platform_build_os_string(void);
+```
+"""
+function aws_get_platform_build_os_string()
+    ccall((:aws_get_platform_build_os_string, libaws_c_common), aws_byte_cursor, ())
 end
 
 """
@@ -10877,29 +10947,37 @@ A scheduled function.
 const aws_task_fn = Cvoid
 
 """
-    union (unnamed at /home/runner/.julia/artifacts/2105f366bf12822c199816056a53b01efa8c62b2/include/aws/common/task_scheduler.h:40:5)
+    __JL_Ctag_17
 
 honor the ABI compat
 """
-struct var"union (unnamed at /home/runner/.julia/artifacts/2105f366bf12822c199816056a53b01efa8c62b2/include/aws/common/task_scheduler.h:40:5)"
+struct __JL_Ctag_17
     data::NTuple{8, UInt8}
 end
 
-function Base.getproperty(x::Ptr{var"union (unnamed at /home/runner/.julia/artifacts/2105f366bf12822c199816056a53b01efa8c62b2/include/aws/common/task_scheduler.h:40:5)"}, f::Symbol)
+function Base.getproperty(x::Ptr{__JL_Ctag_17}, f::Symbol)
     f === :scheduled && return Ptr{Bool}(x + 0)
     f === :reserved && return Ptr{Csize_t}(x + 0)
     return getfield(x, f)
 end
 
-function Base.getproperty(x::var"union (unnamed at /home/runner/.julia/artifacts/2105f366bf12822c199816056a53b01efa8c62b2/include/aws/common/task_scheduler.h:40:5)", f::Symbol)
-    r = Ref{var"union (unnamed at /home/runner/.julia/artifacts/2105f366bf12822c199816056a53b01efa8c62b2/include/aws/common/task_scheduler.h:40:5)"}(x)
-    ptr = Base.unsafe_convert(Ptr{var"union (unnamed at /home/runner/.julia/artifacts/2105f366bf12822c199816056a53b01efa8c62b2/include/aws/common/task_scheduler.h:40:5)"}, r)
+function Base.getproperty(x::__JL_Ctag_17, f::Symbol)
+    r = Ref{__JL_Ctag_17}(x)
+    ptr = Base.unsafe_convert(Ptr{__JL_Ctag_17}, r)
     fptr = getproperty(ptr, f)
     GC.@preserve r unsafe_load(fptr)
 end
 
-function Base.setproperty!(x::Ptr{var"union (unnamed at /home/runner/.julia/artifacts/2105f366bf12822c199816056a53b01efa8c62b2/include/aws/common/task_scheduler.h:40:5)"}, f::Symbol, v)
+function Base.setproperty!(x::Ptr{__JL_Ctag_17}, f::Symbol, v)
     unsafe_store!(getproperty(x, f), v)
+end
+
+function Base.propertynames(x::__JL_Ctag_17, private::Bool = false)
+    (:scheduled, :reserved, if private
+            fieldnames(typeof(x))
+        else
+            ()
+        end...)
 end
 
 """
@@ -10918,7 +10996,7 @@ function Base.getproperty(x::Ptr{aws_task}, f::Symbol)
     f === :node && return Ptr{aws_linked_list_node}(x + 24)
     f === :priority_queue_node && return Ptr{aws_priority_queue_node}(x + 40)
     f === :type_tag && return Ptr{Ptr{Cchar}}(x + 48)
-    f === :abi_extension && return Ptr{var"union (unnamed at /home/runner/.julia/artifacts/2105f366bf12822c199816056a53b01efa8c62b2/include/aws/common/task_scheduler.h:40:5)"}(x + 56)
+    f === :abi_extension && return Ptr{__JL_Ctag_17}(x + 56)
     return getfield(x, f)
 end
 
@@ -10931,6 +11009,14 @@ end
 
 function Base.setproperty!(x::Ptr{aws_task}, f::Symbol, v)
     unsafe_store!(getproperty(x, f), v)
+end
+
+function Base.propertynames(x::aws_task, private::Bool = false)
+    (:fn, :arg, :timestamp, :node, :priority_queue_node, :type_tag, :abi_extension, if private
+            fieldnames(typeof(x))
+        else
+            ()
+        end...)
 end
 
 """

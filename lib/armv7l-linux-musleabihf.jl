@@ -1,4 +1,4 @@
-using CEnum
+using CEnum: CEnum, @cenum
 
 """
 Documentation not found.
@@ -6,30 +6,38 @@ Documentation not found.
 const time_t = Clong
 
 """
-    union (unnamed at /home/runner/.julia/artifacts/452cde0499419e984225c72bc1d2c37ee97a2259/arm-linux-musleabihf/sys-root/usr/include/bits/alltypes.h:58:18)
+    __JL_Ctag_9
 
 Documentation not found.
 """
-struct var"union (unnamed at /home/runner/.julia/artifacts/452cde0499419e984225c72bc1d2c37ee97a2259/arm-linux-musleabihf/sys-root/usr/include/bits/alltypes.h:58:18)"
+struct __JL_Ctag_9
     data::NTuple{24, UInt8}
 end
 
-function Base.getproperty(x::Ptr{var"union (unnamed at /home/runner/.julia/artifacts/452cde0499419e984225c72bc1d2c37ee97a2259/arm-linux-musleabihf/sys-root/usr/include/bits/alltypes.h:58:18)"}, f::Symbol)
+function Base.getproperty(x::Ptr{__JL_Ctag_9}, f::Symbol)
     f === :__i && return Ptr{NTuple{6, Cint}}(x + 0)
     f === :__vi && return Ptr{NTuple{6, Cint}}(x + 0)
     f === :__p && return Ptr{NTuple{6, Ptr{Cvoid}}}(x + 0)
     return getfield(x, f)
 end
 
-function Base.getproperty(x::var"union (unnamed at /home/runner/.julia/artifacts/452cde0499419e984225c72bc1d2c37ee97a2259/arm-linux-musleabihf/sys-root/usr/include/bits/alltypes.h:58:18)", f::Symbol)
-    r = Ref{var"union (unnamed at /home/runner/.julia/artifacts/452cde0499419e984225c72bc1d2c37ee97a2259/arm-linux-musleabihf/sys-root/usr/include/bits/alltypes.h:58:18)"}(x)
-    ptr = Base.unsafe_convert(Ptr{var"union (unnamed at /home/runner/.julia/artifacts/452cde0499419e984225c72bc1d2c37ee97a2259/arm-linux-musleabihf/sys-root/usr/include/bits/alltypes.h:58:18)"}, r)
+function Base.getproperty(x::__JL_Ctag_9, f::Symbol)
+    r = Ref{__JL_Ctag_9}(x)
+    ptr = Base.unsafe_convert(Ptr{__JL_Ctag_9}, r)
     fptr = getproperty(ptr, f)
     GC.@preserve r unsafe_load(fptr)
 end
 
-function Base.setproperty!(x::Ptr{var"union (unnamed at /home/runner/.julia/artifacts/452cde0499419e984225c72bc1d2c37ee97a2259/arm-linux-musleabihf/sys-root/usr/include/bits/alltypes.h:58:18)"}, f::Symbol, v)
+function Base.setproperty!(x::Ptr{__JL_Ctag_9}, f::Symbol, v)
     unsafe_store!(getproperty(x, f), v)
+end
+
+function Base.propertynames(x::__JL_Ctag_9, private::Bool = false)
+    (:__i, :__vi, :__p, if private
+            fieldnames(typeof(x))
+        else
+            ()
+        end...)
 end
 
 """
@@ -42,7 +50,7 @@ struct pthread_mutex_t
 end
 
 function Base.getproperty(x::Ptr{pthread_mutex_t}, f::Symbol)
-    f === :__u && return Ptr{var"union (unnamed at /home/runner/.julia/artifacts/452cde0499419e984225c72bc1d2c37ee97a2259/arm-linux-musleabihf/sys-root/usr/include/bits/alltypes.h:58:18)"}(x + 0)
+    f === :__u && return Ptr{__JL_Ctag_9}(x + 0)
     return getfield(x, f)
 end
 
@@ -57,31 +65,47 @@ function Base.setproperty!(x::Ptr{pthread_mutex_t}, f::Symbol, v)
     unsafe_store!(getproperty(x, f), v)
 end
 
+function Base.propertynames(x::pthread_mutex_t, private::Bool = false)
+    (:__u, if private
+            fieldnames(typeof(x))
+        else
+            ()
+        end...)
+end
+
 """
-    union (unnamed at /home/runner/.julia/artifacts/452cde0499419e984225c72bc1d2c37ee97a2259/arm-linux-musleabihf/sys-root/usr/include/bits/alltypes.h:68:18)
+    __JL_Ctag_10
 
 Documentation not found.
 """
-struct var"union (unnamed at /home/runner/.julia/artifacts/452cde0499419e984225c72bc1d2c37ee97a2259/arm-linux-musleabihf/sys-root/usr/include/bits/alltypes.h:68:18)"
+struct __JL_Ctag_10
     data::NTuple{48, UInt8}
 end
 
-function Base.getproperty(x::Ptr{var"union (unnamed at /home/runner/.julia/artifacts/452cde0499419e984225c72bc1d2c37ee97a2259/arm-linux-musleabihf/sys-root/usr/include/bits/alltypes.h:68:18)"}, f::Symbol)
+function Base.getproperty(x::Ptr{__JL_Ctag_10}, f::Symbol)
     f === :__i && return Ptr{NTuple{12, Cint}}(x + 0)
     f === :__vi && return Ptr{NTuple{12, Cint}}(x + 0)
     f === :__p && return Ptr{NTuple{12, Ptr{Cvoid}}}(x + 0)
     return getfield(x, f)
 end
 
-function Base.getproperty(x::var"union (unnamed at /home/runner/.julia/artifacts/452cde0499419e984225c72bc1d2c37ee97a2259/arm-linux-musleabihf/sys-root/usr/include/bits/alltypes.h:68:18)", f::Symbol)
-    r = Ref{var"union (unnamed at /home/runner/.julia/artifacts/452cde0499419e984225c72bc1d2c37ee97a2259/arm-linux-musleabihf/sys-root/usr/include/bits/alltypes.h:68:18)"}(x)
-    ptr = Base.unsafe_convert(Ptr{var"union (unnamed at /home/runner/.julia/artifacts/452cde0499419e984225c72bc1d2c37ee97a2259/arm-linux-musleabihf/sys-root/usr/include/bits/alltypes.h:68:18)"}, r)
+function Base.getproperty(x::__JL_Ctag_10, f::Symbol)
+    r = Ref{__JL_Ctag_10}(x)
+    ptr = Base.unsafe_convert(Ptr{__JL_Ctag_10}, r)
     fptr = getproperty(ptr, f)
     GC.@preserve r unsafe_load(fptr)
 end
 
-function Base.setproperty!(x::Ptr{var"union (unnamed at /home/runner/.julia/artifacts/452cde0499419e984225c72bc1d2c37ee97a2259/arm-linux-musleabihf/sys-root/usr/include/bits/alltypes.h:68:18)"}, f::Symbol, v)
+function Base.setproperty!(x::Ptr{__JL_Ctag_10}, f::Symbol, v)
     unsafe_store!(getproperty(x, f), v)
+end
+
+function Base.propertynames(x::__JL_Ctag_10, private::Bool = false)
+    (:__i, :__vi, :__p, if private
+            fieldnames(typeof(x))
+        else
+            ()
+        end...)
 end
 
 """
@@ -94,7 +118,7 @@ struct pthread_cond_t
 end
 
 function Base.getproperty(x::Ptr{pthread_cond_t}, f::Symbol)
-    f === :__u && return Ptr{var"union (unnamed at /home/runner/.julia/artifacts/452cde0499419e984225c72bc1d2c37ee97a2259/arm-linux-musleabihf/sys-root/usr/include/bits/alltypes.h:68:18)"}(x + 0)
+    f === :__u && return Ptr{__JL_Ctag_10}(x + 0)
     return getfield(x, f)
 end
 
@@ -109,31 +133,47 @@ function Base.setproperty!(x::Ptr{pthread_cond_t}, f::Symbol, v)
     unsafe_store!(getproperty(x, f), v)
 end
 
+function Base.propertynames(x::pthread_cond_t, private::Bool = false)
+    (:__u, if private
+            fieldnames(typeof(x))
+        else
+            ()
+        end...)
+end
+
 """
-    union (unnamed at /home/runner/.julia/artifacts/452cde0499419e984225c72bc1d2c37ee97a2259/arm-linux-musleabihf/sys-root/usr/include/bits/alltypes.h:78:18)
+    __JL_Ctag_12
 
 Documentation not found.
 """
-struct var"union (unnamed at /home/runner/.julia/artifacts/452cde0499419e984225c72bc1d2c37ee97a2259/arm-linux-musleabihf/sys-root/usr/include/bits/alltypes.h:78:18)"
+struct __JL_Ctag_12
     data::NTuple{32, UInt8}
 end
 
-function Base.getproperty(x::Ptr{var"union (unnamed at /home/runner/.julia/artifacts/452cde0499419e984225c72bc1d2c37ee97a2259/arm-linux-musleabihf/sys-root/usr/include/bits/alltypes.h:78:18)"}, f::Symbol)
+function Base.getproperty(x::Ptr{__JL_Ctag_12}, f::Symbol)
     f === :__i && return Ptr{NTuple{8, Cint}}(x + 0)
     f === :__vi && return Ptr{NTuple{8, Cint}}(x + 0)
     f === :__p && return Ptr{NTuple{8, Ptr{Cvoid}}}(x + 0)
     return getfield(x, f)
 end
 
-function Base.getproperty(x::var"union (unnamed at /home/runner/.julia/artifacts/452cde0499419e984225c72bc1d2c37ee97a2259/arm-linux-musleabihf/sys-root/usr/include/bits/alltypes.h:78:18)", f::Symbol)
-    r = Ref{var"union (unnamed at /home/runner/.julia/artifacts/452cde0499419e984225c72bc1d2c37ee97a2259/arm-linux-musleabihf/sys-root/usr/include/bits/alltypes.h:78:18)"}(x)
-    ptr = Base.unsafe_convert(Ptr{var"union (unnamed at /home/runner/.julia/artifacts/452cde0499419e984225c72bc1d2c37ee97a2259/arm-linux-musleabihf/sys-root/usr/include/bits/alltypes.h:78:18)"}, r)
+function Base.getproperty(x::__JL_Ctag_12, f::Symbol)
+    r = Ref{__JL_Ctag_12}(x)
+    ptr = Base.unsafe_convert(Ptr{__JL_Ctag_12}, r)
     fptr = getproperty(ptr, f)
     GC.@preserve r unsafe_load(fptr)
 end
 
-function Base.setproperty!(x::Ptr{var"union (unnamed at /home/runner/.julia/artifacts/452cde0499419e984225c72bc1d2c37ee97a2259/arm-linux-musleabihf/sys-root/usr/include/bits/alltypes.h:78:18)"}, f::Symbol, v)
+function Base.setproperty!(x::Ptr{__JL_Ctag_12}, f::Symbol, v)
     unsafe_store!(getproperty(x, f), v)
+end
+
+function Base.propertynames(x::__JL_Ctag_12, private::Bool = false)
+    (:__i, :__vi, :__p, if private
+            fieldnames(typeof(x))
+        else
+            ()
+        end...)
 end
 
 """
@@ -146,7 +186,7 @@ struct pthread_rwlock_t
 end
 
 function Base.getproperty(x::Ptr{pthread_rwlock_t}, f::Symbol)
-    f === :__u && return Ptr{var"union (unnamed at /home/runner/.julia/artifacts/452cde0499419e984225c72bc1d2c37ee97a2259/arm-linux-musleabihf/sys-root/usr/include/bits/alltypes.h:78:18)"}(x + 0)
+    f === :__u && return Ptr{__JL_Ctag_12}(x + 0)
     return getfield(x, f)
 end
 
@@ -159,6 +199,14 @@ end
 
 function Base.setproperty!(x::Ptr{pthread_rwlock_t}, f::Symbol, v)
     unsafe_store!(getproperty(x, f), v)
+end
+
+function Base.propertynames(x::pthread_rwlock_t, private::Bool = false)
+    (:__u, if private
+            fieldnames(typeof(x))
+        else
+            ()
+        end...)
 end
 
 """
@@ -5176,8 +5224,32 @@ const aws_condition_predicate_fn = Cvoid
 Documentation not found.
 """
 struct aws_condition_variable
-    condition_handle::pthread_cond_t
-    initialized::Bool
+    data::NTuple{52, UInt8}
+end
+
+function Base.getproperty(x::Ptr{aws_condition_variable}, f::Symbol)
+    f === :condition_handle && return Ptr{pthread_cond_t}(x + 0)
+    f === :initialized && return Ptr{Bool}(x + 48)
+    return getfield(x, f)
+end
+
+function Base.getproperty(x::aws_condition_variable, f::Symbol)
+    r = Ref{aws_condition_variable}(x)
+    ptr = Base.unsafe_convert(Ptr{aws_condition_variable}, r)
+    fptr = getproperty(ptr, f)
+    GC.@preserve r unsafe_load(fptr)
+end
+
+function Base.setproperty!(x::Ptr{aws_condition_variable}, f::Symbol, v)
+    unsafe_store!(getproperty(x, f), v)
+end
+
+function Base.propertynames(x::aws_condition_variable, private::Bool = false)
+    (:condition_handle, :initialized, if private
+            fieldnames(typeof(x))
+        else
+            ()
+        end...)
 end
 
 """
@@ -5242,8 +5314,32 @@ end
 Documentation not found.
 """
 struct aws_mutex
-    mutex_handle::pthread_mutex_t
-    initialized::Bool
+    data::NTuple{28, UInt8}
+end
+
+function Base.getproperty(x::Ptr{aws_mutex}, f::Symbol)
+    f === :mutex_handle && return Ptr{pthread_mutex_t}(x + 0)
+    f === :initialized && return Ptr{Bool}(x + 24)
+    return getfield(x, f)
+end
+
+function Base.getproperty(x::aws_mutex, f::Symbol)
+    r = Ref{aws_mutex}(x)
+    ptr = Base.unsafe_convert(Ptr{aws_mutex}, r)
+    fptr = getproperty(ptr, f)
+    GC.@preserve r unsafe_load(fptr)
+end
+
+function Base.setproperty!(x::Ptr{aws_mutex}, f::Symbol, v)
+    unsafe_store!(getproperty(x, f), v)
+end
+
+function Base.propertynames(x::aws_mutex, private::Bool = false)
+    (:mutex_handle, :initialized, if private
+            fieldnames(typeof(x))
+        else
+            ()
+        end...)
 end
 
 """
@@ -5901,6 +5997,20 @@ function aws_base64_compute_encoded_len(to_encode_len, encoded_len)
 end
 
 """
+    aws_base64_url_compute_encoded_len(to_encode_len, encoded_len)
+
+Computes the length necessary to store the output of [`aws_base64_url_encode`](@ref) call. returns -1 on failure, and 0 on success. encoded\\_length will be set on success.
+
+### Prototype
+```c
+int aws_base64_url_compute_encoded_len(size_t to_encode_len, size_t *encoded_len);
+```
+"""
+function aws_base64_url_compute_encoded_len(to_encode_len, encoded_len)
+    ccall((:aws_base64_url_compute_encoded_len, libaws_c_common), Cint, (Csize_t, Ptr{Csize_t}), to_encode_len, encoded_len)
+end
+
+"""
     aws_base64_encode(to_encode, output)
 
 Base 64 encodes the contents of to\\_encode and stores the result in output.
@@ -5915,9 +6025,23 @@ function aws_base64_encode(to_encode, output)
 end
 
 """
+    aws_base64_url_encode(to_encode, output)
+
+Base 64 URL encodes the contents of to\\_encode and stores the result in output.
+
+### Prototype
+```c
+int aws_base64_url_encode( const struct aws_byte_cursor *AWS_RESTRICT to_encode, struct aws_byte_buf *AWS_RESTRICT output);
+```
+"""
+function aws_base64_url_encode(to_encode, output)
+    ccall((:aws_base64_url_encode, libaws_c_common), Cint, (Ptr{aws_byte_cursor}, Ptr{aws_byte_buf}), to_encode, output)
+end
+
+"""
     aws_base64_compute_decoded_len(to_decode, decoded_len)
 
-Computes the length necessary to store the output of [`aws_base64_decode`](@ref) call. returns -1 on failure, and 0 on success. decoded\\_len will be set on success.
+Computes the length necessary to store the output of [`aws_base64_decode`](@ref) call. Note: works on both regular and url base64. returns -1 on failure, and 0 on success. decoded\\_len will be set on success.
 
 ### Prototype
 ```c
@@ -5931,7 +6055,7 @@ end
 """
     aws_base64_decode(to_decode, output)
 
-Base 64 decodes the contents of to\\_decode and stores the result in output.
+Base 64 decodes the contents of to\\_decode and stores the result in output. Note: works on both regular and url base64.
 
 ### Prototype
 ```c
@@ -8834,6 +8958,14 @@ function Base.setproperty!(x::Ptr{aws_logger_vtable}, f::Symbol, v)
     unsafe_store!(getproperty(x, f), v)
 end
 
+function Base.propertynames(x::aws_logger_vtable, private::Bool = false)
+    (:log, :get_log_level, :clean_up, :set_log_level, if private
+            fieldnames(typeof(x))
+        else
+            ()
+        end...)
+end
+
 """
     aws_logger
 
@@ -9896,7 +10028,31 @@ end
 Documentation not found.
 """
 struct aws_rw_lock
-    lock_handle::pthread_rwlock_t
+    data::NTuple{32, UInt8}
+end
+
+function Base.getproperty(x::Ptr{aws_rw_lock}, f::Symbol)
+    f === :lock_handle && return Ptr{pthread_rwlock_t}(x + 0)
+    return getfield(x, f)
+end
+
+function Base.getproperty(x::aws_rw_lock, f::Symbol)
+    r = Ref{aws_rw_lock}(x)
+    ptr = Base.unsafe_convert(Ptr{aws_rw_lock}, r)
+    fptr = getproperty(ptr, f)
+    GC.@preserve r unsafe_load(fptr)
+end
+
+function Base.setproperty!(x::Ptr{aws_rw_lock}, f::Symbol, v)
+    unsafe_store!(getproperty(x, f), v)
+end
+
+function Base.propertynames(x::aws_rw_lock, private::Bool = false)
+    (:lock_handle, if private
+            fieldnames(typeof(x))
+        else
+            ()
+        end...)
 end
 
 """
@@ -10459,12 +10615,16 @@ end
 """
     aws_platform_os
 
-Documentation not found.
+Platform OS enumeration and their corresponding string representations.
+
+String mappings: - AWS\\_PLATFORM\\_OS\\_WINDOWS → "Windows" (Microsoft Windows family) - AWS\\_PLATFORM\\_OS\\_MAC → "macOS" (Apple desktop/laptop) - AWS\\_PLATFORM\\_OS\\_IOS → "iOS" (Apple mobile platforms, covers iOS, watchOS, tvOS, and other non-macOS Apple platforms) - AWS\\_PLATFORM\\_OS\\_ANDROID → "Android" (Google Android) - AWS\\_PLATFORM\\_OS\\_UNIX → "Unix" (Linux, BSD, other Unix-like)
 """
 @cenum aws_platform_os::UInt32 begin
     AWS_PLATFORM_OS_WINDOWS = 0
     AWS_PLATFORM_OS_MAC = 1
-    AWS_PLATFORM_OS_UNIX = 2
+    AWS_PLATFORM_OS_IOS = 2
+    AWS_PLATFORM_OS_ANDROID = 3
+    AWS_PLATFORM_OS_UNIX = 4
 end
 
 """
@@ -10596,6 +10756,20 @@ enum aws_platform_os aws_get_platform_build_os(void);
 """
 function aws_get_platform_build_os()
     ccall((:aws_get_platform_build_os, libaws_c_common), aws_platform_os, ())
+end
+
+"""
+    aws_get_platform_build_os_string()
+
+Returns the OS this was built under as a string
+
+### Prototype
+```c
+struct aws_byte_cursor aws_get_platform_build_os_string(void);
+```
+"""
+function aws_get_platform_build_os_string()
+    ccall((:aws_get_platform_build_os_string, libaws_c_common), aws_byte_cursor, ())
 end
 
 """
@@ -10808,29 +10982,37 @@ A scheduled function.
 const aws_task_fn = Cvoid
 
 """
-    union (unnamed at /home/runner/.julia/artifacts/e7f81f17200b82e6fd9460b1d65c223719604cc1/include/aws/common/task_scheduler.h:40:5)
+    __JL_Ctag_11
 
 honor the ABI compat
 """
-struct var"union (unnamed at /home/runner/.julia/artifacts/e7f81f17200b82e6fd9460b1d65c223719604cc1/include/aws/common/task_scheduler.h:40:5)"
+struct __JL_Ctag_11
     data::NTuple{4, UInt8}
 end
 
-function Base.getproperty(x::Ptr{var"union (unnamed at /home/runner/.julia/artifacts/e7f81f17200b82e6fd9460b1d65c223719604cc1/include/aws/common/task_scheduler.h:40:5)"}, f::Symbol)
+function Base.getproperty(x::Ptr{__JL_Ctag_11}, f::Symbol)
     f === :scheduled && return Ptr{Bool}(x + 0)
     f === :reserved && return Ptr{Csize_t}(x + 0)
     return getfield(x, f)
 end
 
-function Base.getproperty(x::var"union (unnamed at /home/runner/.julia/artifacts/e7f81f17200b82e6fd9460b1d65c223719604cc1/include/aws/common/task_scheduler.h:40:5)", f::Symbol)
-    r = Ref{var"union (unnamed at /home/runner/.julia/artifacts/e7f81f17200b82e6fd9460b1d65c223719604cc1/include/aws/common/task_scheduler.h:40:5)"}(x)
-    ptr = Base.unsafe_convert(Ptr{var"union (unnamed at /home/runner/.julia/artifacts/e7f81f17200b82e6fd9460b1d65c223719604cc1/include/aws/common/task_scheduler.h:40:5)"}, r)
+function Base.getproperty(x::__JL_Ctag_11, f::Symbol)
+    r = Ref{__JL_Ctag_11}(x)
+    ptr = Base.unsafe_convert(Ptr{__JL_Ctag_11}, r)
     fptr = getproperty(ptr, f)
     GC.@preserve r unsafe_load(fptr)
 end
 
-function Base.setproperty!(x::Ptr{var"union (unnamed at /home/runner/.julia/artifacts/e7f81f17200b82e6fd9460b1d65c223719604cc1/include/aws/common/task_scheduler.h:40:5)"}, f::Symbol, v)
+function Base.setproperty!(x::Ptr{__JL_Ctag_11}, f::Symbol, v)
     unsafe_store!(getproperty(x, f), v)
+end
+
+function Base.propertynames(x::__JL_Ctag_11, private::Bool = false)
+    (:scheduled, :reserved, if private
+            fieldnames(typeof(x))
+        else
+            ()
+        end...)
 end
 
 """
@@ -10849,7 +11031,7 @@ function Base.getproperty(x::Ptr{aws_task}, f::Symbol)
     f === :node && return Ptr{aws_linked_list_node}(x + 16)
     f === :priority_queue_node && return Ptr{aws_priority_queue_node}(x + 24)
     f === :type_tag && return Ptr{Ptr{Cchar}}(x + 28)
-    f === :abi_extension && return Ptr{var"union (unnamed at /home/runner/.julia/artifacts/e7f81f17200b82e6fd9460b1d65c223719604cc1/include/aws/common/task_scheduler.h:40:5)"}(x + 32)
+    f === :abi_extension && return Ptr{__JL_Ctag_11}(x + 32)
     return getfield(x, f)
 end
 
@@ -10862,6 +11044,14 @@ end
 
 function Base.setproperty!(x::Ptr{aws_task}, f::Symbol, v)
     unsafe_store!(getproperty(x, f), v)
+end
+
+function Base.propertynames(x::aws_task, private::Bool = false)
+    (:fn, :arg, :timestamp, :node, :priority_queue_node, :type_tag, :abi_extension, if private
+            fieldnames(typeof(x))
+        else
+            ()
+        end...)
 end
 
 """
