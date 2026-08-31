@@ -1704,7 +1704,7 @@ end
 """
     aws_array_list_set_at(list, val, index)
 
-Copies the the memory pointed to by val into the array at index. If in dynamic mode, the size will grow by a factor of two when the array is full. In static mode, AWS\\_ERROR\\_INVALID\\_INDEX will be raised if the index is past the bounds of the array.
+Copies the memory pointed to by val into the array at index. If in dynamic mode, the size will grow by a factor of two when the array is full. In static mode, AWS\\_ERROR\\_INVALID\\_INDEX will be raised if the index is past the bounds of the array.
 
 ### Prototype
 ```c
@@ -2307,6 +2307,20 @@ function aws_ntoh32(x)
 end
 
 """
+    aws_letoh32(x)
+
+Convert 32 bit integer from little endian to host byte order.
+
+### Prototype
+```c
+AWS_STATIC_IMPL uint32_t aws_letoh32(uint32_t x);
+```
+"""
+function aws_letoh32(x)
+    ccall((:aws_letoh32, libaws_c_common), UInt32, (UInt32,), x)
+end
+
+"""
     aws_ntohf32(x)
 
 Convert 32 bit float from network to host byte order.
@@ -2363,6 +2377,20 @@ function aws_ntoh16(x)
 end
 
 """
+    aws_letoh16(x)
+
+Convert 16 bit integer from little endian to host byte order.
+
+### Prototype
+```c
+AWS_STATIC_IMPL uint16_t aws_letoh16(uint16_t x);
+```
+"""
+function aws_letoh16(x)
+    ccall((:aws_letoh16, libaws_c_common), UInt16, (UInt16,), x)
+end
+
+"""
     aws_byte_buf
 
 Represents a length-delimited binary string or buffer. If byte buffer points to constant memory or memory that should otherwise not be freed by this struct, set allocator to NULL and free function will be a no-op.
@@ -2370,6 +2398,10 @@ Represents a length-delimited binary string or buffer. If byte buffer points to 
 This structure used to define the output for all functions that write to a buffer.
 
 Note that this structure allocates memory at the buffer pointer only. The struct itself does not get dynamically allocated and must be either maintained or copied to avoid losing access to the memory.
+
+GROWABILITY CONTRACT: - When `allocator != NULL`: the buffer owns its memory and can be grown via [`aws_byte_buf_reserve`](@ref) / [`aws_byte_buf_append_dynamic`](@ref) / etc. - When `allocator == NULL`: the buffer's memory is externally owned (e.g. by a buffer pool, by static storage, or by a stack frame) and MUST NOT be reallocated. Functions that would grow the buffer ([`aws_byte_buf_reserve`](@ref), [`aws_byte_buf_append_dynamic`](@ref), etc.) fail with AWS\\_ERROR\\_INVALID\\_ARGUMENT when called on such a buffer.
+
+Callers that may receive a buffer of either kind (e.g. from a buffer pool ticket) should use [`aws_byte_buf_append_auto`](@ref), which selects the right append path automatically.
 """
 struct aws_byte_buf
     len::Csize_t
@@ -2685,6 +2717,20 @@ function aws_byte_cursor_next_split(input_str, split_on, substr)
 end
 
 """
+    aws_byte_cursor_next_split_on_cursor(input_str, split_on, substr)
+
+same as [`aws_byte_cursor_next_split`](@ref), but splits on a cursor instead of a single char. ex. can split on delims like "--" or "<<". Note: splits on the whole split\\_on cursor, it does not treat split\\_on as array of different chars to split on
+
+### Prototype
+```c
+bool aws_byte_cursor_next_split_on_cursor( const struct aws_byte_cursor *AWS_RESTRICT input_str, struct aws_byte_cursor split_on, struct aws_byte_cursor *AWS_RESTRICT substr);
+```
+"""
+function aws_byte_cursor_next_split_on_cursor(input_str, split_on, substr)
+    ccall((:aws_byte_cursor_next_split_on_cursor, libaws_c_common), Bool, (Ptr{aws_byte_cursor}, aws_byte_cursor, Ptr{aws_byte_cursor}), input_str, split_on, substr)
+end
+
+"""
     aws_byte_cursor_split_on_char(input_str, split_on, output)
 
 No copies, no buffer allocations. Fills in output with a list of [`aws_byte_cursor`](@ref) instances where buffer is an offset into the input\\_str and len is the length of that string in the original buffer.
@@ -2851,6 +2897,26 @@ function aws_byte_buf_append_dynamic(to, from)
 end
 
 """
+    aws_byte_buf_append_auto(to, from)
+
+Copies `from` to `to`, selecting between static and dynamic append based on whether `to` has an allocator.
+
+- If `to->allocator != NULL`: uses [`aws_byte_buf_append_dynamic`](@ref) (grows the buffer as needed; same behavior as calling that function directly). - If `to->allocator == NULL`: uses [`aws_byte_buf_append`](@ref) (no grow; returns AWS\\_ERROR\\_DEST\\_COPY\\_TOO\\_SMALL if `from` does not fit in remaining capacity).
+
+This is intended for callers that receive a buffer from a source whose growability is not known at the call site — most commonly a buffer obtained from an aws\\_s3\\_buffer\\_pool ticket, where pool-backed tickets return a fixed-size buffer (allocator == NULL) and the default pool may return a growable one.
+
+`from` and `to` may be the same buffer, permitting copying a buffer into itself.
+
+### Prototype
+```c
+int aws_byte_buf_append_auto(struct aws_byte_buf *to, const struct aws_byte_cursor *from);
+```
+"""
+function aws_byte_buf_append_auto(to, from)
+    ccall((:aws_byte_buf_append_auto, libaws_c_common), Cint, (Ptr{aws_byte_buf}, Ptr{aws_byte_cursor}), to, from)
+end
+
+"""
     aws_byte_buf_append_dynamic_secure(to, from)
 
 Copies `from` to `to`. If `to` is too small, the buffer will be grown appropriately and the old contents copied over, before the new contents are appended.
@@ -2939,7 +3005,7 @@ end
 
 Attempts to increase the capacity of a buffer to the requested capacity
 
-If the the buffer's capacity is currently larger than the request capacity, the function does nothing (no shrink is performed).
+If the buffer's capacity is currently larger than the request capacity, the function does nothing (no shrink is performed).
 
 ### Prototype
 ```c
@@ -3338,6 +3404,22 @@ function aws_byte_cursor_read_be16(cur, var)
 end
 
 """
+    aws_byte_cursor_read_le16(cur, var)
+
+Reads a 16-bit value in little-endian byte order from cur, and places it in host byte order into var.
+
+On success, returns true and updates the cursor pointer/length accordingly. If there is insufficient space in the cursor, returns false, leaving the cursor unchanged.
+
+### Prototype
+```c
+bool aws_byte_cursor_read_le16(struct aws_byte_cursor *cur, uint16_t *var);
+```
+"""
+function aws_byte_cursor_read_le16(cur, var)
+    ccall((:aws_byte_cursor_read_le16, libaws_c_common), Bool, (Ptr{aws_byte_cursor}, Ptr{UInt16}), cur, var)
+end
+
+"""
     aws_byte_cursor_read_be24(cur, var)
 
 Reads an unsigned 24-bit value (3 bytes) in network byte order from cur, and places it in host byte order into 32-bit var. Ex: if cur's next 3 bytes are {0xAA, 0xBB, 0xCC}, then var becomes 0x00AABBCC.
@@ -3367,6 +3449,54 @@ bool aws_byte_cursor_read_be32(struct aws_byte_cursor *cur, uint32_t *var);
 """
 function aws_byte_cursor_read_be32(cur, var)
     ccall((:aws_byte_cursor_read_be32, libaws_c_common), Bool, (Ptr{aws_byte_cursor}, Ptr{UInt32}), cur, var)
+end
+
+"""
+    aws_byte_cursor_read_le32(cur, var)
+
+Reads a 32-bit value in little endian byte order from cur, and places it in host byte order into var.
+
+On success, returns true and updates the cursor pointer/length accordingly. If there is insufficient space in the cursor, returns false, leaving the cursor unchanged.
+
+### Prototype
+```c
+bool aws_byte_cursor_read_le32(struct aws_byte_cursor *cur, uint32_t *var);
+```
+"""
+function aws_byte_cursor_read_le32(cur, var)
+    ccall((:aws_byte_cursor_read_le32, libaws_c_common), Bool, (Ptr{aws_byte_cursor}, Ptr{UInt32}), cur, var)
+end
+
+"""
+    aws_byte_cursor_read_be_i32(cur, var)
+
+Reads a signed 32-bit value in network byte order from cur, and places it in host byte order into var.
+
+On success, returns true and updates the cursor pointer/length accordingly. If there is insufficient space in the cursor, returns false, leaving the cursor unchanged.
+
+### Prototype
+```c
+bool aws_byte_cursor_read_be_i32(struct aws_byte_cursor *cur, int32_t *var);
+```
+"""
+function aws_byte_cursor_read_be_i32(cur, var)
+    ccall((:aws_byte_cursor_read_be_i32, libaws_c_common), Bool, (Ptr{aws_byte_cursor}, Ptr{Int32}), cur, var)
+end
+
+"""
+    aws_byte_cursor_read_le_i32(cur, var)
+
+Reads a signed 32-bit value in little-endian order from cur, and places it in host byte order into var.
+
+On success, returns true and updates the cursor pointer/length accordingly. If there is insufficient space in the cursor, returns false, leaving the cursor unchanged.
+
+### Prototype
+```c
+bool aws_byte_cursor_read_le_i32(struct aws_byte_cursor *cur, int32_t *var);
+```
+"""
+function aws_byte_cursor_read_le_i32(cur, var)
+    ccall((:aws_byte_cursor_read_le_i32, libaws_c_common), Bool, (Ptr{aws_byte_cursor}, Ptr{Int32}), cur, var)
 end
 
 """
@@ -3739,6 +3869,24 @@ int aws_byte_cursor_utf8_parse_u64(struct aws_byte_cursor cursor, uint64_t *dst)
 """
 function aws_byte_cursor_utf8_parse_u64(cursor, dst)
     ccall((:aws_byte_cursor_utf8_parse_u64, libaws_c_common), Cint, (aws_byte_cursor, Ptr{UInt64}), cursor, dst)
+end
+
+"""
+    aws_byte_cursor_utf8_parse_i64(cursor, dst)
+
+Read entire cursor as ASCII/UTF-8 signed base-10 number. Stricter than strtoll(), which allows whitespace and inputs that start with "0x"
+
+Examples: "0" -> 0 "123" -> 123 "00004" -> 4 // leading zeros ok "-1" -> -1
+
+Rejects things like: "1,000" // only characters 0-9 allowed "" // blank string not allowed " 0 " // whitespace not allowed "0x0" // hex not allowed "FF" // hex not allowed "999999999999999999999999999999999999999999" // larger than max i64
+
+### Prototype
+```c
+int aws_byte_cursor_utf8_parse_i64(struct aws_byte_cursor cursor, int64_t *dst);
+```
+"""
+function aws_byte_cursor_utf8_parse_i64(cursor, dst)
+    ccall((:aws_byte_cursor_utf8_parse_i64, libaws_c_common), Cint, (aws_byte_cursor, Ptr{Int64}), cursor, dst)
 end
 
 """
@@ -4230,7 +4378,7 @@ end
 """
     aws_cache
 
-Base stucture for caches, used the linked hash table implementation.
+Base structure for caches, used the linked hash table implementation.
 """
 struct aws_cache
     allocator::Ptr{aws_allocator}
@@ -4444,7 +4592,7 @@ end
 """
     aws_cbor_encoder_new(allocator)
 
-Create a new cbor encoder. Creating a encoder with a temporay buffer. Every aws\\_cbor\\_encoder\\_write\\_* will encode directly into the buffer to follow the encoded data.
+Create a new cbor encoder. Creating an encoder with a temporary buffer. Every aws\\_cbor\\_encoder\\_write\\_* will encode directly into the buffer to follow the encoded data.
 
 # Arguments
 * `allocator`:
@@ -4779,9 +4927,9 @@ end
 """
     aws_cbor_decoder_new(allocator, src)
 
-Create a cbor decoder to take src to decode. The typical usage of decoder will be: - If the next element type only accept what expected, `aws\\_cbor\\_decoder\\_pop\\_next\\_*` - If the next element type accept different type, invoke [`aws_cbor_decoder_peek_type`](@ref) first, then based on the type to invoke corresponding `aws\\_cbor\\_decoder\\_pop\\_next\\_*` - If the next element type doesn't have corrsponding value, specifically: AWS\\_CBOR\\_TYPE\\_NULL, AWS\\_CBOR\\_TYPE\\_UNDEFINED, AWS\\_CBOR\\_TYPE\\_INF\\_*\\_START, AWS\\_CBOR\\_TYPE\\_BREAK, call [`aws_cbor_decoder_consume_next_single_element`](@ref) to consume it and continues for further decoding. - To ignore the next data item (the element and the content of it), [`aws_cbor_decoder_consume_next_whole_data_item`](@ref)
+Create a cbor decoder to take src to decode. The typical usage of decoder will be: - If the next element type only accept what expected, `aws\\_cbor\\_decoder\\_pop\\_next\\_*` - If the next element type accept different type, invoke [`aws_cbor_decoder_peek_type`](@ref) first, then based on the type to invoke corresponding `aws\\_cbor\\_decoder\\_pop\\_next\\_*` - If the next element type doesn't have corresponding value, specifically: AWS\\_CBOR\\_TYPE\\_NULL, AWS\\_CBOR\\_TYPE\\_UNDEFINED, AWS\\_CBOR\\_TYPE\\_INF\\_*\\_START, AWS\\_CBOR\\_TYPE\\_BREAK, call [`aws_cbor_decoder_consume_next_single_element`](@ref) to consume it and continues for further decoding. - To ignore the next data item (the element and the content of it), [`aws_cbor_decoder_consume_next_whole_data_item`](@ref)
 
-Note: it's caller's responsibilty to keep the src outlive the decoder.
+Note: it's caller's responsibility to keep the src alive to outlive the decoder.
 
 # Arguments
 * `allocator`:
@@ -4813,7 +4961,7 @@ end
 """
     aws_cbor_decoder_get_remaining_length(decoder)
 
-Get the length of the remaining bytes of the source. Once the source was decoded, it will be consumed, and result in decrease of the remaining length of bytes.
+Get the length of the remaining bytes of the source. Once the source was decoded, it will be consumed, and result in decrease of the remaining length of bytes. Note: [`aws_cbor_decoder_peek_type`](@ref) will also decrease the remaining length, as it decodes the next element internally.
 
 # Arguments
 * `decoder`:
@@ -4826,6 +4974,24 @@ size_t aws_cbor_decoder_get_remaining_length(const struct aws_cbor_decoder *deco
 """
 function aws_cbor_decoder_get_remaining_length(decoder)
     ccall((:aws_cbor_decoder_get_remaining_length, libaws_c_common), Csize_t, (Ptr{aws_cbor_decoder},), decoder)
+end
+
+"""
+    aws_cbor_decoder_get_unconsumed_length(decoder)
+
+Get the number of bytes that have not yet been consumed (popped) by the caller. Unlike [`aws_cbor_decoder_get_remaining_length`](@ref), [`aws_cbor_decoder_peek_type`](@ref) does NOT affect this value. Only pop/consume operations reduce the unconsumed length.
+
+# Arguments
+* `decoder`:
+# Returns
+The number of bytes not yet consumed from the decoder source.
+### Prototype
+```c
+size_t aws_cbor_decoder_get_unconsumed_length(const struct aws_cbor_decoder *decoder);
+```
+"""
+function aws_cbor_decoder_get_unconsumed_length(decoder)
+    ccall((:aws_cbor_decoder_get_unconsumed_length, libaws_c_common), Csize_t, (Ptr{aws_cbor_decoder},), decoder)
 end
 
 """
@@ -6746,6 +6912,7 @@ Documentation not found.
     AWS_ERROR_FILE_WRITE_FAILURE = 59
     AWS_ERROR_INVALID_CBOR = 60
     AWS_ERROR_CBOR_UNEXPECTED_TYPE = 61
+    AWS_ERROR_CBOR_RESOURCE_LIMIT_EXCEEDED = 62
     AWS_ERROR_END_COMMON_RANGE = 1023
 end
 
@@ -6761,7 +6928,7 @@ Prototype for a hash table equality check function pointer.
 
 This type is usually used for a function that compares two hash table keys, but note that the same type is used for a function that compares two hash table values in [`aws_hash_table_eq`](@ref).
 
-Equality functions used in a hash table must be be reflexive (a == a), symmetric (a == b => b == a), transitive (a == b, b == c => a == c) and consistent (result does not change with time).
+Equality functions used in a hash table must be reflexive (a == a), symmetric (a == b => b == a), transitive (a == b, b == c => a == c) and consistent (result does not change with time).
 """
 const aws_hash_callback_eq_fn = Cvoid
 
@@ -7169,6 +7336,70 @@ int aws_file_path_read_from_offset_direct_io_with_chunk_size( const struct aws_s
 """
 function aws_file_path_read_from_offset_direct_io_with_chunk_size(file_path, offset, max_read_length, max_chunk_size, output_buf, out_actual_read)
     ccall((:aws_file_path_read_from_offset_direct_io_with_chunk_size, libaws_c_common), Cint, (Ptr{aws_string}, UInt64, Csize_t, Csize_t, Ptr{aws_byte_buf}, Ptr{Csize_t}), file_path, offset, max_read_length, max_chunk_size, output_buf, out_actual_read)
+end
+
+"""
+    aws_file_path_write_to_offset_direct_io(file_path, offset, data)
+
+Write to a file using DIRECT I/O at the given offset. Using direct IO to bypass the OS cache. Helpful when the disk I/O outperform the kernel cache. If O\\_DIRECT is not supported, returns AWS\\_ERROR\\_UNSUPPORTED\\_OPERATION.
+
+The file must already exist; the caller is responsible for creating it.
+
+For aligned writes (offset and length both aligned to page size), O\\_DIRECT is used for the entire write.
+
+Notes: - ONLY supports linux for now and raises AWS\\_ERROR\\_UNSUPPORTED\\_OPERATION on all other platforms. - The offset, data.len, and data.ptr all need to be aligned with the page size (a multiple of page size). Otherwise, AWS\\_ERROR\\_INVALID\\_ARGUMENT will be raised. - check the NOTES for O\\_DIRECT in https://man7.org/linux/man-pages/man2/openat.2.html
+
+Returns [`AWS_OP_SUCCESS`](@ref), or [`AWS_OP_ERR`](@ref) (after an error has been raised).
+
+# Arguments
+* `file_path`: The file path to write to.
+* `offset`: The offset in the file to start writing at.
+* `data`: The buffer to write from (data.len bytes will be written).
+### Prototype
+```c
+int aws_file_path_write_to_offset_direct_io( const struct aws_string *file_path, uint64_t offset, struct aws_byte_cursor data);
+```
+"""
+function aws_file_path_write_to_offset_direct_io(file_path, offset, data)
+    ccall((:aws_file_path_write_to_offset_direct_io, libaws_c_common), Cint, (Ptr{aws_string}, UInt64, aws_byte_cursor), file_path, offset, data)
+end
+
+"""
+    aws_file_direct_io_is_supported()
+
+Returns true if direct I/O (O\\_DIRECT) is supported on the current platform.
+
+Currently only Linux supports direct I/O. On unsupported platforms, [`aws_file_path_read_from_offset_direct_io`](@ref)() and [`aws_file_path_write_to_offset_direct_io`](@ref)() will raise AWS\\_ERROR\\_UNSUPPORTED\\_OPERATION.
+
+Use this to check at init time whether direct I/O is viable, rather than calling the read/write functions and handling the error reactively.
+
+### Prototype
+```c
+bool aws_file_direct_io_is_supported(void);
+```
+"""
+function aws_file_direct_io_is_supported()
+    ccall((:aws_file_direct_io_is_supported, libaws_c_common), Bool, ())
+end
+
+"""
+    aws_file_get_last_modified_epoch(file, last_modified_ns)
+
+Gets the last modification time of an open file as nanoseconds since unix epoch.
+
+Unix flavors use fstat with nanosecond-precision fields (st\\_mtim on Linux/FreeBSD, st\\_mtimespec on Apple). Windows uses GetFileTime on the HANDLE queried from the libc FILE pointer (100-nanosecond FILETIME precision).
+
+Platform timestamp-visibility guarantees differ: - POSIX: st\\_mtime/st\\_mtim is updated by write(2) itself (see inode(7): https://man7.org/linux/man-pages/man7/inode.7.html). Callers using buffered stdio writes must fflush() or fclose() first so write(2) actually happens; once it has, a subsequent stat()/fstat() sees the new timestamp immediately, no fsync needed (fsync(2) confirms fdatasync() skips flushing st\\_mtime for this reason: https://man7.org/linux/man-pages/man2/fsync.2.html). - Windows: the last write time is only guaranteed correct once all write handles are closed; FlushFileBuffers() does not help. See "File Times": https://learn.microsoft.com/en-us/windows/win32/sysinfo/file-times
+
+As a result, if a file was written to and you need to observe that write in its updated timestamp, close the write handle first, then open a new handle and call this function on that new handle. Calling this function on the (now-closed) write handle is not valid on any platform, since a closed FILE* cannot be used at all.
+
+### Prototype
+```c
+int aws_file_get_last_modified_epoch(FILE *file, uint64_t *last_modified_ns);
+```
+"""
+function aws_file_get_last_modified_epoch(file, last_modified_ns)
+    ccall((:aws_file_get_last_modified_epoch, libaws_c_common), Cint, (Ptr{Libc.FILE}, Ptr{UInt64}), file, last_modified_ns)
 end
 
 """
@@ -7988,7 +8219,7 @@ end
 """
     aws_json_value_get_from_object_c_str(object, key)
 
-Returns the [`aws_json_value`](@ref) at the given key. Note: same as [`aws_json_value_get_from_object`](@ref) but with key as const char *. Prefer this method is you have a key thats already a valid char * as it is likely to be faster.
+Returns the [`aws_json_value`](@ref) at the given key. Note: same as [`aws_json_value_get_from_object`](@ref) but with key as const char *. Prefer this method if you have a key that's already a valid char * as it is likely to be faster.
 
 # Arguments
 * `object`: The object [`aws_json_value`](@ref) you want to get the value from.
@@ -8026,7 +8257,7 @@ end
 """
     aws_json_value_has_key_c_str(object, key)
 
-Checks if there is a [`aws_json_value`](@ref) at the given key. Note: same as [`aws_json_value_has_key`](@ref) but with key as const char *. Prefer this method is you have a key thats already a valid char * as it is likely to be faster.
+Checks if there is a [`aws_json_value`](@ref) at the given key. Note: same as [`aws_json_value_has_key`](@ref) but with key as const char *. Prefer this method if you have a key that's already a valid char * as it is likely to be faster.
 
 # Arguments
 * `object`: The value [`aws_json_value`](@ref) you want to check a key in.
@@ -8064,7 +8295,7 @@ end
 """
     aws_json_value_remove_from_object_c_str(object, key)
 
-Removes the [`aws_json_value`](@ref) at the given key. Note: same as [`aws_json_value_remove_from_object`](@ref) but with key as const char *. Prefer this method is you have a key thats already a valid char * as it is likely to be faster.
+Removes the [`aws_json_value`](@ref) at the given key. Note: same as [`aws_json_value_remove_from_object`](@ref) but with key as const char *. Prefer this method if you have a key that's already a valid char * as it is likely to be faster.
 
 # Arguments
 * `object`: The object [`aws_json_value`](@ref) you want to remove a [`aws_json_value`](@ref) in.
@@ -9486,7 +9717,7 @@ end
 """
     aws_priority_queue_init_dynamic(queue, alloc, default_size, item_size, pred)
 
-Initializes a priority queue struct for use. This mode will grow memory automatically (exponential model) Default size is the inital size of the queue item\\_size is the size of each element in bytes. Mixing items types is not supported by this API. pred is the function that will be used to determine priority.
+Initializes a priority queue struct for use. This mode will grow memory automatically (exponential model) Default size is the initial size of the queue item\\_size is the size of each element in bytes. Mixing items types is not supported by this API. pred is the function that will be used to determine priority.
 
 ### Prototype
 ```c
@@ -12182,6 +12413,20 @@ function aws_xml_node_as_body(node, out_body)
 end
 
 """
+    aws_xml_node_as_body_unescaped(allocator, node, out_body)
+
+Writes the contents of the body of node unescaped into out\\_body. out\\_body is an output parameter in this case. Upon success, out\\_body will contain the body of the node. out\\_body must either have space for new data or be resizable.
+
+### Prototype
+```c
+int aws_xml_node_as_body_unescaped( struct aws_allocator *allocator, struct aws_xml_node *node, struct aws_byte_buf *out_body);
+```
+"""
+function aws_xml_node_as_body_unescaped(allocator, node, out_body)
+    ccall((:aws_xml_node_as_body_unescaped, libaws_c_common), Cint, (Ptr{aws_allocator}, Ptr{aws_xml_node}, Ptr{aws_byte_buf}), allocator, node, out_body)
+end
+
+"""
     aws_xml_node_traverse(node, on_node_encountered, user_data)
 
 Traverse node and invoke on\\_node\\_encountered when a nested node is encountered.
@@ -12235,6 +12480,20 @@ struct aws_xml_attribute aws_xml_node_get_attribute(const struct aws_xml_node *n
 """
 function aws_xml_node_get_attribute(node, attribute_index)
     ccall((:aws_xml_node_get_attribute, libaws_c_common), aws_xml_attribute, (Ptr{aws_xml_node}, Csize_t), node, attribute_index)
+end
+
+"""
+    aws_byte_buf_append_unescaped_xml(allocator, data, out)
+
+Helper that removes escaping within xml strings. ex. replaces " with ".
+
+### Prototype
+```c
+int aws_byte_buf_append_unescaped_xml( struct aws_allocator *allocator, struct aws_byte_cursor data, struct aws_byte_buf *out);
+```
+"""
+function aws_byte_buf_append_unescaped_xml(allocator, data, out)
+    ccall((:aws_byte_buf_append_unescaped_xml, libaws_c_common), Cint, (Ptr{aws_allocator}, aws_byte_cursor, Ptr{aws_byte_buf}), allocator, data, out)
 end
 
 """
