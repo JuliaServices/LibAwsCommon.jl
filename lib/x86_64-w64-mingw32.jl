@@ -6408,6 +6408,52 @@ function aws_last_error()
 end
 
 """
+    aws_last_error_or_unknown_error()
+
+Returns the last error on the current thread, or AWS\\_ERROR\\_UNKNOWN if the current thread error isn't set. Useful to ensure that an error code is not AWS\\_ERROR\\_SUCCESS in a failure path.
+
+### Prototype
+```c
+int aws_last_error_or_unknown_error(void);
+```
+"""
+function aws_last_error_or_unknown_error()
+    ccall((:aws_last_error_or_unknown_error, libaws_c_common), Cint, ())
+end
+
+"""
+    aws_error_or_unknown_error(error_code)
+
+Utility function that returns the passed in error code if not AWS\\_ERROR\\_SUCCESS, otherwise it returns AWS\\_ERROR\\_UNKNOWN
+
+Useful helper in situations where you get back an error code from a system and want to guarantee it's an actual error and not success.
+
+### Prototype
+```c
+int aws_error_or_unknown_error(int error_code);
+```
+"""
+function aws_error_or_unknown_error(error_code)
+    ccall((:aws_error_or_unknown_error, libaws_c_common), Cint, (Cint,), error_code)
+end
+
+"""
+    aws_error_or_last_error_or_unknown_error(error_code)
+
+Utility function that returns the passed in error code if not AWS\\_ERROR\\_SUCCESS, otherwise it returns the result of aws\\_last\\_error\\_or\\_unknown()
+
+Useful helper in situations where you get back an error code from a system and want to guarantee it's an actual error and not success.
+
+### Prototype
+```c
+int aws_error_or_last_error_or_unknown_error(int error_code);
+```
+"""
+function aws_error_or_last_error_or_unknown_error(error_code)
+    ccall((:aws_error_or_last_error_or_unknown_error, libaws_c_common), Cint, (Cint,), error_code)
+end
+
+"""
     aws_error_str(err)
 
 Returns the error str corresponding to `err`.
@@ -6657,6 +6703,7 @@ Documentation not found.
     AWS_ERROR_INVALID_CBOR = 60
     AWS_ERROR_CBOR_UNEXPECTED_TYPE = 61
     AWS_ERROR_CBOR_RESOURCE_LIMIT_EXCEEDED = 62
+    AWS_ERROR_EXTERNAL_REQUEST_SHUTDOWN = 63
     AWS_ERROR_END_COMMON_RANGE = 1023
 end
 
@@ -7109,11 +7156,134 @@ function aws_file_path_write_to_offset_direct_io(file_path, offset, data)
 end
 
 """
+    __JL_Ctag_3
+
+Value representing "no descriptor", for use with the DIRECT I/O descriptor functions below.
+"""
+@cenum __JL_Ctag_3::Int32 begin
+    AWS_FILE_INVALID_FD = -1
+end
+
+"""
+    aws_file_open_for_write(file_path, out_fd)
+
+Open a file for writing, producing a descriptor for [`aws_file_write_to_offset`](@ref)().
+
+A caller issuing many writes to the same file can hold one descriptor across all of them instead of paying an open/close pair per write.
+
+This is the buffered counterpart to [`aws_file_open_direct_io_for_write`](@ref)(): the descriptor goes through the OS page cache and carries no alignment requirements. Unlike that function, it is supported on every platform.
+
+The file must already exist; the caller is responsible for creating it.
+
+Notes: - Release the descriptor with [`aws_file_close_fd`](@ref)(). - Opened in binary mode, so the bytes written are the bytes given.
+
+Returns [`AWS_OP_SUCCESS`](@ref), or [`AWS_OP_ERR`](@ref) (after an error has been raised).
+
+# Arguments
+* `file_path`: The file path to open.
+* `out_fd`: Set to the open descriptor on success; left untouched on failure.
+### Prototype
+```c
+int aws_file_open_for_write(const struct aws_string *file_path, int *out_fd);
+```
+"""
+function aws_file_open_for_write(file_path, out_fd)
+    ccall((:aws_file_open_for_write, libaws_c_common), Cint, (Ptr{aws_string}, Ptr{Cint}), file_path, out_fd)
+end
+
+"""
+    aws_file_close_fd(fd)
+
+Close a file descriptor
+
+### Prototype
+```c
+void aws_file_close_fd(int fd);
+```
+"""
+function aws_file_close_fd(fd)
+    ccall((:aws_file_close_fd, libaws_c_common), Cvoid, (Cint,), fd)
+end
+
+"""
+    aws_file_write_to_offset(fd, offset, data)
+
+Write to an already-open descriptor at the given offset.
+
+The write carries its own offset and does not consult the descriptor's file position, so several threads may write concurrently through one descriptor as long as their ranges do not overlap. (Implemented with pwrite() on POSIX, and WriteFile() with an OVERLAPPED offset on Windows. The Windows call moves the descriptor's file position as a side effect; the offset written to is unaffected by it.)
+
+Unlike [`aws_file_write_to_offset_direct_io`](@ref)(), the offset, data.len, and data.ptr carry no alignment requirements.
+
+Returns [`AWS_OP_SUCCESS`](@ref), or [`AWS_OP_ERR`](@ref) (after an error has been raised).
+
+# Arguments
+* `fd`: A descriptor from [`aws_file_open_for_write`](@ref)().
+* `offset`: The offset in the file to start writing at.
+* `data`: The buffer to write from (data.len bytes will be written).
+### Prototype
+```c
+int aws_file_write_to_offset(int fd, uint64_t offset, struct aws_byte_cursor data);
+```
+"""
+function aws_file_write_to_offset(fd, offset, data)
+    ccall((:aws_file_write_to_offset, libaws_c_common), Cint, (Cint, UInt64, aws_byte_cursor), fd, offset, data)
+end
+
+"""
+    aws_file_open_direct_io_for_write(file_path, out_fd)
+
+Open a file for writing with DIRECT I/O, producing a descriptor for [`aws_file_write_to_offset_direct_io`](@ref)().
+
+A caller issuing many writes to the same file can hold one descriptor across all of them instead of paying an open/close pair per write.
+
+The file must already exist; the caller is responsible for creating it.
+
+Notes: - ONLY supports linux for now and raises AWS\\_ERROR\\_UNSUPPORTED\\_OPERATION on all other platforms. - Release the descriptor with [`aws_file_close_fd`](@ref)().
+
+Returns [`AWS_OP_SUCCESS`](@ref), or [`AWS_OP_ERR`](@ref) (after an error has been raised).
+
+# Arguments
+* `file_path`: The file path to open.
+* `out_fd`: Set to the open descriptor on success; left untouched on failure.
+### Prototype
+```c
+int aws_file_open_direct_io_for_write(const struct aws_string *file_path, int *out_fd);
+```
+"""
+function aws_file_open_direct_io_for_write(file_path, out_fd)
+    ccall((:aws_file_open_direct_io_for_write, libaws_c_common), Cint, (Ptr{aws_string}, Ptr{Cint}), file_path, out_fd)
+end
+
+"""
+    aws_file_write_to_offset_direct_io(fd, offset, data)
+
+Write to an already-open DIRECT I/O descriptor at the given offset. Using direct IO to bypass the OS cache. Helpful when the disk I/O outperform the kernel cache. If O\\_DIRECT is not supported, returns AWS\\_ERROR\\_UNSUPPORTED\\_OPERATION.
+
+The write carries its own offset and does not consult or advance the descriptor's file position, so several threads may write concurrently through one descriptor as long as their ranges do not overlap.
+
+Notes: - ONLY supports linux for now and raises AWS\\_ERROR\\_UNSUPPORTED\\_OPERATION on all other platforms. - The offset, data.len, and data.ptr all need to be aligned with the page size (a multiple of page size). Otherwise, AWS\\_ERROR\\_INVALID\\_ARGUMENT will be raised. - check the NOTES for O\\_DIRECT in https://man7.org/linux/man-pages/man2/openat.2.html
+
+Returns [`AWS_OP_SUCCESS`](@ref), or [`AWS_OP_ERR`](@ref) (after an error has been raised).
+
+# Arguments
+* `fd`: A descriptor from [`aws_file_open_direct_io_for_write`](@ref)().
+* `offset`: The offset in the file to start writing at.
+* `data`: The buffer to write from (data.len bytes will be written).
+### Prototype
+```c
+int aws_file_write_to_offset_direct_io(int fd, uint64_t offset, struct aws_byte_cursor data);
+```
+"""
+function aws_file_write_to_offset_direct_io(fd, offset, data)
+    ccall((:aws_file_write_to_offset_direct_io, libaws_c_common), Cint, (Cint, UInt64, aws_byte_cursor), fd, offset, data)
+end
+
+"""
     aws_file_direct_io_is_supported()
 
 Returns true if direct I/O (O\\_DIRECT) is supported on the current platform.
 
-Currently only Linux supports direct I/O. On unsupported platforms, [`aws_file_path_read_from_offset_direct_io`](@ref)() and [`aws_file_path_write_to_offset_direct_io`](@ref)() will raise AWS\\_ERROR\\_UNSUPPORTED\\_OPERATION.
+Currently only Linux supports direct I/O. On unsupported platforms, the direct I/O read, write, and open functions declared above all raise AWS\\_ERROR\\_UNSUPPORTED\\_OPERATION.
 
 Use this to check at init time whether direct I/O is viable, rather than calling the read/write functions and handling the error reactively.
 
@@ -7147,11 +7317,11 @@ function aws_file_get_last_modified_epoch(file, last_modified_ns)
 end
 
 """
-    __JL_Ctag_3
+    __JL_Ctag_4
 
 Documentation not found.
 """
-@cenum __JL_Ctag_3::UInt32 begin
+@cenum __JL_Ctag_4::UInt32 begin
     AWS_COMMON_HASH_TABLE_ITER_CONTINUE = 1
     AWS_COMMON_HASH_TABLE_ITER_DELETE = 2
     AWS_COMMON_HASH_TABLE_ITER_ERROR = 4
@@ -9023,11 +9193,11 @@ Log subject is an enum similar to aws error: each library has its own value-spac
 const aws_log_subject_t = UInt32
 
 """
-    __JL_Ctag_4
+    __JL_Ctag_5
 
 Each library gets space for 2^^10 log subject entries
 """
-@cenum __JL_Ctag_4::UInt32 begin
+@cenum __JL_Ctag_5::UInt32 begin
     AWS_LOG_SUBJECT_STRIDE_BITS = 10
 end
 
@@ -9354,11 +9524,11 @@ Documentation not found.
 const static_assertion_at_line_62 = NTuple{1, Cchar}
 
 """
-    __JL_Ctag_5
+    __JL_Ctag_6
 
 Documentation not found.
 """
-@cenum __JL_Ctag_5::UInt32 begin
+@cenum __JL_Ctag_6::UInt32 begin
     AWS_CACHE_LINE = 64
 end
 
@@ -10176,11 +10346,11 @@ Documentation not found.
 const aws_crt_statistics_category_t = UInt32
 
 """
-    __JL_Ctag_6
+    __JL_Ctag_7
 
 Each library gets space for 2^^8 category entries
 """
-@cenum __JL_Ctag_6::UInt32 begin
+@cenum __JL_Ctag_7::UInt32 begin
     AWS_CRT_STATISTICS_CATEGORY_STRIDE_BITS = 8
 end
 
@@ -11181,32 +11351,32 @@ A scheduled function.
 const aws_task_fn = Cvoid
 
 """
-    __JL_Ctag_10
+    __JL_Ctag_11
 
 honor the ABI compat
 """
-struct __JL_Ctag_10
+struct __JL_Ctag_11
     data::NTuple{8, UInt8}
 end
 
-function Base.getproperty(x::Ptr{__JL_Ctag_10}, f::Symbol)
+function Base.getproperty(x::Ptr{__JL_Ctag_11}, f::Symbol)
     f === :scheduled && return Ptr{Bool}(x + 0)
     f === :reserved && return Ptr{Csize_t}(x + 0)
     return getfield(x, f)
 end
 
-function Base.getproperty(x::__JL_Ctag_10, f::Symbol)
-    r = Ref{__JL_Ctag_10}(x)
-    ptr = Base.unsafe_convert(Ptr{__JL_Ctag_10}, r)
+function Base.getproperty(x::__JL_Ctag_11, f::Symbol)
+    r = Ref{__JL_Ctag_11}(x)
+    ptr = Base.unsafe_convert(Ptr{__JL_Ctag_11}, r)
     fptr = getproperty(ptr, f)
     GC.@preserve r unsafe_load(fptr)
 end
 
-function Base.setproperty!(x::Ptr{__JL_Ctag_10}, f::Symbol, v)
+function Base.setproperty!(x::Ptr{__JL_Ctag_11}, f::Symbol, v)
     unsafe_store!(getproperty(x, f), v)
 end
 
-function Base.propertynames(x::__JL_Ctag_10, private::Bool = false)
+function Base.propertynames(x::__JL_Ctag_11, private::Bool = false)
     (:scheduled, :reserved, if private
             fieldnames(typeof(x))
         else
@@ -11230,7 +11400,7 @@ function Base.getproperty(x::Ptr{aws_task}, f::Symbol)
     f === :node && return Ptr{aws_linked_list_node}(x + 24)
     f === :priority_queue_node && return Ptr{aws_priority_queue_node}(x + 40)
     f === :type_tag && return Ptr{Ptr{Cchar}}(x + 48)
-    f === :abi_extension && return Ptr{__JL_Ctag_10}(x + 56)
+    f === :abi_extension && return Ptr{__JL_Ctag_11}(x + 56)
     return getfield(x, f)
 end
 
@@ -11512,7 +11682,7 @@ end
 """
     aws_default_thread_options()
 
-Returns an instance of system default thread options.
+Returns a reference to the CRT's default thread options.
 
 ### Prototype
 ```c
@@ -11521,6 +11691,24 @@ const struct aws_thread_options *aws_default_thread_options(void);
 """
 function aws_default_thread_options()
     ccall((:aws_default_thread_options, libaws_c_common), Ptr{aws_thread_options}, ())
+end
+
+"""
+    aws_set_default_thread_options(options)
+
+Overrides the default thread options used when creating threads (of particular interest, event loop threads). Since `name` is a raw char pointer, it must outlive all thread creation while active.
+
+Test/Debug-only. Not thread safe.
+
+# Arguments
+* `options`: new default thread options
+### Prototype
+```c
+void aws_set_default_thread_options(const struct aws_thread_options *options);
+```
+"""
+function aws_set_default_thread_options(options)
+    ccall((:aws_set_default_thread_options, libaws_c_common), Cvoid, (Ptr{aws_thread_options},), options)
 end
 
 """
@@ -11914,6 +12102,21 @@ function aws_gmtime(time, t)
 end
 
 """
+    aws_tribool
+
+A boolean option that can also be left unspecified, for config structs where "the caller passed false" and "the caller passed nothing" have to lead to different behavior. Replaces carrying a `bool value` alongside a `bool value\\_is\\_set`, where nothing stops the two from disagreeing.
+
+AWS\\_TRIBOOL\\_UNSET is 0, so a zero-initialized options struct reads as unspecified.
+
+Do not test one of these for truth directly: `if (options->foo)` is also true for AWS\\_TRIBOOL\\_FALSE, which is non-zero. Compare against the enumerator you mean, e.g. `options->foo != AWS\\_TRIBOOL\\_FALSE` for an option that defaults to on.
+"""
+@cenum aws_tribool::UInt32 begin
+    AWS_TRIBOOL_UNSET = 0
+    AWS_TRIBOOL_FALSE = 1
+    AWS_TRIBOOL_TRUE = 2
+end
+
+"""
     aws_uri
 
 Data representing a URI. uri\\_str is always allocated and filled in. The other portions are merely storing offsets into uri\\_str.
@@ -12215,20 +12418,20 @@ struct aws_uuid
 end
 
 """
-    __JL_Ctag_7
+    __JL_Ctag_8
 
 36 bytes for the UUID plus one more for the null terminator.
 """
-@cenum __JL_Ctag_7::UInt32 begin
+@cenum __JL_Ctag_8::UInt32 begin
     AWS_UUID_STR_LEN = 37
 end
 
 """
-    __JL_Ctag_8
+    __JL_Ctag_9
 
 32 bytes for the UUID (no dashes) plus one more for the null terminator.
 """
-@cenum __JL_Ctag_8::UInt32 begin
+@cenum __JL_Ctag_9::UInt32 begin
     AWS_UUID_STR_COMPACT_LEN = 33
 end
 
