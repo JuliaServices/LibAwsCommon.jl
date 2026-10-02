@@ -2870,6 +2870,34 @@ function aws_byte_cursor_eq_ignore_case(a, b)
 end
 
 """
+    aws_byte_cursor_eq_cb(a, b)
+
+Callback variant of [`aws_byte_cursor_eq`](@ref) that takes const void * arguments. Both pointers must reference [`aws_byte_cursor`](@ref) structures. Use this where a comparison callback with a bool(const void *, const void *) signature is required; passing [`aws_byte_cursor_eq`](@ref) directly there is undefined behavior (call through incompatible function pointer).
+
+### Prototype
+```c
+bool aws_byte_cursor_eq_cb(const void *a, const void *b);
+```
+"""
+function aws_byte_cursor_eq_cb(a, b)
+    ccall((:aws_byte_cursor_eq_cb, libaws_c_common), Bool, (Ptr{Cvoid}, Ptr{Cvoid}), a, b)
+end
+
+"""
+    aws_byte_cursor_eq_ignore_case_cb(a, b)
+
+Callback variant of [`aws_byte_cursor_eq_ignore_case`](@ref) that takes const void * arguments. Both pointers must reference [`aws_byte_cursor`](@ref) structures. Use this where a comparison callback with a bool(const void *, const void *) signature is required; passing [`aws_byte_cursor_eq_ignore_case`](@ref) directly there is undefined behavior (call through incompatible function pointer).
+
+### Prototype
+```c
+bool aws_byte_cursor_eq_ignore_case_cb(const void *a, const void *b);
+```
+"""
+function aws_byte_cursor_eq_ignore_case_cb(a, b)
+    ccall((:aws_byte_cursor_eq_ignore_case_cb, libaws_c_common), Bool, (Ptr{Cvoid}, Ptr{Cvoid}), a, b)
+end
+
+"""
     aws_byte_cursor_eq_byte_buf(a, b)
 
 Compare an [`aws_byte_cursor`](@ref) and an [`aws_byte_buf`](@ref). Return whether their contents are equivalent.
