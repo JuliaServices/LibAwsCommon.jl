@@ -12201,6 +12201,20 @@ function aws_uri_clean_up(uri)
 end
 
 """
+    aws_uri_clean_up_secure(uri)
+
+Securely cleans up a uri, zeroing the backing uri string buffer before releasing it. Use this instead of [`aws_uri_clean_up`](@ref) when the uri may contain sensitive material (for example a SigV4 presigned URL carrying X-Amz-Credential / X-Amz-Security-Token), so the contents are not left readable in freed heap memory.
+
+### Prototype
+```c
+void aws_uri_clean_up_secure(struct aws_uri *uri);
+```
+"""
+function aws_uri_clean_up_secure(uri)
+    ccall((:aws_uri_clean_up_secure, libaws_c_common), Cvoid, (Ptr{aws_uri},), uri)
+end
+
+"""
     aws_uri_scheme(uri)
 
 Returns the scheme portion of the uri (e.g. http, https, ftp, ftps, etc...). If the scheme was not present in the uri, the returned value will be empty. It is the users job to determine the appropriate defaults if this field is empty, based on protocol, port, etc...
